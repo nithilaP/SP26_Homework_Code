@@ -78,7 +78,11 @@ def main():
         # TODO: [part g] Make some other model here
         # set mconf.rope parameter
         ### YOUR CODE HERE ###
-        pass
+        
+        mconf.rope = True
+        model = models.GPT(mconf)
+        model = model.to(device=device) # FIX: w GPU, get RT error for tensor on same device
+
         ### END YOUR CODE ###
     else:
         raise ValueError("Unknown model variant")
@@ -183,7 +187,7 @@ def main():
         assert args.outputs_path is not None
         assert args.reading_params_path is not None
         assert args.eval_corpus_path is not None
-        model.load_state_dict(torch.load(args.reading_params_path))
+        model.load_state_dict(torch.load(args.reading_params_path),  map_location=device)
         correct = 0
         total = 0
         with open(args.outputs_path, 'w', encoding='utf-8') as fout:
