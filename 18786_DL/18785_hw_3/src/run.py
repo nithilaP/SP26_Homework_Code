@@ -31,7 +31,8 @@ def main():
 
     device = 'cpu'
     if torch.cuda.is_available():
-        device = torch.cuda.current_device()
+        # device = torch.cuda.current_device()
+        device = 'cuda'
     elif torch.backends.mps.is_available() and args.variant == 'vanilla':
         device = 'mps'
 
