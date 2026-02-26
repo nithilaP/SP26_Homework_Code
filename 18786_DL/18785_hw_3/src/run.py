@@ -107,7 +107,17 @@ def main():
         # writer=writer
 
         ### YOUR CODE HERE ###
-        pass
+        
+        #     1. Pretrain the model on this corpus
+        #     2. Save the resulting model in args.writing_params_path -> do with ckpt_path 
+        #           -> write to config.ckpt_path: https://github.com/karpathy/minGPT/issues/8
+        tconf = trainer.TrainerConfig(max_epochs=650, batch_size=128, learning_rate=args.pretrain_lr, lr_decay=True,
+                                      warmup_tokens=512*20, final_tokens=650*len(pretrain_dataset)*block_size, writer=writer,
+                                      ckpt_path=args.writing_params_path)
+        
+        tr = trainer.Trainer(model, pretrain_dataset, config=tconf, test_dataset=None)
+        tr.train()
+
         ### END YOUR CODE ###
     elif args.function == 'finetune':
         assert args.writing_params_path is not None
@@ -150,12 +160,17 @@ def main():
         finetune_txt = open(args.finetune_corpus_path, 'r').read()
         finetune_data = dataset.NameDataset(pretrain_dataset, finetune_txt)
 
-        # HW CHECK IN
+        # add in for 2f -> if pretrained (reading_params_path is not None, load
+        max_epochs_val = 75
         if (args.reading_params_path):
-            model.load_state_dict(torch.load(args.reading_params_path, device))
+            max_epochs_val = 10 # less epochs if pretrained -> short adaptation training
+
+            # HW CHECK IN 2 LINES BELOW AND MAX EPOCH ABOVE.
+            curr = torch.load(args.reading_params_path, map_location=device)
+            model.load_state_dict(curr)
 
         # set up trainer config
-        tconf = trainer.TrainerConfig(max_epochs=75, batch_size=256, learning_rate=args.finetune_lr,
+        tconf = trainer.TrainerConfig(max_epochs=max_epochs_val, batch_size=256, learning_rate=args.finetune_lr,
                             lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size,
                             writer=writer, ckpt_path=args.writing_params_path)
         # write to config.ckpt_path: https://github.com/karpathy/minGPT/issues/8

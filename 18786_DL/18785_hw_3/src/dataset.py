@@ -111,14 +111,14 @@ class CharCorruptionDataset(Dataset):
         #    and no more than int(self.block_size*7/8) characters.
 
         # 1a. make each document atleast 4 char.
-        upper_bound = max(len(document), int(self.block_size *7/8))
-        if (upper_bound < 4):
-            needed_char = 4 - upper_bound
+        max_doc_len = min(len(document), int(self.block_size *7/8))
+        if (len(document) < 4):
+            needed_char = 4 - len(document)
             document = document + "_" * needed_char
-            upper_bound = 4
+            max_doc_len = 4
 
         # 1b. random truncate document
-        rand_trunc_i = random.randint(4,upper_bound)
+        rand_trunc_i = random.randint(4,max_doc_len)
         document = document[:rand_trunc_i]
 
         # 2. Now, break the (truncated) document into three substrings: [prefix] [masked_content] [suffix]
