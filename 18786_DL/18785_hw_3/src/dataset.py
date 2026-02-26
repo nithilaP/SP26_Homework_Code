@@ -101,7 +101,64 @@ class CharCorruptionDataset(Dataset):
     def __getitem__(self, idx):
         # TODO [part e]: see spec above
         ### YOUR CODE HERE ###
-        pass
+
+
+        # 0. Use the idx argument of __getitem__ to retrieve the element of self.data
+        #    at the given index. We'll call the resulting data entry a document.
+        document = self.data[idx]
+
+        # 1. Randomly truncate the document to a length no less than 4 characters,
+        #    and no more than int(self.block_size*7/8) characters.
+
+        # 1a. make each document atleast 4 char.
+        upper_bound = max(len(document), int(self.block_size *7/8))
+        if (upper_bound < 4):
+            needed_char = 4 - upper_bound
+            document = document + "_" * needed_char
+            upper_bound = 4
+
+        # 1b. random truncate document
+        rand_trunc_i = random.randint(4,upper_bound)
+        document = document[:rand_trunc_i]
+
+        # 2. Now, break the (truncated) document into three substrings: [prefix] [masked_content] [suffix]
+        #
+        #   In other words, choose three strings prefix, masked_content and suffix
+        #     such that prefix + masked_content + suffix = [the truncated document].
+        #   The length of [masked_content] should be random, and 1/4 the length of the
+        #     truncated document on average.
+        # TODO HW CHECK IN BELOW 6 LINES
+        rand_val = random.random() # random value between 0 and 1
+        masked_content_i =  1 + int(rand_val * (len(document) // 2)) # scale by length of random document, cast to int, and bump by 1 to avoid 0 val 
+        start_i = random.randint(0, len(document) - masked_content_i)
+
+        prefix = document[:start_i]
+        masked_content = document [start_i: start_i + masked_content_i]
+        suffix = document[start_i + masked_content_i:] # rest of file
+
+        # 3. Rearrange these substrings into the following form: [prefix] MASK_CHAR [suffix] MASK_CHAR [masked_content] [pads]
+        # PAD_CHAR characters chosen so that the entire string is of length self.block_size + 1.
+        masked_string = prefix + self.MASK_CHAR + suffix  + self.MASK_CHAR + masked_content
+        masked_string = masked_string + self.PAD_CHAR * (self.block_size + 1 - len(masked_string))  # add pads to string 
+
+        # 4. We now use masked_string to construct the input and output example pair.
+        # input string -> masked_string[:-1]
+        # output string -> masked_string[1:]
+        input_str = masked_string[:-1]
+        output_str = masked_string[1:]
+
+        # 5. Encode the resulting input & output strings as Long tensors & ret data. 
+
+        # 5a. map each string into single character array. 
+        # pytorch needs integers for torch.long conversion so use stoi
+        input_array = [self.stoi[char] for char in input_str]
+        output_array = [self.stoi[char] for char in output_str]
+
+        # 5b. create long tensors. 
+        input = torch.tensor(input_array, dtype=torch.long)
+        output = torch.tensor(output_array, dtype=torch.long)
+
+        return input, output
         ### END YOUR CODE ###
 
 
