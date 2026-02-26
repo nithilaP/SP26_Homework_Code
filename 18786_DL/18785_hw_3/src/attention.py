@@ -37,7 +37,25 @@ def precompute_rotary_emb(dim, max_positions):
     rope_cache = None
     # TODO: [part g]
     ### YOUR CODE HERE ###
-    pass
+    
+    # HW CHECK IN (2 LINES)
+    # TODO: INSERT COMMENT
+    positions = torch.arange(max_positions, torch.device("cpu"), torch.float32);
+    i = torch.arange(dim/2, torch.device("cpu"), torch.float32);
+
+    # dim 1 tensor : https://docs.pytorch.org/docs/main/generated/torch.unsqueeze.html
+    positions = positions.unsqueeze(1); # [[a], [b], [c], ...]
+    i = torch.unsqueeze(0); # [[ a,  b,  c, ... ]]
+
+    # FROM STAFF: 
+    # cos(t theta_i) and sin(t theta_i)
+    #   where t is the position and
+    #         theta_i = 1/10000^(-2(i-1)/dim) for i in [1, dim/2] */
+    theta_val = positions * (1/10000^(-2(i-1)/dim));
+
+    # HW CHECK IN (1 LINES)
+    rope_cache = torch.stack([torch.cos(theta_val), torch.sin(theta_val)], dim=-1);
+
     ### END YOUR CODE ###
     return rope_cache
 
@@ -57,8 +75,31 @@ def apply_rotary_emb(x, rope_cache):
 
     rotated_x = None
     ### YOUR CODE HERE ###
-    pass
+
+    # unpack x 
+    B = x.shape[0]
+    n_head = x.shape[1]
+    T = x.shape[2]
+    head_size = x.shape[3]
+
+    # fit cache into length of seq T
+    rope_trimmed = rope_cache[:T] # size = [T, dimension pair = head_size / 2]
+    complex_rope = torch.view_as_complex(rope_trimmed.float())
+    # fIX: need  to be able to do comp for each batch & head -> when mult w complex atten tensor. -> https://docs.pytorch.org/docs/stable/generated/torch.Tensor.view.html
+    complex_rope = complex_rope.view(1, 1, T, head_size // 2) # [1, T, dimension pair = head_size / 2]
+
+    # torch.view_as_complex - https://pytorch.org/docs/stable/generated/torch.view_as_complex.html
+    complex_x = torch.view_as_complex(x.float().reshape(B, n_head, T, head_size // 2, 2)) # FIX: neex x.float() here for view+as_complex
+
+    # do elem wise rotation clac
+    rotated_x = complex_x * complex_rope
+
+    # convert back to real.
+    rotated_x = torch.view_as_real(rotated_x)
+    rotated_x = rotated_x.reshape(B, n_head, T, head_size) # sizeback from [...h/2, 2] -> h
+
     ### END YOUR CODE ###
+
     return rotated_x
 
 class CausalSelfAttention(nn.Module):
@@ -83,7 +124,9 @@ class CausalSelfAttention(nn.Module):
             # Hint: The maximum sequence length is given by config.block_size.
             rope_cache = None
             ### YOUR CODE HERE ###
-            pass
+            
+            rope_cache = precompute_rotary_emb(dim=(config.n_embd // config.n_head), max_positions=config.block_size)
+
             ### END YOUR CODE ###
 
             self.register_buffer("rope_cache", rope_cache)
@@ -97,7 +140,11 @@ class CausalSelfAttention(nn.Module):
         # TODO: causal mask to ensure that attention is only applied to the left in the input sequence
         mask = None
         ### YOUR CODE HERE ###
-        pass
+        
+        block_matrix = torch.ones(config.block_size, config.block_size)
+        low_triangle_matrix = torch.tril(block_matrix) # makes sure that token n can only see token 0 - (n-1)
+        mask = low_triangle_matrix.view(1, 1,config.block_size, config.block_size) # make it 4D now for mul for attn tens
+
         ### END YOUR CODE ###
 
         self.register_buffer("mask", mask)
@@ -113,7 +160,13 @@ class CausalSelfAttention(nn.Module):
         if self.rope:
             # TODO: [part g] Apply RoPE to the query and key.
             ### YOUR CODE HERE ###
-            pass
+            
+            # query 
+            q = apply_rotary_emb(q, rope_cache=self.rope_cache)
+
+            # key 
+            k = apply_rotary_emb(k, rope_cache=self.rope_cache)
+
             ### END YOUR CODE ###
 
         # TODO: causal self-attention
@@ -125,7 +178,29 @@ class CausalSelfAttention(nn.Module):
         # 6. re-assemble all head outputs side by side
         y = None
         ### YOUR CODE HERE ###
-        pass
+        
+        # 1. compute attention map (pre-softmax) -> (QK^T/sqrt(d_k))
+        K_T = k.transpose(2, 3) # transpose to head_size, T
+        d = C // self.n_head
+        attention_map = (q @ K_T) / d**0.5
+
+        # 2. apply attention mask to the attention map
+        trim_mask = self.mask[:, :, :T, :T] # fit to current seq list
+        attention_map = attention_map.masked_fill(trim_mask == 0, -1e9) # replace all 0 w -1e9 for softmax
+
+        # 3. apply softmax to the attention map (hint: masked parts should not be included in the softmax)
+        attention_map = F.softmax(attention_map, dim=3)
+
+        # 4. apply attention dropout to the attention map
+        attention_map = self.attn_drop(attention_map)
+
+        # 5. compute the output by applying the attention map to the value
+        y = attention_map @ v # current dim = B, n_head, T, head_size
+
+        # 6. re-assemble all head outputs side by side -> set to (B, T, C)
+        y = y.transpose(1, 2) # switch T & n_head
+        y = y.reshape(B, T, C)
+
         ### END YOUR CODE ###
 
         # output projection
