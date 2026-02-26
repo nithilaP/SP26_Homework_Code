@@ -68,7 +68,10 @@ def main():
     if args.variant == 'vanilla':
         # TODO: [part c] Make some model here
         ### YOUR CODE HERE ###
-        pass
+        
+        model = models.GPT(mconf)
+        model = model.to(device=device) # FIX: w GPU, get RT error for tensor on same device
+
         ### END YOUR CODE ###
     elif args.variant == 'rope':
         # TODO: [part g] Make some other model here
@@ -142,7 +145,23 @@ def main():
         #     number of epochs for each case.
 
         ### YOUR CODE HERE ###
-        pass
+        
+        # load & build data
+        finetune_txt = open(args.finetune_corpus_path, 'r').read()
+        finetune_data = dataset.NameDataset(pretrain_dataset, finetune_txt)
+
+        # HW CHECK IN
+        if (args.reading_params_path):
+            model.load_state_dict(torch.load(args.reading_params_path, device))
+
+        # set up trainer config
+        tconf = trainer.TrainerConfig(max_epochs=75, batch_size=256, learning_rate=args.finetune_lr,
+                            lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size,
+                            writer=writer, ckpt_path=args.writing_params_path)
+        # write to config.ckpt_path: https://github.com/karpathy/minGPT/issues/8
+        tr = trainer.Trainer(model, finetune_data, config=tconf, test_dataset=None)
+        tr.train()
+
         ### END YOUR CODE ###
     elif args.function == 'evaluate':
         assert args.outputs_path is not None
