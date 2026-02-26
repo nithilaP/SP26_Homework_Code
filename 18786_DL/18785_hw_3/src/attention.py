@@ -38,23 +38,24 @@ def precompute_rotary_emb(dim, max_positions):
     # TODO: [part g]
     ### YOUR CODE HERE ###
     
-    # HW CHECK IN (2 LINES)
+    # HW CHECK IN (2 LINES) -> need to do arange for i-1 in theta calc
     # TODO: INSERT COMMENT
-    positions = torch.arange(max_positions, torch.device("cpu"), torch.float32);
-    i = torch.arange(dim/2, torch.device("cpu"), torch.float32);
+    positions = torch.arange(max_positions, device=torch.device("cpu"), dtype=torch.float32);
+    i = torch.arange(1, dim//2 + 1, device=torch.device("cpu"), dtype=torch.float32); # from above: for i in [1, dim/2
 
     # dim 1 tensor : https://docs.pytorch.org/docs/main/generated/torch.unsqueeze.html
     positions = positions.unsqueeze(1); # [[a], [b], [c], ...]
-    i = torch.unsqueeze(0); # [[ a,  b,  c, ... ]]
+    i = i.unsqueeze(0); # [[ a,  b,  c, ... ]]
 
     # FROM STAFF: 
     # cos(t theta_i) and sin(t theta_i)
     #   where t is the position and
     #         theta_i = 1/10000^(-2(i-1)/dim) for i in [1, dim/2] */
-    theta_val = positions * (1/10000^(-2(i-1)/dim));
+    theta_i = (1/(10000 ** ((2 * (i-1))/ dim))) # FIX: need decreasing freq -> ^ 2.. instead of -2
+    angle_vals = positions * theta_i;
 
     # HW CHECK IN (1 LINES)
-    rope_cache = torch.stack([torch.cos(theta_val), torch.sin(theta_val)], dim=-1);
+    rope_cache = torch.stack([torch.cos(angle_vals), torch.sin(angle_vals)], dim=-1);
 
     ### END YOUR CODE ###
     return rope_cache
