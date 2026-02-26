@@ -1,0 +1,13 @@
+# virtual envs
+**/.venv-hw3/
+**/.venv/
+venv/
+env/
+
+# python junk
+**/__pycache__/
+*.pyc
+
+# # tensorboard logs
+# **/events.out.tfevents.*
+# **/runs/
