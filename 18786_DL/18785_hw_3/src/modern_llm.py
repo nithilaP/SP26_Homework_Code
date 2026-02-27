@@ -112,7 +112,7 @@ def main():
         num_tokens_input = len(tokens_input[0])
 
         with torch.no_grad():
-            output = model.generate(**input2, max_new_tokens=10, do_sample=False, use_cache=True)
+            output = model.generate(**input2, max_new_tokens=50, do_sample=False, use_cache=True)
 
         output_text = tokenizer.decode(output[0, num_tokens_input:], skip_special_tokens=True)
         output_text = output_text.strip() # FIX: strip the output so we can match with oup
