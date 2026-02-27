@@ -52,7 +52,7 @@ def main():
         input1 = tokenizer(inp, return_tensors="pt").to(model.device)
         
         with torch.no_grad():
-            output = model.generate(**input1, max_new_tokens=50, do_sample=False) # do not want random
+            output = model.generate(**input1, max_new_tokens=10, do_sample=False) # do not want random
 
         output_text = tokenizer.decode(output[0], skip_special_tokens=True)
         generated_text = output_text[len(inp):]
@@ -80,7 +80,7 @@ def main():
         input2 = tokenizer(reformat_inp, return_tensors="pt").to(model.device)
 
         with torch.no_grad():
-            output = model.generate(**input2, max_new_tokens=50, do_sample=False)
+            output = model.generate(**input2, max_new_tokens=10, do_sample=False)
 
         output_text = tokenizer.decode(output[0], skip_special_tokens=True)
         generated_text = output_text[len(reformat_inp):]
