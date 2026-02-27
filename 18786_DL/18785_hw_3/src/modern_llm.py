@@ -25,6 +25,7 @@ def main():
     model_name = "Qwen/Qwen2.5-1.5B-Instruct"
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
 
+    # Hw CHECK IN COULD CHANGE
     model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16, device_map="auto", trust_remote_code=True)
     model.eval()
 
@@ -33,50 +34,48 @@ def main():
     # HW CHECK IN   
     # parse the birth dev tsv. 
     with open(args.dev_set_path, 'r', encoding='utf-8') as data_file:
-        dataset = []
+        birth_data = []
         for line in data_file:
-            if line:
+            if line.strip(): # consider lines with just \n
                 inp, oup = line.split('\t')      
-                dataset.append((inp, oup))
+                birth_data.append((inp, oup))
     
     # LOGGING:
     pred_lines_v1 = []
 
     # Variant 1:
     variant1_correct = 0
-    for inp, oup in tqdm(dataset, desc="Variant 1"):
+    for inp, oup in tqdm(birth_data, desc="Variant 1"):
 
         # FIX: REMOVE WHITESPACES
         inp = inp.strip()
         oup = oup.strip()
 
         input1 = tokenizer(inp, return_tensors="pt").to(model.device)
+        # determine number of tokens in input 
+        tokens_input = input1["input_ids"] #https://discuss.huggingface.co/t/fine-tune-a-minimal-llm-model-with-rtx-2050-gpu/171003
+        num_tokens_input = len(tokens_input[0])
         
         with torch.no_grad():
             output = model.generate(**input1, max_new_tokens=10, do_sample=False, use_cache=True) # do not want random
 
-        # gen_i = output[0][input1["input_ids"].shape[-1]:]
-        # generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
-        # generated_text = generated_text.strip() # strip the output so we can match with oup
+        output_text = tokenizer.decode(output[0, num_tokens_input:], skip_special_tokens=True)
+        output_text = output_text.strip() # FIX: strip the output so we can match with oup
 
-        output_text = tokenizer.decode(output[0], skip_special_tokens=True)
-        generated_text = output_text[len(inp):]
-        generated_text = generated_text.strip() # strip the output so we can match with oup
-
-        if (oup == generated_text):
+        if (oup == output_text):
             variant1_correct += 1
         
         # LOGGING: 
-        pred_lines_v1.append(f"{inp}\t{oup}\t{generated_text}")
+        pred_lines_v1.append(f"{inp}\t{oup}\t{output_text}")
 
-    variant1_accuracy = (variant1_correct / len(dataset)) * 100
+    variant1_accuracy = (variant1_correct / len(birth_data)) * 100
     
     # Variant 2:
     # LOGGING:
     pred_lines_v2 = []
 
     variant2_correct = 0  
-    for inp, oup in tqdm(dataset, desc="Variant 2"):
+    for inp, oup in tqdm(birth_data, desc="Variant 2"):
 
         # FIX: REMOVE WHITESPACES
         inp = inp.strip()
@@ -84,30 +83,28 @@ def main():
 
         # get name from input
         inp_heading = "Where was "
-        inp_ending = "born?"
+        inp_ending = " born?"
         name = inp[len(inp_heading):-len(inp_ending)] # slice just name
-        reformat_inp = name + " was born in?"
+        reformat_inp = "What is the birthplace of " + name + "?" # from 4c 
 
         input2 = tokenizer(reformat_inp, return_tensors="pt").to(model.device)
+        # determine number of tokens in input 
+        tokens_input = input2["input_ids"] #https://discuss.huggingface.co/t/fine-tune-a-minimal-llm-model-with-rtx-2050-gpu/171003
+        num_tokens_input = len(tokens_input[0])
 
         with torch.no_grad():
             output = model.generate(**input2, max_new_tokens=10, do_sample=False, use_cache=True)
 
-        # gen_i = output[0][input2["input_ids"].shape[-1]:]
-        # generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
-        # generated_text = generated_text.strip() # strip the output so we can match with oup
+        output_text = tokenizer.decode(output[0, num_tokens_input:], skip_special_tokens=True)
+        output_text = output_text.strip() # FIX: strip the output so we can match with oup
 
-        output_text = tokenizer.decode(output[0], skip_special_tokens=True)
-        generated_text = output_text[len(reformat_inp):]
-        generated_text = generated_text.strip() # strip the output so we can match with oup
-
-        if (oup == generated_text):
+        if (oup == output_text):
             variant2_correct += 1
 
         # LOGGING: 
-        pred_lines_v2.append(f"{inp}\t{oup}\t{generated_text}")
+        pred_lines_v2.append(f"{inp}\t{oup}\t{output_text}")
     
-    variant2_accuracy = (variant2_correct / len(dataset)) * 100
+    variant2_accuracy = (variant2_correct / len(birth_data)) * 100
 
     with open("modern_llm__variant1_v1_debug.tsv", "w", encoding="utf-8") as f:
         f.write("\n".join(pred_lines_v1))
