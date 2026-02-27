@@ -122,9 +122,6 @@ int main() {
 
     cudaEventRecord(st2);
     kernel_call<<<1, 128>>>(N, dev_in, dev_out);
-    // for (int rep = 0; rep < 10000; rep++) {
-    //     kernel_call<<<1, 128>>>(N, dev_in, dev_out);
-    // }
     cudaEventRecord(et2);
 
     // host waits until et2 has occured
@@ -134,7 +131,6 @@ int main() {
     cudaEventElapsedTime(&milliseconds, st2, et2);
 
     cout << "Kernel time: " << milliseconds << "ms" << endl;
-    // cout << "Avg kernel time: " << (milliseconds / 10000.0f) << "ms" << endl;
 
     // copy data out
     cudaMemcpy(host_out, dev_out, B * B * N * N * sizeof(float),
