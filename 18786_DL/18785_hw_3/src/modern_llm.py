@@ -35,11 +35,12 @@ def main():
     with open(args.dev_set_path, 'r', encoding='utf-8') as data_file:
         dataset = []
         for line in data_file:
-            # if (line.strip()): # if value
-                # line = line.strip()
             if line:
                 inp, oup = line.split('\t')      
                 dataset.append((inp, oup))
+    
+    # LOGGING:
+    pred_lines_v1 = []
 
     # Variant 1:
     variant1_correct = 0
@@ -54,20 +55,26 @@ def main():
         with torch.no_grad():
             output = model.generate(**input1, max_new_tokens=10, do_sample=False, use_cache=True) # do not want random
 
-        gen_i = output[0][input1["input_ids"].shape[-1]:]
-        generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
-        generated_text = generated_text.strip() # strip the output so we can match with oup
-
-        # output_text = tokenizer.decode(output[0], skip_special_tokens=True)
-        # generated_text = output_text[len(inp):]
+        # gen_i = output[0][input1["input_ids"].shape[-1]:]
+        # generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
         # generated_text = generated_text.strip() # strip the output so we can match with oup
+
+        output_text = tokenizer.decode(output[0], skip_special_tokens=True)
+        generated_text = output_text[len(inp):]
+        generated_text = generated_text.strip() # strip the output so we can match with oup
 
         if (oup == generated_text):
             variant1_correct += 1
+        
+        # LOGGING: 
+        pred_lines_v1.append(f"{inp}\t{oup}\t{generated_text}")
 
     variant1_accuracy = (variant1_correct / len(dataset)) * 100
     
     # Variant 2:
+    # LOGGING:
+    pred_lines_v2 = []
+
     variant2_correct = 0  
     for inp, oup in tqdm(dataset, desc="Variant 2"):
 
@@ -86,18 +93,27 @@ def main():
         with torch.no_grad():
             output = model.generate(**input2, max_new_tokens=10, do_sample=False, use_cache=True)
 
-        gen_i = output[0][input2["input_ids"].shape[-1]:]
-        generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
-        generated_text = generated_text.strip() # strip the output so we can match with oup
-
-        # output_text = tokenizer.decode(output[0], skip_special_tokens=True)
-        # generated_text = output_text[len(reformat_inp):]
+        # gen_i = output[0][input2["input_ids"].shape[-1]:]
+        # generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
         # generated_text = generated_text.strip() # strip the output so we can match with oup
+
+        output_text = tokenizer.decode(output[0], skip_special_tokens=True)
+        generated_text = output_text[len(reformat_inp):]
+        generated_text = generated_text.strip() # strip the output so we can match with oup
 
         if (oup == generated_text):
             variant2_correct += 1
+
+        # LOGGING: 
+        pred_lines_v2.append(f"{inp}\t{oup}\t{generated_text}")
     
     variant2_accuracy = (variant2_correct / len(dataset)) * 100
+
+    with open("modern_llm__variant1_v1_debug.tsv", "w", encoding="utf-8") as f:
+        f.write("\n".join(pred_lines_v1))
+
+    with open("modern_llm__variant1_v2_debug.tsv", "w", encoding="utf-8") as f:
+        f.write("\n".join(pred_lines_v2))
 
     ### END YOUR CODE ###
     print("Variant 1 acc:", variant1_accuracy)
