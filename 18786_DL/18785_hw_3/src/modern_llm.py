@@ -25,7 +25,7 @@ def main():
     model_name = "Qwen/Qwen2.5-1.5B-Instruct"
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
 
-    model = AutoModelForCausalLM.from_pretrained(model_name, dtype=torch.float16, device_map="auto", trust_remote_code=True)
+    model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16, device_map="auto", trust_remote_code=True)
     model.eval()
 
     print(next(model.parameters()).device)
@@ -43,7 +43,7 @@ def main():
 
     # Variant 1:
     variant1_correct = 0
-    for inp, oup in dataset:
+    for inp, oup in tqdm(dataset, desc="Variant 1"):
 
         # FIX: REMOVE WHITESPACES
         inp = inp.strip()
@@ -52,7 +52,7 @@ def main():
         input1 = tokenizer(inp, return_tensors="pt").to(model.device)
         
         with torch.no_grad():
-            output = model.generate(**input1, max_new_tokens=10, do_sample=False) # do not want random
+            output = model.generate(**input1, max_new_tokens=10, do_sample=False, use_cache=True) # do not want random
 
         output_text = tokenizer.decode(output[0], skip_special_tokens=True)
         generated_text = output_text[len(inp):]
@@ -65,7 +65,7 @@ def main():
     
     # Variant 2:
     variant2_correct = 0  
-    for inp, oup in dataset:
+    for inp, oup in tqdm(dataset, desc="Variant 2"):
 
         # FIX: REMOVE WHITESPACES
         inp = inp.strip()
@@ -80,7 +80,7 @@ def main():
         input2 = tokenizer(reformat_inp, return_tensors="pt").to(model.device)
 
         with torch.no_grad():
-            output = model.generate(**input2, max_new_tokens=10, do_sample=False)
+            output = model.generate(**input2, max_new_tokens=10, do_sample=False, use_cache=True)
 
         output_text = tokenizer.decode(output[0], skip_special_tokens=True)
         generated_text = output_text[len(reformat_inp):]
@@ -92,7 +92,8 @@ def main():
     variant2_accuracy = (variant2_correct / len(dataset)) * 100
 
     ### END YOUR CODE ###
-
+    print("Variant 1 acc:", variant1_accuracy)
+    print("Variant 2 acc:", variant2_accuracy)
     return variant1_accuracy, variant2_accuracy
 
 if __name__ == '__main__':
