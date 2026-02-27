@@ -9,7 +9,7 @@ int main() {
     float *host_in;
     float *dev_in;
 
-    size_t N = 1 << 10;
+    size_t N = 1 << 24;
 
     cudaEvent_t st1, et1, st2, et2;
     cudaEventCreate(&st1);
@@ -36,38 +36,17 @@ int main() {
     // no sync required here because memcpy is synchronized
     cudaEventRecord(et1);
 
-    // // record time at start
-    // cudaEventRecord(st2);
-
-    // kernel_call<<<4, 1024>>>();
-
-    // // wait until kernel is done start timing
-    // cudaDeviceSynchronize();
-    // cudaEventRecord(et2);
-
-    // cudaEventElapsedTime(&ms1, st1, et1);
-    // cudaEventElapsedTime(&ms2, st2, et2);
-
-    // ---------------- KERNEL TIMING ----------------
-    // warm up (removes first-launch overhead)
-    kernel_call<<<1, 1>>>();
-    cudaDeviceSynchronize();
-
-    const int iters = 10000;
-
+    // record time at start
     cudaEventRecord(st2);
-    for (int i = 0; i < iters; i++) {
-        kernel_call<<<1, 1>>>();
-    }
+
+    kernel_call<<<4, 1024>>>();
+
+    // wait until kernel is done start timing
+    cudaDeviceSynchronize();
     cudaEventRecord(et2);
 
-    cudaEventSynchronize(et2);      // IMPORTANT: wait for et2 to complete
-    cudaDeviceSynchronize();        // ensures all kernels finished (either is fine; this is extra-safe)
-
+    cudaEventElapsedTime(&ms1, st1, et1);
     cudaEventElapsedTime(&ms2, st2, et2);
-
-    cout << "Avg empty kernel launch time: " << (ms2 / iters) << " ms" << endl;
-    // ---------------- KERNEL TIMING ----------------
 
     cout << "MemCpy: " << N << " floats:\t" << ms1 << "ms" << endl;
     cout << "Kernel:\t\t\t" << ms2 << "ms" << endl;
