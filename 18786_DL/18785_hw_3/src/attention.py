@@ -77,6 +77,11 @@ def apply_rotary_emb(x, rope_cache):
     rotated_x = None
     ### YOUR CODE HERE ###
 
+    # CHOICE: think as complex numbers instead of even vs odd 
+    # After testing, even vs odd split (bc of my slicing) gave me ~10% accuracy. :(
+
+    # TRY CHANGE TO EVEN VS ODD CODE>
+
     # unpack x 
     B = x.shape[0]
     n_head = x.shape[1]
