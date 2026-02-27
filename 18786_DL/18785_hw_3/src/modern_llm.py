@@ -51,7 +51,16 @@ def main():
         inp = inp.strip()
         oup = oup.strip()
 
-        input1 = tokenizer(inp, return_tensors="pt").to(model.device)
+        # need to use chat template for Qwen: https://discuss.huggingface.co/t/fine-tune-a-minimal-llm-model-with-rtx-2050-gpu/171003
+        messages = [
+            {
+                "role": "user",
+                "content": inp
+            }
+        ]
+        templ_inp = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        input1 = tokenizer(templ_inp, return_tensors="pt").to(model.device)
+
         # determine number of tokens in input 
         tokens_input = input1["input_ids"] #https://discuss.huggingface.co/t/fine-tune-a-minimal-llm-model-with-rtx-2050-gpu/171003
         num_tokens_input = len(tokens_input[0])
@@ -87,7 +96,16 @@ def main():
         name = inp[len(inp_heading):-len(inp_ending)] # slice just name
         reformat_inp = "What is the birthplace of " + name + "?" # from 4c 
 
-        input2 = tokenizer(reformat_inp, return_tensors="pt").to(model.device)
+        # need to use chat template for Qwen: https://discuss.huggingface.co/t/fine-tune-a-minimal-llm-model-with-rtx-2050-gpu/171003
+        messages = [
+            {
+                "role": "user",
+                "content": reformat_inp
+            }
+        ]
+        templ_inp = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        input2 = tokenizer(templ_inp, return_tensors="pt").to(model.device)
+
         # determine number of tokens in input 
         tokens_input = input2["input_ids"] #https://discuss.huggingface.co/t/fine-tune-a-minimal-llm-model-with-rtx-2050-gpu/171003
         num_tokens_input = len(tokens_input[0])
