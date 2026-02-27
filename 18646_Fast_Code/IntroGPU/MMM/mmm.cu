@@ -65,7 +65,7 @@ __global__ void kernel_call(float *c) {
         int j = c_i % 64; /* iterate through elements in the column */
         int curr_c_i = i * 64 + j;
 
-        /* each thread do this own indp element calcs. */
+        /* local sum: each thread do this own indp element calcs. */
         float elem_sum = s_c[curr_c_i];
         for (int a_col = 0; a_col < 64; ++a_col) { // 64 columns of A
             elem_sum += s_a[a_col * 64 + i] * s_b[a_col * 64 + j];
