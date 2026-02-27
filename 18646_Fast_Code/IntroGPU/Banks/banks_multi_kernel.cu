@@ -2,6 +2,7 @@
 #include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <cfloat>
 
 using namespace std;
 
@@ -90,28 +91,43 @@ int main() {
     cudaEvent_t st2, et2;
     cudaEventCreate(&st2);
     cudaEventCreate(&et2);
-    cudaEventRecord(st2);    
 
-    // STAFF STARTER: kernel_call<<<1, 128>>>(N, dev_in, dev_out);
-    /* MY CHANGE: multi kernel launch */
-    int num_elem_in_tile = N * N; // FIX
-    for (int ii = 0; ii < B; ++ii) {
-        for (int jj = 0; jj < B; ++jj) {
-            /* map element to transpose elem & add offset to the dev_in and dev_out */
-            kernel_call<<<1, 128>>>(N, dev_in + num_elem_in_tile * (ii * B + jj), dev_out+ num_elem_in_tile * (jj * B + ii));
+    float curr_total_milliseconds = 0.0; 
+    float curr_min_milliseconds = FLT_MAX;
+    for (int i = 0; i < 1000; i++){
 
+        cudaEventRecord(st2);    
+
+        // STAFF STARTER: kernel_call<<<1, 128>>>(N, dev_in, dev_out);
+        /* MY CHANGE: multi kernel launch */
+        int num_elem_in_tile = N * N; // FIX
+        for (int ii = 0; ii < B; ++ii) {
+            for (int jj = 0; jj < B; ++jj) {
+                /* map element to transpose elem & add offset to the dev_in and dev_out */
+                kernel_call<<<1, 128>>>(N, dev_in + num_elem_in_tile * (ii * B + jj), dev_out+ num_elem_in_tile * (jj * B + ii));
+
+            }
         }
+
+        cudaEventRecord(et2);
+
+        // host waits until et2 has occured
+        cudaEventSynchronize(et2);
+        cudaDeviceSynchronize();  /* avoid gpu optimziation betwen iter*/
+
+        float milliseconds = 0;
+        cudaEventElapsedTime(&milliseconds, st2, et2);
+    
+        curr_total_milliseconds += milliseconds;
+        if(milliseconds < curr_min_milliseconds){
+            curr_min_milliseconds = milliseconds;
+        }
+
     }
+    cout << "Average Kernel time: " << (curr_total_milliseconds / 1000) << "ms" << endl;
+    cout << "Minimum Kernel time: " << curr_min_milliseconds << "ms" << endl;
 
-    cudaEventRecord(et2);
-
-    // host waits until et2 has occured
-    cudaEventSynchronize(et2);
-
-    float milliseconds = 0;
-    cudaEventElapsedTime(&milliseconds, st2, et2);
-
-    cout << "Kernel time: " << milliseconds << "ms" << endl;
+    // cout << "Kernel time: " << milliseconds << "ms" << endl;
     // cout << "Avg kernel time: " << (milliseconds / 10000.0f) << "ms" << endl;
 
     // copy data out
