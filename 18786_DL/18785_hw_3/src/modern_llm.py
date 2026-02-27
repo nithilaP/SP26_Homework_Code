@@ -25,7 +25,7 @@ def main():
     model_name = "Qwen/Qwen2.5-1.5B-Instruct"
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
 
-    model = Qwen2ForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16, device_map="auto", trust_remote_code=True)
+    model = AutoModelForCausalLM.from_pretrained(model_name, dtype=torch.float16, device_map="auto", trust_remote_code=True)
     model.eval()
 
     # HW CHECK IN   
@@ -47,7 +47,7 @@ def main():
         inp = inp.strip()
         oup = oup.strip()
 
-        input1 = tokenizer(inp, return_tensors="pt", padding=True).to(model.device)
+        input1 = tokenizer(inp, return_tensors="pt").to(model.device)
         
         with torch.no_grad():
             output = model.generate(**input1, max_new_tokens=50, do_sample=False) # do not want random
@@ -75,7 +75,7 @@ def main():
         name = inp[len(inp_heading):-len(inp_ending)] # slice just name
         reformat_inp = name + " was born in?"
 
-        input2 = tokenizer(reformat_inp, return_tensors="pt", padding=True).to(model.device)
+        input2 = tokenizer(reformat_inp, return_tensors="pt").to(model.device)
 
         with torch.no_grad():
             output = model.generate(**input2, max_new_tokens=50, do_sample=False)
