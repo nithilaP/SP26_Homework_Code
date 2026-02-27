@@ -54,9 +54,13 @@ def main():
         with torch.no_grad():
             output = model.generate(**input1, max_new_tokens=10, do_sample=False, use_cache=True) # do not want random
 
-        output_text = tokenizer.decode(output[0], skip_special_tokens=True)
-        generated_text = output_text[len(inp):]
+        gen_i = output[0][input1["input_ids"].shape[-1]:]
+        generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
         generated_text = generated_text.strip() # strip the output so we can match with oup
+
+        # output_text = tokenizer.decode(output[0], skip_special_tokens=True)
+        # generated_text = output_text[len(inp):]
+        # generated_text = generated_text.strip() # strip the output so we can match with oup
 
         if (oup == generated_text):
             variant1_correct += 1
@@ -82,9 +86,13 @@ def main():
         with torch.no_grad():
             output = model.generate(**input2, max_new_tokens=10, do_sample=False, use_cache=True)
 
-        output_text = tokenizer.decode(output[0], skip_special_tokens=True)
-        generated_text = output_text[len(reformat_inp):]
+        gen_i = output[0][input2["input_ids"].shape[-1]:]
+        generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
         generated_text = generated_text.strip() # strip the output so we can match with oup
+
+        # output_text = tokenizer.decode(output[0], skip_special_tokens=True)
+        # generated_text = output_text[len(reformat_inp):]
+        # generated_text = generated_text.strip() # strip the output so we can match with oup
 
         if (oup == generated_text):
             variant2_correct += 1
