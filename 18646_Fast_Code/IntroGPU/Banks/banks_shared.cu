@@ -12,40 +12,69 @@ __global__ void kernel_call(int N, float *in, float *out) {
 
     int id = threadIdx.x; // get my id;
 
-    /* STAFF STARTER CODE*/
-    // read 2 rows at a time, write 2 columns at a time
-    // for (int i = 0; i != 64 * 64 / blockDim.x; ++i) {
-    //     share_buf[i * 2 + (id % 64) * 64 + (id / 64)] = in[blockDim.x * i + id];
-    // }
+    /* STAFF STARTER CODE
+    read 2 rows at a time, write 2 columns at a time
+    for (int i = 0; i != 64 * 64 / blockDim.x; ++i) {
+        share_buf[i * 2 + (id % 64) * 64 + (id / 64)] = in[blockDim.x * i + id];
+    }
+    */
 
     /* MY CHANGE: 
-    -> No additional shared memory: change access patter, no padding 
+    -> From lecture GPU Memory, Transpose Exercise
+    -> read input from coalesced memory (buffer[row][col] = row * 64 + col)
+    -> Put into shared buffer, but transpose it as we put it in.
+    -> if we store tranposed row & col in shared buffer, cause bank conflicts within warp
+    -> SO need intermediate layout: can stagger inputs: 
+        -> In slides, we stagger inputs by shifting in each row such that no two values in one 
+        column previous stay in a colum. They are now staggered. Columns can be put back together 
+        in diagonal. 
     
     NOTES: 
     -> in: 64 x 64 (row major)
     -> out: 64 x 64 */
     for (int i = 0; i != 64 * 64 / blockDim.x; ++i) {
 
-        /* shared memory location
-        -> For each 128 (bc 128 threads defined), assigns a new thread to each element for tranpose in chunks. 
-        -> when i =0, in array vals 0 - 127 are accessed by thread 0 - 127 respectively 
-        -> makes it so that contiguous threads share contiguous memory locs -> contiguous locations, so good for warp! 
-        */
+        /* shared memory location but made flat.*/
         int seq_access = blockDim.x * i + id; /* map each to a val from 0 to 4096 */
         // cout << "seq_access:" << seq_access;
 
-        /* since transpose -> output[row][col] = input[col][row] -> SO would be in[64 * col + row]
-        -> just perform tranpose into shared memory. */
-        share_buf[seq_access] = in[(seq_access / 64) + 64 * (seq_access % 64)];
+        /* determine transpose position */
+        int transpose_row = seq_access % 64; /* the column value is the new row */
+        int transpose_col = seq_access / 64; /* the row value is the new col */
+
+        /* need to stagger the value, so no shared bank conflict */
+        /* to shift over one place in matrix, mult by row; 
+        -> mod 64 for wrap around when we shift by 1 */
+        int stagger_offset = seq_access % 64; /* shift by row val so that we can wrap around w one shift for each row*/
+        int stagger_col = ((transpose_col + stagger_offset) % 64);
+
+        share_buf[transpose_row * 64 + stagger_col] = in[seq_access]; /* put the curr value into shared buffer*/
     }
 
     __syncthreads(); // wait till everyone is done
 
-    /* STAFF STARTER CODE*/
+    /* STAFF STARTER CODE
     // copy everything to main memory
     for (int i = 0; i != 64 * 64 / blockDim.x; ++i) {
         out[id + blockDim.x * i] = share_buf[id + blockDim.x * i];
     }
+    */
+
+    /* MY CHANGES: revert shared memory changes from when we store earlier. */
+    // copy everything to main memory
+    for (int i = 0; i != 64 * 64 / blockDim.x; ++i) {
+        int seq_access = blockDim.x * i + id; /* map each to a val from 0 to 4096 */
+
+        /* determine transpose position in the shared buffer */
+        int transpose_row = seq_access / 64; 
+        int transpose_col = seq_access % 64;
+
+        int stagger_offset = seq_access / 64; /* shift by row val so that we can wrap around w one shift for each row*/
+        int stagger_col = ((transpose_col + stagger_offset) % 64);
+
+        out[seq_access] = share_buf[transpose_row * 64 + stagger_col];
+    }
+
 }
 
 int main() {
@@ -93,6 +122,9 @@ int main() {
 
     cudaEventRecord(st2);
     kernel_call<<<1, 128>>>(N, dev_in, dev_out);
+    // for (int rep = 0; rep < 10000; rep++) {
+    //     kernel_call<<<1, 128>>>(N, dev_in, dev_out);
+    // }
     cudaEventRecord(et2);
 
     // host waits until et2 has occured
@@ -102,6 +134,7 @@ int main() {
     cudaEventElapsedTime(&milliseconds, st2, et2);
 
     cout << "Kernel time: " << milliseconds << "ms" << endl;
+    // cout << "Avg kernel time: " << (milliseconds / 10000.0f) << "ms" << endl;
 
     // copy data out
     cudaMemcpy(host_out, dev_out, B * B * N * N * sizeof(float),
