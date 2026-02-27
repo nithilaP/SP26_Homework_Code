@@ -28,6 +28,8 @@ def main():
     model = AutoModelForCausalLM.from_pretrained(model_name, dtype=torch.float16, device_map="auto", trust_remote_code=True)
     model.eval()
 
+    print(next(model.parameters()).device)
+
     # HW CHECK IN   
     # parse the birth dev tsv. 
     with open(args.dev_set_path, 'r', encoding='utf-8') as data_file:
