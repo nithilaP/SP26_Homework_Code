@@ -16,6 +16,8 @@ __global__ void kernel_call(float *c) {
 
     /**** Do Not Change Code Above This ****/
 
+    /* Notes: Assume A, B, C in shared memory. Limited to only 1 thread block but can change number of threads. */
+    /* STAFF STARTER CODE.
     for (int i = id; i < 64; i += p) {
         for (int j = id; j < 64; j += p) {
             s_c[i * 64 + j] = i * 64 + j + 1.0;
@@ -23,10 +25,23 @@ __global__ void kernel_call(float *c) {
             s_b[i * 64 + j] = i * 64 + j + 1.0;
         }
     }
+    */
+
+    /* MY CHANGE:
+    -> Save computation by storing value each iteration */
+    for (int i = id; i < 64; i += p) {
+        for (int j = id; j < 64; j += p) {
+            int base = i * 64 + j; /* save computation by storing*/
+            s_c[base] = base + 1.0;
+            s_a[base] = base + 2.0;
+            s_b[base] = base + 1.0;
+        }
+    }
 
     // ensure all threads are done initializing the buffer
     __syncthreads();
 
+    /* STAFF STARTER CODE.
     // Computes C += A * B using only 1 thread
     // A is column major order, the other 2 matrices are row major order
     for (int i = 0; i < 64; ++i) {         // 64 rows of C
@@ -36,7 +51,29 @@ __global__ void kernel_call(float *c) {
             }
         }
     }
+    */
+    
+    // Computes C += A * B 
+    /* MY CHANGE: 
+    -> COMPUTE in PARALLEL based on elements in C
+    -> each thread would just compute C[id], C[id + p], C[id + 2 * p], etc */
+    int total_C_elem = 64 * 64;
+    for (int c_i = id; c_i < total_C_elem; c_i += p) {
 
+        /* calc i & j based on c_i */
+        int i = c_i / 64; /* iterate through elements in the row */
+        int j = c_i % 64; /* iterate through elements in the column */
+        int curr_c_i = i * 64 + j;
+
+        /* each thread do this own indp element calcs. */
+        float elem_sum = s_c[curr_c_i];
+        for (int a_col = 0; a_col < 64; ++a_col) { // 64 columns of A
+            elem_sum += s_a[a_col * 64 + i] * s_b[a_col * 64 + j];
+        }
+        s_c[curr_c_i] = elem_sum;
+    }
+    __syncthreads(); /* do before copy out*/
+    
     /**** Do Not Change Code Below This ****/
 
     // copy C out such that C is in row major order
@@ -72,11 +109,13 @@ int main() {
     cudaEventRecord(st2);
 
     // change number of threads here
-    kernel_call<<<1, 1>>>(dev_out);
+    kernel_call<<<1, 256>>>(dev_out); /* launch 256 threads here. */
 
     // wait until kernel is done start timing
-    cudaDeviceSynchronize();
+    cudaDeviceSynchronize(); /* kernel sync */
     cudaEventRecord(et2);
+    cudaEventSynchronize(et2); /* need to do this before comuting elapsed time when kernel call and GPU */
+    // /* ^ need to sync GPU and wait and it has reached et2 in order to get correct measurement*/
 
     cudaEventElapsedTime(&ms2, st2, et2);
     cout << "Kernel:\t\t\t" << ms2 << "ms" << endl;
