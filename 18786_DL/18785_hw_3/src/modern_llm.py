@@ -13,6 +13,18 @@ from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer # need to pip install transformers
 from transformers.models.qwen2.modeling_qwen2 import Qwen2ForCausalLM
 
+# 4c addition 
+import re # for expression matching
+def find_output_loc(inp_str):
+    inp_str = inp_str.strip()
+
+    # get place after "born in phrase"
+    if "born in" in inp_str.strip().lower():
+        inp_str.strip().lower().split("born in", 1)[1]
+
+    return inp.str.strip()
+
+
 def main():
 
     # get the dev set
@@ -25,7 +37,7 @@ def main():
     model_name = "Qwen/Qwen2.5-1.5B-Instruct"
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
 
-    # Hw CHECK IN COULD CHANGE
+    # Choose btwn Qwen2ForCausalLM, AutoModelForCausalLM (worked better)
     model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16, device_map="auto", trust_remote_code=True)
     model.eval()
 
@@ -36,12 +48,12 @@ def main():
     with open(args.dev_set_path, 'r', encoding='utf-8') as data_file:
         birth_data = []
         for line in data_file:
-            if line.strip(): # consider lines with just \n
+            if line.strip(): # ADD: do not consider lines with just \n. 
                 inp, oup = line.split('\t')      
                 birth_data.append((inp, oup))
     
     # LOGGING:
-    pred_lines_v1 = []
+    # pred_lines_v1 = []
 
     # Variant 1:
     variant1_correct = 0
@@ -51,15 +63,6 @@ def main():
         inp = inp.strip()
         oup = oup.strip()
 
-        # # need to use chat template for Qwen, where I found out about this -> inspo : https://discuss.huggingface.co/t/fine-tune-a-minimal-llm-model-with-rtx-2050-gpu/171003
-        # # documentation: https://qwen.readthedocs.io/en/v2.0/inference/chat.html
-        # messages = [
-        #     {
-        #         "role": "user",
-        #         "content": inp
-        #     }
-        # ]
-        # templ_inp = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
         input1 = tokenizer(inp, return_tensors="pt").to(model.device)
 
         # determine number of tokens in input 
@@ -72,17 +75,17 @@ def main():
         output_text = tokenizer.decode(output[0, num_tokens_input:], skip_special_tokens=True)
         output_text = output_text.strip() # FIX: strip the output so we can match with oup
 
-        if (oup == output_text):
+        if (find_output_loc(oup) == find_output_loc(output_text)):
             variant1_correct += 1
         
-        # LOGGING: 
-        pred_lines_v1.append(f"{inp}\t{oup}\t{output_text}")
+        # # LOGGING: 
+        # pred_lines_v1.append(f"{inp}\t{oup}\t{output_text}")
 
     variant1_accuracy = (variant1_correct / len(birth_data)) * 100
     
     # Variant 2:
     # LOGGING:
-    pred_lines_v2 = []
+    # pred_lines_v2 = []
 
     variant2_correct = 0  
     for inp, oup in tqdm(birth_data, desc="Variant 2"):
@@ -95,16 +98,8 @@ def main():
         inp_heading = "Where was "
         inp_ending = " born?"
         name = inp[len(inp_heading):-len(inp_ending)] # slice just name
-        reformat_inp = "What is the birthplace of " + name + "?" # from 4c 
+        reformat_inp = "What is the birthplace of " + name + "?" # from 4c
 
-        # need to use chat template for Qwen: https://discuss.huggingface.co/t/fine-tune-a-minimal-llm-model-with-rtx-2050-gpu/171003
-        # messages = [
-        #     {
-        #         "role": "user",
-        #         "content": reformat_inp
-        #     }
-        # ]
-        # templ_inp = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
         input2 = tokenizer(reformat_inp, return_tensors="pt").to(model.device)
 
         # determine number of tokens in input 
@@ -117,19 +112,19 @@ def main():
         output_text = tokenizer.decode(output[0, num_tokens_input:], skip_special_tokens=True)
         output_text = output_text.strip() # FIX: strip the output so we can match with oup
 
-        if (oup == output_text):
+        if (find_output_loc(oup) == find_output_loc(output_text)):
             variant2_correct += 1
 
-        # LOGGING: 
-        pred_lines_v2.append(f"{inp}\t{oup}\t{output_text}")
+        # # LOGGING: 
+        # pred_lines_v2.append(f"{inp}\t{oup}\t{output_text}")
     
     variant2_accuracy = (variant2_correct / len(birth_data)) * 100
 
-    with open("modern_llm__variant1_v1_debug.tsv", "w", encoding="utf-8") as f:
-        f.write("\n".join(pred_lines_v1))
+    # with open("modern_llm__variant1_v1_debug.tsv", "w") as file:
+    #     file.write("\n".join(pred_lines_v1))
 
-    with open("modern_llm__variant1_v2_debug.tsv", "w", encoding="utf-8") as f:
-        f.write("\n".join(pred_lines_v2))
+    # with open("modern_llm__variant1_v2_debug.tsv", "w") as file:
+    #     file.write("\n".join(pred_lines_v2))
 
     ### END YOUR CODE ###
     print("Variant 1 acc:", variant1_accuracy)
