@@ -22,4 +22,4 @@ Verify CUDA:
     ./<file_name>.x
 
 ## In order ot run the profiler on <file_name>.cu, 
-    nsys profile -o <report_name> ./<file_name>.x
+    nsys nvprof ./<file_name>.x

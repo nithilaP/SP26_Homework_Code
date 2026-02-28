@@ -109,7 +109,7 @@ int main() {
     cudaEventRecord(st2);
 
     // change number of threads here
-    kernel_call<<<1, 256>>>(dev_out); /* launch 256 threads here. */
+    kernel_call<<<1, 128>>>(dev_out); /* launch 256 threads here. */
 
     // wait until kernel is done start timing
     cudaDeviceSynchronize(); /* kernel sync */
