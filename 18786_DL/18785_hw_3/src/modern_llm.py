@@ -22,7 +22,7 @@ def find_output_loc(inp_str):
     if "born in" in inp_str.strip().lower():
         inp_str.strip().lower().split("born in", 1)[1]
 
-    return inp.str.strip()
+    return inp_str.strip()
 
 
 def main():
