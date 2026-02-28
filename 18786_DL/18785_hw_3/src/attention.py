@@ -54,7 +54,7 @@ def precompute_rotary_emb(dim, max_positions):
     theta_i = (1/(10000 ** ((2 * (i-1))/ dim))) # FIX: need decreasing freq -> ^ 2.. instead of -2
     angle_vals = positions * theta_i;
 
-    # HW CHECK IN (1 LINES)
+    # stack for apply rotary embedding
     rope_cache = torch.stack([torch.cos(angle_vals), torch.sin(angle_vals)], dim=-1);
 
     ### END YOUR CODE ###
@@ -77,10 +77,23 @@ def apply_rotary_emb(x, rope_cache):
     rotated_x = None
     ### YOUR CODE HERE ###
 
-    # CHOICE: think as complex numbers instead of even vs odd 
-    # After testing, even vs odd split (bc of my slicing) gave me ~10% accuracy. :(
+    # ATTEMPT 1: Even, odd Split instead -> Gave me 10% accuracy!
+    # rope_trimmed = rope_cache[:T] # size = [T, dimension pair = head_size / 2]
+    # complex_rope = torch.view_as_complex(rope_trimmed.float())
 
-    # TRY CHANGE TO EVEN VS ODD CODE>
+    # even = x[:,:,:,::2]
+    # odd = x[:,:,:,1::2]
+    # x_out = torch.stack((even, odd), dim=4).contiguous()
+
+    # complex_x = torch.view_as_complex(x_out) # FIX: neex x.float() here for view+as_complex
+    # rotated_x = complex_rope * complex_x
+
+    # rotated_x = torch.view_as_read(rotated_x)
+    # rotated_x = rotated_x.reshape(B, n_head, T, head_size)
+
+    # ATTEMPT 2: Use same process as eq from proof question 
+    # https://aiexpjourney.substack.com/p/an-in-depth-exploration-of-rotary-position-embedding-rope-ac351a45c794
+    # https://github.com/naver-ai/rope-vit/blob/main/deit/models_v2_rope.py
 
     # unpack x 
     B = x.shape[0]
@@ -90,12 +103,13 @@ def apply_rotary_emb(x, rope_cache):
 
     # fit cache into length of seq T
     rope_trimmed = rope_cache[:T] # size = [T, dimension pair = head_size / 2]
-    complex_rope = torch.view_as_complex(rope_trimmed.float())
-    # fIX: need  to be able to do comp for each batch & head -> when mult w complex atten tensor. -> https://docs.pytorch.org/docs/stable/generated/torch.Tensor.view.html
+    complex_rope = torch.view_as_complex(rope_trimmed.float()) # input cache as float
+    # For comp for each batch & head -> when mult w complex atten tensor. -> https://docs.pytorch.org/docs/stable/generated/torch.Tensor.view.html
     complex_rope = complex_rope.view(1, 1, T, head_size // 2) # [1, T, dimension pair = head_size / 2]
 
     # torch.view_as_complex - https://pytorch.org/docs/stable/generated/torch.view_as_complex.html
-    complex_x = torch.view_as_complex(x.float().reshape(B, n_head, T, head_size // 2, 2)) # FIX: neex x.float() here for view+as_complex
+    # when debugging, verified that last dim of x is pairs of real, img after reshaping
+    complex_x = torch.view_as_complex(x.float().reshape(B, n_head, T, head_size // 2, 2)) # FIX: neex x.float() here -> last dim of x is pairs of real, img after reshaping, https://github.com/naver-ai/rope-vit/blob/main/deit/models_v2_rope.py
 
     # do elem wise rotation clac
     rotated_x = complex_x * complex_rope
@@ -192,6 +206,7 @@ class CausalSelfAttention(nn.Module):
 
         # 2. apply attention mask to the attention map
         trim_mask = self.mask[:, :, :T, :T] # fit to current seq list
+        # attention_map = attention_map + self.mask[:T, :T]
         attention_map = attention_map.masked_fill(trim_mask == 0, -1e9) # replace all 0 w -1e9 for softmax
 
         # 3. apply softmax to the attention map (hint: masked parts should not be included in the softmax)
@@ -205,7 +220,7 @@ class CausalSelfAttention(nn.Module):
 
         # 6. re-assemble all head outputs side by side -> set to (B, T, C)
         y = y.transpose(1, 2) # switch T & n_head
-        y = y.reshape(B, T, C)
+        y = y.reshape(B, T, C) # worked without .contiguous()
 
         ### END YOUR CODE ###
 
