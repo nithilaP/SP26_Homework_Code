@@ -223,5 +223,6 @@ if __name__ == "__main__":
         compare_output = torch.allclose(out_my_conv, out_conv, atol=1e-5)
         print("Compare Output: ", compare_output)
     
+    conv_test_1();
 
     pass
