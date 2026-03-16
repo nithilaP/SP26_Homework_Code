@@ -33,10 +33,17 @@ class MyConv2D(nn.Module):
         ## Create the torch.nn.Parameter for the weights and bias (if bias=True)
         ## Be careful about the size
         # ----- TODO -----
-        self.W = None
-        self.b = None
 
-        raise NotImplementedError
+        # shape of weight: [out_channels, in_channels, kernel_size, kernel_size]
+        self.W = nn.Parameter(torch.randn(out_channels, in_channels, kernel_size, kernel_size))
+
+        # shape of bias: [out_channels]
+        if (bias == True):
+            self.b = nn.Parameter(torch.randn(out_channels))
+        else:    
+            self.b = None
+
+        # raise NotImplementedError
             
     
     def __call__(self, x):
@@ -56,8 +63,43 @@ class MyConv2D(nn.Module):
 
         # call MyFConv2D here
         # ----- TODO -----
+
+        batch_size = x.shape[0]
+        channel = x.shape[1]
+        input_height = x.shape[2]
+        input_width = x.shape[3]
+
+        # calculating dims: 
+        # dim_out = (dim_in + 2P - D(K-1) - 1) / S + 1 
+        # P - Padding, D - Dilation, K - Kernel Size, S - Stride length (no dilation in this case)
+
+        # need padding to make sure spatial dim are preserved of the input after convolution 
+        input_padding = nn.ZeroPad2d(self.padding)
+        input_w_padding = F.pad(input_padding)
+
+        output_height = ((input_height + 2 * self.padding - (self.kernel_size -1) + 1) // self.stride + 1)
+        output_width = ((input_width + 2 * self.padding - (self.kernel_size -1) + 1) // self.stride + 1)
         
-        raise NotImplementedError
+        # TODO: DOUBLE CHECK BELOW!
+        output = torch.zeros(batch_size, self.out_channels, output_height, output_width, device=x.device, dtype=x.dtype)
+
+        # iterate through each dimension of output tensor
+        for batch in range(batch_size): 
+            for out_channel in range(self.out_channels): 
+                for output_i in range(output_height):
+                    for output_j in range(output_width):
+
+                        # determine the kernel window 
+                        # TODO: CHECK THIS!! !
+                        kernel_window = input_w_padding[batch, :, (output_i * self.stride):(output_i * self.stride + self.kernel_size),  (output_j * self.stride):(output_j * self.stride + self.kernel_size)]
+
+                        # do the convolution 
+                        # TODO: CHECK THIS!! !
+                        output[batch, out_channel, output_i, output_j] = torch.sum(self.W[out_channel] * kernel_window)
+                        if self.b != None: 
+                            output[batch, out_channel, output_i, output_j] += self.b[out_channel]
+        return output
+        # raise NotImplementedError
 
     
 class MyMaxPool2D(nn.Module):
@@ -77,9 +119,12 @@ class MyMaxPool2D(nn.Module):
         ## Hint: what should be the default stride_size if it is not given? 
         ## Think about the relationship with kernel_size
         # ----- TODO -----
-        self.stride = None
+        if (stride == None):
+            self.stride = kernel_size
+        else:
+            self.stride = stride
 
-        raise NotImplementedError
+        # raise NotImplementedError
 
 
     def __call__(self, x):
@@ -107,16 +152,34 @@ class MyMaxPool2D(nn.Module):
         
         ## Derive the output size
         # ----- TODO -----
-        self.output_height   = None
-        self.output_width    = None
-        self.output_channels = None
-        self.x_pool_out      = None
+
+        self.output_height   = ((self.input_height + 2 * self.padding - (self.kernel_size -1) + 1) // self.stride + 1)
+        self.output_width    = ((self.input_width + 2 * self.padding - (self.kernel_size -1) + 1) // self.stride + 1)
+        self.output_channels = self.channel
+
+        self.x_pool_out = torch.zeros(self.batch_size, self.out_channels, self.output_height, self.output_width, device=x.device, dtype=x.dtype)
 
         ## Maxpooling process
         ## Feel free to use for loop
         # ----- TODO -----
 
-        raise NotImplementedError
+        # iterate through each dimension of output tensor
+        for batch in range(self.batch_size): 
+            for out_channel in range(self.out_channels): 
+                for output_i in range(self.output_height):
+                    for output_j in range(self.output_width):
+
+                        # determine the kernel window 
+                        # TODO: CHECK THIS!! !
+                        kernel_window = x[batch, :, (output_i * self.stride):(output_i * self.stride + self.kernel_size),  (output_j * self.stride):(output_j * self.stride + self.kernel_size)]
+
+                        # do the convolution 
+                        # TODO: CHECK THIS!! !
+                        self.x_pool_out[batch, out_channel, output_i, output_j] = torch.max(kernel_window)
+
+        return self.x_pool_out
+
+        # raise NotImplementedError
 
 
 if __name__ == "__main__":
