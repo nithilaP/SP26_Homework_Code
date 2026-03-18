@@ -160,7 +160,7 @@ class MyMaxPool2D(nn.Module):
         self.output_width    = ((self.input_width - (self.kernel_size -1) - 1) // self.stride + 1)
         self.output_channels = self.channel
 
-        output = torch.zeros(self.batch_size, self.out_channels, self.output_height, self.output_width, device=x.device, dtype=x.dtype)
+        output = torch.zeros(self.batch_size, self.output_channels, self.output_height, self.output_width, device=x.device, dtype=x.dtype)
 
         ## Maxpooling process
         ## Feel free to use for loop
