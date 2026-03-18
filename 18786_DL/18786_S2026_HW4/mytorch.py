@@ -174,7 +174,7 @@ class MyMaxPool2D(nn.Module):
 
                         # determine the kernel window 
                         # TODO: CHECK THIS!! !
-                        kernel_window = x[batch, :, (output_i * self.stride):(output_i * self.stride + self.kernel_size),  (output_j * self.stride):(output_j * self.stride + self.kernel_size)]
+                        kernel_window = x[batch, out_channel, (output_i * self.stride):(output_i * self.stride + self.kernel_size),  (output_j * self.stride):(output_j * self.stride + self.kernel_size)]
 
                         # do the convolution 
                         # TODO: CHECK THIS!! !
