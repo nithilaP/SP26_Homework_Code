@@ -319,7 +319,7 @@ if __name__ == "__main__":
         out_my_maxpool = my_maxpool(x)
         print("my_maxpool output: ", out_my_maxpool.shape)
 
-        maxpool = nn.MaxPool2D(kernel_size=kernel_size, stride=stride)
+        maxpool = nn.MaxPool2d(kernel_size=kernel_size, stride=stride)
         # need to copy the weight into torch conv
         # TODO: CHECK IN 
         out_maxpool = maxpool(x)
