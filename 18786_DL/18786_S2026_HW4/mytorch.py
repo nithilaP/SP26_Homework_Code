@@ -270,7 +270,7 @@ if __name__ == "__main__":
     
     # CONV TEST 3: stride > 1 
     def conv_test_3():
-        print("Running Conv Test 2.")
+        print("Running Conv Test 3.")
         torch.manual_seed(0)
 
         batch_size = 2
@@ -279,7 +279,7 @@ if __name__ == "__main__":
         height = 16
         width = 16
         padding = 1 
-        stride = 1
+        stride = 3
         kernel_size = 5
 
         x = torch.randn(batch_size, in_channels, height, width)
@@ -307,7 +307,7 @@ if __name__ == "__main__":
     
     # CONV TEST 4: padding = 0
     def conv_test_4():
-        print("Running Conv Test 2.")
+        print("Running Conv Test 4.")
         torch.manual_seed(0)
 
         batch_size = 2
@@ -344,7 +344,7 @@ if __name__ == "__main__":
 
     # CONV TEST 5: bias = False
     def conv_test_5():
-        print("Running Conv Test 2.")
+        print("Running Conv Test 5.")
         torch.manual_seed(0)
 
         batch_size = 2
@@ -482,13 +482,14 @@ if __name__ == "__main__":
         compare_output = torch.allclose(out_my_maxpool, out_maxpool, atol=1e-5)
         print("Compare Output: ", compare_output)
 
-    # RUN ALL TESTS
+    # RUN ALL CONV TESTS
     conv_test_1()
     conv_test_2()
     conv_test_3()
     conv_test_4()
     conv_test_5()
 
+    # RUN ALL MAXPOOL TESTS
     maxpool_test_1()
     maxpool_test_2()
     maxpool_test_3()
