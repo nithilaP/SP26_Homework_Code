@@ -168,7 +168,7 @@ class MyMaxPool2D(nn.Module):
 
         # iterate through each dimension of output tensor
         for batch in range(self.batch_size): 
-            for out_channel in range(self.out_channels): 
+            for out_channel in range(self.output_channels): 
                 for output_i in range(self.output_height):
                     for output_j in range(self.output_width):
 
