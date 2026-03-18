@@ -355,18 +355,20 @@ if __name__ == "__main__":
         padding = 0
         stride = 1
         kernel_size = 5
+        bias = False
 
         x = torch.randn(batch_size, in_channels, height, width)
 
-        my_conv = MyConv2D(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=False)
+        my_conv = MyConv2D(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=bias)
         out_my_conv = my_conv(x)
         print("my_conv output: ", out_my_conv.shape)
 
-        conv = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=False)
+        conv = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=bias)
         # need to copy the weight into torch conv
         # TODO: CHECK IN 
         conv.weight.data = my_conv.W.data.clone()
-        conv.bias.data = my_conv.b.data.clone()
+        if (bias):
+            conv.bias.data = my_conv.b.data.clone()
         out_conv = conv(x)
         print("conv output: ", out_conv.shape)
 
