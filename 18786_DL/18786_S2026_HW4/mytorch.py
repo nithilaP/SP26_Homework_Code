@@ -343,7 +343,7 @@ if __name__ == "__main__":
         print("Compare Output: ", compare_output)
 
     # CONV TEST 5: bias = False
-    def conv_test_4():
+    def conv_test_5():
         print("Running Conv Test 2.")
         torch.manual_seed(0)
 
