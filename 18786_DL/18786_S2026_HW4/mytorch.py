@@ -73,9 +73,11 @@ class MyConv2D(nn.Module):
         # dim_out = (dim_in + 2P - D(K-1) - 1) / S + 1 
         # P - Padding, D - Dilation, K - Kernel Size, S - Stride length (no dilation in this case)
 
-        # need padding to make sure spatial dim are preserved of the input after convolution 
-        input_padding = nn.ZeroPad2d(self.padding)
-        input_w_padding = F.pad(input_padding)
+        # CHECK TO_DO: need padding to make sure spatial dim are preserved of the input after convolution 
+        # input_padding = nn.ZeroPad2d(self.padding)
+
+        # TO_DO: (left, right, top, bottom) = (self.padding, self.padding, self.padding, self.padding)
+        input_w_padding = F.pad(x, (self.padding, self.padding, self.padding, self.padding), mode="constant", value=0)
 
         output_height = ((input_height + 2 * self.padding - (self.kernel_size -1) + 1) // self.stride + 1)
         output_width = ((input_width + 2 * self.padding - (self.kernel_size -1) + 1) // self.stride + 1)
@@ -215,7 +217,7 @@ if __name__ == "__main__":
         print("conv output: ", out_conv.shape)
 
         # check if the shapes match 
-        shape_check = (out_my_conv.shape == my_conv.shape)
+        shape_check = (out_my_conv.shape == out_conv.shape)
         print("Compare Shapes: ", shape_check)
 
         # compare the outputs 
