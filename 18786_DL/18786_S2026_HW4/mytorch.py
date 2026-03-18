@@ -79,8 +79,8 @@ class MyConv2D(nn.Module):
         # TO_DO: (left, right, top, bottom) = (self.padding, self.padding, self.padding, self.padding)
         input_w_padding = F.pad(x, (self.padding, self.padding, self.padding, self.padding), mode="constant", value=0)
 
-        output_height = ((input_height + 2 * self.padding - (self.kernel_size -1) + 1) // self.stride + 1)
-        output_width = ((input_width + 2 * self.padding - (self.kernel_size -1) + 1) // self.stride + 1)
+        output_height = ((input_height + 2 * self.padding - (self.kernel_size -1)- 1) // self.stride + 1)
+        output_width = ((input_width + 2 * self.padding - (self.kernel_size -1) -1) // self.stride + 1)
         
         # TODO: DOUBLE CHECK BELOW!
         output = torch.zeros(batch_size, self.out_channels, output_height, output_width, device=x.device, dtype=x.dtype)
