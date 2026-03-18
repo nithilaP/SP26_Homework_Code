@@ -71,7 +71,7 @@ class MyConv2D(nn.Module):
 
         # calculating dims: 
         # dim_out = (dim_in + 2P - D(K-1) - 1) / S + 1 
-        # P - Padding, D - Dilation, K - Kernel Size, S - Stride length (no dilation in this case)
+        # P - Padding, D - Dilation, K - Kernel Size, S - Stride length (dilation=1 in this case)
 
         # CHECK TO_DO: need padding to make sure spatial dim are preserved of the input after convolution 
         # input_padding = nn.ZeroPad2d(self.padding)
@@ -154,12 +154,13 @@ class MyMaxPool2D(nn.Module):
         
         ## Derive the output size
         # ----- TODO -----
+        # no padding value for this case. -> dim_out = (dim_in - D(K-1) - 1) / S + 1 
 
-        self.output_height   = ((self.input_height + 2 * self.padding - (self.kernel_size -1) + 1) // self.stride + 1)
-        self.output_width    = ((self.input_width + 2 * self.padding - (self.kernel_size -1) + 1) // self.stride + 1)
+        self.output_height   = ((self.input_height - (self.kernel_size -1) - 1) // self.stride + 1)
+        self.output_width    = ((self.input_width - (self.kernel_size -1) - 1) // self.stride + 1)
         self.output_channels = self.channel
 
-        self.x_pool_out = torch.zeros(self.batch_size, self.out_channels, self.output_height, self.output_width, device=x.device, dtype=x.dtype)
+        output = torch.zeros(self.batch_size, self.out_channels, self.output_height, self.output_width, device=x.device, dtype=x.dtype)
 
         ## Maxpooling process
         ## Feel free to use for loop
@@ -177,11 +178,14 @@ class MyMaxPool2D(nn.Module):
 
                         # do the convolution 
                         # TODO: CHECK THIS!! !
-                        self.x_pool_out[batch, out_channel, output_i, output_j] = torch.max(kernel_window)
+                        output[batch, out_channel, output_i, output_j] = torch.max(kernel_window)
 
-        return self.x_pool_out
+        return output
 
         # raise NotImplementedError
+
+
+# BUILD FCNN FOR CIFAR-100 
 
 
 if __name__ == "__main__":
@@ -225,11 +229,9 @@ if __name__ == "__main__":
         compare_output = torch.allclose(out_my_conv, out_conv, atol=1e-5)
         print("Compare Output: ", compare_output)
     
-        # CONV TEST 1
-    
     # CONV TEST 2
     def conv_test_2():
-        print("Running Conv Test 1.")
+        print("Running Conv Test 2.")
         torch.manual_seed(0)
 
         batch_size = 2
@@ -264,7 +266,80 @@ if __name__ == "__main__":
         compare_output = torch.allclose(out_my_conv, out_conv, atol=1e-5)
         print("Compare Output: ", compare_output)
     
+    # TESTING CASES FOR CONV: bias = False for conv, stride > 1, no padding
+    
+    # MAXPOOL TEST 1
+    def maxpool_test_1():
+        print("Running MaxPool Test 1.")
+        torch.manual_seed(0)
+
+        batch_size = 2
+        channels = 3
+        height = 32
+        width = 32
+        stride = 2
+        kernel_size = 2
+
+        x = torch.randn(batch_size, channels, height, width)
+
+        my_maxpool = MyMaxPool2D(kernel_size=kernel_size, stride=stride)
+        out_my_maxpool = my_maxpool(x)
+        print("my_maxpool output: ", out_my_maxpool.shape)
+
+        maxpool = nn.MaxPool2D(kernel_size=kernel_size, stride=stride)
+        # need to copy the weight into torch conv
+        # TODO: CHECK IN 
+        out_maxpool = maxpool(x)
+        print("conv output: ", out_maxpool.shape)
+
+        # check if the shapes match 
+        shape_check = (out_my_maxpool.shape == out_maxpool.shape)
+        print("Compare Shapes: ", shape_check)
+
+        # compare the outputs 
+        # TODO: CHECK
+        compare_output = torch.allclose(out_my_maxpool, out_maxpool, atol=1e-5)
+        print("Compare Output: ", compare_output)
+    
+    # MAXPOOL TEST 2 
+    def maxpool_test_2():
+        print("Running MaxPool Test 1.")
+        torch.manual_seed(1)
+
+        batch_size = 2
+        channels = 8
+        height = 12
+        width = 12
+        stride = 2
+        kernel_size = 4
+
+        x = torch.randn(batch_size, channels, height, width)
+
+        my_maxpool = MyMaxPool2D(kernel_size=kernel_size, stride=stride)
+        out_my_maxpool = my_maxpool(x)
+        print("my_maxpool output: ", out_my_maxpool.shape)
+
+        maxpool = nn.MaxPool2D(kernel_size=kernel_size, stride=stride)
+        # need to copy the weight into torch conv
+        # TODO: CHECK IN 
+        out_maxpool = maxpool(x)
+        print("conv output: ", out_maxpool.shape)
+
+        # check if the shapes match 
+        shape_check = (out_my_maxpool.shape == out_maxpool.shape)
+        print("Compare Shapes: ", shape_check)
+
+        # compare the outputs 
+        # TODO: CHECK
+        compare_output = torch.allclose(out_my_maxpool, out_maxpool, atol=1e-5)
+        print("Compare Output: ", compare_output)
+    
+
+    # TESTING CASES FOR MAXPOOL: stride != kernel-size, stride = None
 
     # RUN ALL TESTS
     conv_test_1()
     conv_test_2()
+
+    maxpool_test_1()
+    maxpool_test_2()
