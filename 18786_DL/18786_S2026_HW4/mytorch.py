@@ -266,6 +266,119 @@ if __name__ == "__main__":
         compare_output = torch.allclose(out_my_conv, out_conv, atol=1e-5)
         print("Compare Output: ", compare_output)
     
+        # CONV TEST 2
+    
+    # CONV TEST 3: stride > 1 
+    def conv_test_3():
+        print("Running Conv Test 2.")
+        torch.manual_seed(0)
+
+        batch_size = 2
+        in_channels = 6 # applies convolution on each in_channel seperately & take sum
+        out_channels = 7 # make _ feature maps
+        height = 16
+        width = 16
+        padding = 1 
+        stride = 1
+        kernel_size = 5
+
+        x = torch.randn(batch_size, in_channels, height, width)
+
+        my_conv = MyConv2D(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=True)
+        out_my_conv = my_conv(x)
+        print("my_conv output: ", out_my_conv.shape)
+
+        conv = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=True)
+        # need to copy the weight into torch conv
+        # TODO: CHECK IN 
+        conv.weight.data = my_conv.W.data.clone()
+        conv.bias.data = my_conv.b.data.clone()
+        out_conv = conv(x)
+        print("conv output: ", out_conv.shape)
+
+        # check if the shapes match 
+        shape_check = (out_my_conv.shape == out_conv.shape)
+        print("Compare Shapes: ", shape_check)
+
+        # compare the outputs 
+        # TODO: CHECK
+        compare_output = torch.allclose(out_my_conv, out_conv, atol=1e-5)
+        print("Compare Output: ", compare_output)
+    
+    # CONV TEST 4: bias = False
+    def conv_test_4():
+        print("Running Conv Test 2.")
+        torch.manual_seed(0)
+
+        batch_size = 2
+        in_channels = 6 # applies convolution on each in_channel seperately & take sum
+        out_channels = 7 # make _ feature maps
+        height = 16
+        width = 16
+        padding = 1 
+        stride = 1
+        kernel_size = 5
+
+        x = torch.randn(batch_size, in_channels, height, width)
+
+        my_conv = MyConv2D(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=False)
+        out_my_conv = my_conv(x)
+        print("my_conv output: ", out_my_conv.shape)
+
+        conv = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=False)
+        # need to copy the weight into torch conv
+        # TODO: CHECK IN 
+        conv.weight.data = my_conv.W.data.clone()
+        conv.bias.data = my_conv.b.data.clone()
+        out_conv = conv(x)
+        print("conv output: ", out_conv.shape)
+
+        # check if the shapes match 
+        shape_check = (out_my_conv.shape == out_conv.shape)
+        print("Compare Shapes: ", shape_check)
+
+        # compare the outputs 
+        # TODO: CHECK
+        compare_output = torch.allclose(out_my_conv, out_conv, atol=1e-5)
+        print("Compare Output: ", compare_output)
+
+    # CONV TEST 5: padding = 0
+    def conv_test_5():
+        print("Running Conv Test 2.")
+        torch.manual_seed(0)
+
+        batch_size = 2
+        in_channels = 6 # applies convolution on each in_channel seperately & take sum
+        out_channels = 7 # make _ feature maps
+        height = 16
+        width = 16
+        padding = 0
+        stride = 1
+        kernel_size = 5
+
+        x = torch.randn(batch_size, in_channels, height, width)
+
+        my_conv = MyConv2D(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=False)
+        out_my_conv = my_conv(x)
+        print("my_conv output: ", out_my_conv.shape)
+
+        conv = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=False)
+        # need to copy the weight into torch conv
+        # TODO: CHECK IN 
+        conv.weight.data = my_conv.W.data.clone()
+        conv.bias.data = my_conv.b.data.clone()
+        out_conv = conv(x)
+        print("conv output: ", out_conv.shape)
+
+        # check if the shapes match 
+        shape_check = (out_my_conv.shape == out_conv.shape)
+        print("Compare Shapes: ", shape_check)
+
+        # compare the outputs 
+        # TODO: CHECK
+        compare_output = torch.allclose(out_my_conv, out_conv, atol=1e-5)
+        print("Compare Output: ", compare_output)
+
     # TESTING CASES FOR CONV: bias = False for conv, stride > 1, no padding
     
     # MAXPOOL TEST 1
@@ -301,7 +414,7 @@ if __name__ == "__main__":
         compare_output = torch.allclose(out_my_maxpool, out_maxpool, atol=1e-5)
         print("Compare Output: ", compare_output)
     
-    # MAXPOOL TEST 2 
+    # MAXPOOL TEST 2: stride != kernel-size
     def maxpool_test_2():
         print("Running MaxPool Test 1.")
         torch.manual_seed(1)
@@ -334,12 +447,46 @@ if __name__ == "__main__":
         compare_output = torch.allclose(out_my_maxpool, out_maxpool, atol=1e-5)
         print("Compare Output: ", compare_output)
     
+    # MAXPOOL TEST 3: stride = None
+    def maxpool_test_3(): 
+        print("Running MaxPool Test 1.")
+        torch.manual_seed(1)
 
-    # TESTING CASES FOR MAXPOOL: stride != kernel-size, stride = None
+        batch_size = 2
+        channels = 8
+        height = 12
+        width = 12
+        stride = None
+        kernel_size = 4
+
+        x = torch.randn(batch_size, channels, height, width)
+
+        my_maxpool = MyMaxPool2D(kernel_size=kernel_size, stride=stride)
+        out_my_maxpool = my_maxpool(x)
+        print("my_maxpool output: ", out_my_maxpool.shape)
+
+        maxpool = nn.MaxPool2d(kernel_size=kernel_size, stride=stride)
+        # need to copy the weight into torch conv
+        # TODO: CHECK IN 
+        out_maxpool = maxpool(x)
+        print("conv output: ", out_maxpool.shape)
+
+        # check if the shapes match 
+        shape_check = (out_my_maxpool.shape == out_maxpool.shape)
+        print("Compare Shapes: ", shape_check)
+
+        # compare the outputs 
+        # TODO: CHECK
+        compare_output = torch.allclose(out_my_maxpool, out_maxpool, atol=1e-5)
+        print("Compare Output: ", compare_output)
 
     # RUN ALL TESTS
     conv_test_1()
     conv_test_2()
+    conv_test_3()
+    conv_test_4()
+    conv_test_5()
 
     maxpool_test_1()
     maxpool_test_2()
+    maxpool_test_3()
