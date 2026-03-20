@@ -295,7 +295,7 @@ class MyCNN(nn.Module):
         self.flat = nn.Flatten()
 
         # OUTPUT LAYER
-        self.fully_connected_hidden_layer = nn.Linear(2048, 256) # flattened input to first FC layer. 
+        self.fully_connected_hidden_layer = nn.Linear(4096, 256) # flattened input to first FC layer. 
         self.fully_connected_relu = nn.ReLU()
         self.fully_connected_layer_out = nn.Linear(256, self.num_output_classes)
 
