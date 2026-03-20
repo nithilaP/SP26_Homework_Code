@@ -278,11 +278,13 @@ class MyCNN(nn.Module):
 
         # LAYER 1
         self.layer_1_conv = MyConv2D(in_channels=3, out_channels=32, kernel_size=3, stride=1, padding=1, bias=True)
+        self.layer_1_batch_norm = nn.BatchNorm2d(32)
         self.layer_1_relu = nn.ReLU()
         self.layer_1_maxpool = MyMaxPool2D(kernel_size=2, stride=2)
 
         # LAYER 2
         self.layer_2_conv = MyConv2D(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1, bias=True)
+        self.layer_2_batch_norm = nn.BatchNorm2d(64)
         self.layer_2_relu = nn.ReLU()
         self.layer_2_maxpool = MyMaxPool2D(kernel_size=2, stride=2)
 
@@ -295,8 +297,7 @@ class MyCNN(nn.Module):
         self.flat = nn.Flatten()
 
         # dropout layer
-        self.dropout_1 = nn.Dropout(p=0.25)
-        self.dropout_2 = nn.Dropout(p=0.5)
+        self.dropout = nn.Dropout(p=0.25)
 
         # OUTPUT LAYER
         self.fully_connected_hidden_layer = nn.Linear(4096, 256) # flattened input to first FC layer. 
@@ -325,11 +326,13 @@ class MyCNN(nn.Module):
         # Hidden layer structure: conv -> relu -> pool
         # hidden layer 1 
         x = self.layer_1_conv(x)
+        x = self.layer_1_batch_norm(x)
         x = self.layer_1_relu(x)
         x = self.layer_1_maxpool(x)
 
         # hidden layer 2 
         x = self.layer_2_conv(x)
+        x = self.layer_2_batch_norm(x)
         x = self.layer_2_relu(x)
         x = self.layer_2_maxpool(x)
 
@@ -340,11 +343,11 @@ class MyCNN(nn.Module):
 
         # Flatten before you apply fully connected layers
         x = self.flat(x)
-        x = self.dropout_2(x)
+
         # FC layer to calc class scores.
         x = self.fully_connected_hidden_layer(x)
         x = self.fully_connected_relu(x)
-        x = self.dropout_1(x)
+        x = self.dropout(x)
         x = self.fully_connected_layer_out(x)
 
         return x
