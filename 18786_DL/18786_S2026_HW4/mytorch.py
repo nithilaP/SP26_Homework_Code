@@ -1,4 +1,5 @@
 import sys
+import random
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -6,7 +7,12 @@ import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.optim as optim
 
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader
+
+# CONV2D CLASS IMPLEMENTATION 
 class MyConv2D(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride, padding, bias=True):
 
@@ -103,7 +109,7 @@ class MyConv2D(nn.Module):
         return output
         # raise NotImplementedError
 
-    
+# MAXPOOL2D CLASS IMPLEMENTATION 
 class MyMaxPool2D(nn.Module):
 
     def __init__(self, kernel_size, stride=None):
@@ -184,9 +190,306 @@ class MyMaxPool2D(nn.Module):
 
         # raise NotImplementedError
 
+# FCNN CLASS IMPLEMENTATION 
+class MyFCNN(nn.Module):
+    def __init__(self, hidden_layers_size, input_size=None, num_output_classes=None):
 
-# BUILD FCNN FOR CIFAR-100 
+        """
+        My custom FCNN, designed for CIFAR-100. 
 
+        CIFAR-10 Dataset: https://www.cs.toronto.edu/~kriz/cifar.html -> 32x32 colour images, 3 channels (read, green, blue) (1024 bytes each), 100 classes
+
+        [input]
+        * input_size  : dimensions of input (flat input)
+        * hidden_layers_size  : list of hidden layer sizes # assume 2 hidden layers [satisfies > 1 hidden layer requirement]
+        * num_output_classes   : number of classes for output
+
+        """
+        super().__init__()
+
+        self.input_size = input_size
+        if (input_size == None):
+            self.input_size = 32 * 32 * 3 # CIFAR Image data: 32 x 32 images, 3 color channels
+
+        self.num_output_classes = num_output_classes
+        if (num_output_classes == None):
+            self.num_output_classes = 100
+
+        self.hidden_layers_size = hidden_layers_size
+        
+
+        # hidden layer 1 on NN. 
+        self.hidden_layer_1 = nn.Linear(self.input_size, self.hidden_layers_size[0])
+        self.layer_1_activation = nn.ReLU()
+
+        # hidden layer 2 
+        self.hidden_layer_2 = nn.Linear(self.hidden_layers_size[0], self.hidden_layers_size[1])
+        self.layer_2_activation = nn.ReLU()
+
+        # output layer 
+        self.output_layer =  nn.Linear(self.hidden_layers_size[1], self.num_output_classes)
+    
+        # layer_activations = []
+        # layer_input_size = self.input_size
+        # for i in range(num_hidden_layers):
+        #     layer_activations.append(nn.Linear(layer_input_size, self.hidden_layers_size[i]))
+        #     layer_activations.append(nn.ReLU())
+        #     layer_input_size = self.hidden_layers_size[i] #update for next iteration
+        # layer_activations.append(nn.Linear(layer_input_size, self.num_output_classes)) # last layer w output
+
+
+    def __call__(self, x):
+        
+        return self.forward(x)
+    
+    def forward(self, x):
+
+        """
+        [input]
+        x (torch.tensor)      : (batch_size, in_channels, input_height, input_width)
+
+        [output]
+        output (torch.tensor) : (batch_size, out_channels, output_height, output_width)
+
+        """
+
+        # turn into 2D tensor: nn.Flatten()
+        flat = nn.Flatten()
+        x = flat(x)
+
+        # hidden layer 1 
+        x = self.hidden_layer_1(x)
+        x = self.layer_1_activation(x)
+
+        # hidden layer 2
+        x = self.hidden_layer_2(x)
+        x = self.layer_2_activation(x)
+
+        # output layer
+        x = self.output_layer(x)
+
+        return x
+
+# CNN CLASS IMPLEMENTATION
+class MyCNN(nn.Module):
+    def __init__(self, num_output_classes=None):
+
+        """
+        My custom CNN, designed for CIFAR-100. 
+
+        Pattern: 
+        - Conv
+        - Activation (ReLU)
+        - Max Pooling
+
+        [input]
+        * num_output_classes   : number of classes for output
+        """
+        super().__init__()
+
+        self.num_output_classes = num_output_classes
+        if (num_output_classes == None):
+            self.num_output_classes = 100        
+
+        # LAYER 1
+        self.layer_1_conv = MyConv2D(in_channels=3, out_channels=32, kernel_size=3, stride=1, padding=1, bias=True)
+        self.layer_1_activation = nn.ReLU()
+        self.layer_1_maxpool = MyMaxPool2D(kernel_size=2, stride=2)
+
+        # LAYER 2
+        self.layer_2_conv = MyConv2D(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1, bias=True)
+        self.layer_2_activation = nn.ReLU()
+        self.layer_2_maxpool = MyMaxPool2D(kernel_size=2, stride=2)
+
+        # LAYER 3
+        self.layer_3_conv = MyConv2D(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1, bias=True)
+        self.layer_3_activation = nn.ReLU()
+        self.layer_3_maxpool = MyMaxPool2D(kernel_size=2, stride=2)
+
+        # OUTPUT LAYER
+        self.fc_1 = nn.Linear(128 * 4 * 4, 256) # assuming hidden layer dim
+        self.output_layer_activation = nn.ReLU()
+        self.output_layer_func = nn.Linear(256, self.num_output_classes)
+    
+    def __call__(self, x):
+        
+        return self.forward(x)
+    
+    def forward(self, x):
+
+        """
+        [input]
+        x (torch.tensor)      : (batch_size, in_channels, input_height, input_width)
+
+        [output]
+        output (torch.tensor) : (batch_size, out_channels, output_height, output_width)
+
+        """
+        # FIX: turn into 2D tensor: nn.Flatten() -> https://stackoverflow.com/questions/65993494/difference-between-torch-flatten-and-nn-flatten
+        flat = nn.Flatten()
+
+        # hidden layer 1 
+        x = self.layer_1_conv(x)
+        x = self.layer_1_activation(x)
+        x = self.layer_1_maxpool(x)
+
+        # hidden layer 2 
+        x = self.layer_2_conv(x)
+        x = self.layer_2_activation(x)
+        x = self.layer_2_maxpool(x)
+
+        # hidden layer 3 
+        x = self.layer_3_conv(x)
+        x = self.layer_3_activation(x)
+        x = self.layer_3_maxpool(x)
+
+        # FIX: flatten
+        x = flat(x)
+
+        # output layer
+        x = self.fc_1(x)
+        x = self.output_layer_activation(x)
+        x = self.output_layer_func(x)
+
+        return x
+
+# TODO CHECK: model training
+def train(net, num_epoch, learning_rate, train_dataloader, test_dataloader, device):
+    net = net.to(device)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9)
+
+    train_loss = []
+    train_accuracy = []
+    
+    test_loss = []
+    test_accuracy = []
+    # https://docs.pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html -> Train the network section
+    for epoch in range(num_epoch):
+        net.train() # TODO FIND EVIDENCE 
+
+        curr_loss = 0.0
+        curr_correct = 0 
+        curr_total = 0
+
+        for i, data in enumerate(train_dataloader,0):
+            inputs, labels = data
+            inputs = inputs.to(device) # for CUDA
+            labels = labels.to(device)
+
+            optimizer.zero_grad()
+
+            outputs = net(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+
+            # output stats
+            curr_loss += inputs.size(0) * loss.item() # mult by num images
+            if i % 2000 == 1999:    # print every 2000 mini-batches
+                print(f'[{epoch + 1}, {i + 1:5d}] loss: {curr_loss / 2000:.3f}')
+
+            # TODO CHECK
+            _, prediction = torch.max(outputs, 1) # from pytorch documentation -> "Test the network on test data"
+            curr_total += labels.size(0)
+            curr_correct += (prediction == labels).sum().item()
+
+        # calculate & update loss & accuracy 
+        train_loss_i = curr_loss / curr_total
+        train_loss.append(train_loss_i)
+
+        train_accuracy_i = curr_correct / curr_total
+        train_accuracy.append(train_accuracy_i)
+
+        # TEST TODO CHECK: EVALUATE to get test_loss, test_acc
+        net.eval() # TODO FIND EVIDENCE 
+
+        # https://docs.pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html -> "Test the network on test data"
+        test_correct = 0
+        test_total = 0
+        curr_test_loss = 0.0
+        with torch.no_grad():
+            for data in test_dataloader:
+                images, labels = data
+
+                images = images.to(device)
+                labels = labels.to(device)
+                
+                outputs = net(images)
+                loss = criterion(outputs, labels)
+
+                _, predicted = torch.max(outputs, 1)
+                test_total += labels.size(0)
+                test_correct += (predicted == labels).sum().item()
+                curr_test_loss += labels.size(0) * loss.item()
+        
+        test_loss_i = curr_test_loss / test_total
+        test_loss.append(test_loss_i)
+
+        test_accuracy_i = test_correct / test_total
+        test_accuracy.append(test_accuracy_i)
+
+        # TODO: REMOVE 
+        print(
+            f"Epoch [{epoch+1}/{num_epoch}] | "
+            f"Train Loss: {train_loss_i:.4f} | Train Acc: {train_accuracy_i:.4f} | "
+            f"Test Loss: {test_loss_i:.4f} | Test Acc: {test_accuracy_i:.4f}"
+        )
+
+    return net, train_loss, train_accuracy, test_loss, test_accuracy
+    
+def generate_plots(model_str, epochs, train_loss, train_accuracy, test_loss, test_accuracy):
+
+    # make the losses plot 
+    plt.figure()
+
+    plt.plot(epochs, train_loss, label="Train Loss")
+    plt.plot(epochs, test_loss, label="Test Loss")
+
+    plt.title(f"{model_str} Train and Test Loss Plot")
+    plt.ylabel("Loss")
+    plt.xlabel("Epoch")
+    plt.legend()
+    plt.savefig(f"{model_str}_loss_plot")
+
+    # make the accuracy plot
+    plt.figure()
+
+    plt.plot(epochs, train_accuracy, label="Train Accuracy")
+    plt.plot(epochs, test_accuracy, label="Test Accuracy")
+
+    plt.title(f"{model_str} Train and Test Accuracy Plot")
+    plt.ylabel("Accuracy")
+    plt.xlabel("Epoch")
+    plt.legend()
+    plt.savefig(f"{model_str}_accuracy_plot")
+
+
+def visualize_predictions(model, dataset, classes, device, model_name, num_images=5):
+    model.eval()
+
+    indices = random.sample(range(len(dataset)), num_images)
+
+    plt.figure(figsize=(15, 3))
+
+    with torch.no_grad():
+        for i, idx in enumerate(indices):
+            image, label = dataset[idx]
+            input_image = image.unsqueeze(0).to(device)
+
+            output = model(input_image)
+            pred = torch.argmax(output, 1).item()
+
+            img_np = image.permute(1, 2, 0).cpu().numpy()
+
+            plt.subplot(1, num_images, i + 1)
+            plt.imshow(img_np)
+            plt.axis("off")
+            plt.title(f"GT: {classes[label]}\nPred: {classes[pred]}")
+
+    plt.tight_layout()
+    plt.savefig(f"{model_name.lower()}_predictions.png")
+    plt.close()
 
 if __name__ == "__main__":
 
@@ -418,7 +721,7 @@ if __name__ == "__main__":
     
     # MAXPOOL TEST 2: stride != kernel-size
     def maxpool_test_2():
-        print("Running MaxPool Test 1.")
+        print("Running MaxPool Test 2.")
         torch.manual_seed(1)
 
         batch_size = 2
@@ -451,7 +754,7 @@ if __name__ == "__main__":
     
     # MAXPOOL TEST 3: stride = None
     def maxpool_test_3(): 
-        print("Running MaxPool Test 1.")
+        print("Running MaxPool Test 3.")
         torch.manual_seed(1)
 
         batch_size = 2
@@ -493,3 +796,47 @@ if __name__ == "__main__":
     maxpool_test_1()
     maxpool_test_2()
     maxpool_test_3()
+
+    # MODEL TRAINING FOR DELIVERABLE 1
+
+    # SET TRAINING PARAM
+    batch_size = 64
+    epochs = 10
+    learning_rate = 0.01
+
+    # TODO check: 
+    # init data loaders & data: https://docs.pytorch.org/vision/0.9/datasets.html#cifar
+    train_data = datasets.CIFAR100(root="./data", train=True, download=True, transform=transforms.Compose([transforms.ToTensor()]))
+    train_dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
+
+    test_data = datasets.CIFAR100(root="./data", train=False, download=True, transform=transforms.Compose([transforms.ToTensor()]))
+    test_dataloader = DataLoader(test_data, batch_size=batch_size, shuffle=False)
+
+    # set up device 
+    device = 'cpu'
+    if torch.cuda.is_available():
+        # device = torch.cuda.current_device()
+        device = 'cuda'
+    
+    # FCNN
+    my_fcnn = MyFCNN(hidden_layers_size=[1024, 512], num_output_classes=100)
+    my_fcnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_fcnn, num_epoch=epochs, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
+
+    # PLOTTING
+    num_epochs = len(train_loss)
+    epochs_axis = [i for i in range(1, num_epochs + 1)]
+    generate_plots("FCNN", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
+    visualize_predictions(my_fcnn, test_data, train_data.classes, device, "FCNN", num_images=5)
+
+
+    # CNN 
+    my_cnn = MyCNN(num_output_classes=100)
+    cnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_cnn, num_epoch=1, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
+
+    # PLOTTING
+    num_epochs = len(train_loss)
+    epochs_axis = [i for i in range(1, num_epochs + 1)]
+    generate_plots("CNN", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
+    visualize_predictions(my_cnn, test_data, train_data.classes, device, "CNN", num_images=5)
+
+
