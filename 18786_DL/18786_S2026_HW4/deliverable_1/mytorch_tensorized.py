@@ -282,9 +282,9 @@ class MyCNN(nn.Module):
         self.layer_1_maxpool = MyMaxPool2D(kernel_size=2, stride=2)
 
         # LAYER 2
-        # self.layer_2_conv = MyConv2D(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1, bias=True)
-        # self.layer_2_relu = nn.ReLU()
-        # self.layer_2_maxpool = MyMaxPool2D(kernel_size=2, stride=2)
+        self.layer_2_conv = MyConv2D(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1, bias=True)
+        self.layer_2_relu = nn.ReLU()
+        self.layer_2_maxpool = MyMaxPool2D(kernel_size=2, stride=2)
 
         # LAYER 3
         # self.layer_3_conv = MyConv2D(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1, bias=True)
@@ -295,7 +295,7 @@ class MyCNN(nn.Module):
         self.flat = nn.Flatten()
 
         # OUTPUT LAYER
-        self.fully_connected_hidden_layer = nn.Linear(32 * 16 * 16, 256) # flattened input to first FC layer. 
+        self.fully_connected_hidden_layer = nn.Linear(2048, 256) # flattened input to first FC layer. 
         self.fully_connected_relu = nn.ReLU()
         self.fully_connected_layer_out = nn.Linear(256, self.num_output_classes)
 
@@ -323,9 +323,9 @@ class MyCNN(nn.Module):
         x = self.layer_1_maxpool(x)
 
         # hidden layer 2 
-        # x = self.layer_2_conv(x)
-        # x = self.layer_2_relu(x)
-        # x = self.layer_2_maxpool(x)
+        x = self.layer_2_conv(x)
+        x = self.layer_2_relu(x)
+        x = self.layer_2_maxpool(x)
 
         # hidden layer 3 
         # x = self.layer_3_conv(x)
@@ -835,7 +835,7 @@ if __name__ == "__main__":
         device = 'cuda'
     
     # FCNN
-    my_fcnn = MyFCNN(hidden_layers_size=[2048, 1024], num_output_classes=100)
+    my_fcnn = MyFCNN(hidden_layers_size=[512, 256], num_output_classes=100)
     my_fcnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_fcnn, num_epoch=epochs, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
 
     # PLOTTING
