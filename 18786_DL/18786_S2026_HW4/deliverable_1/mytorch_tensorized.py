@@ -218,12 +218,8 @@ class MyFCNN(nn.Module):
         self.hidden_layer_2 = nn.Linear(self.hidden_layers_size[0], self.hidden_layers_size[1])
         self.layer_2_activation = nn.ReLU()
 
-        # hidden layer 3 
-        self.hidden_layer_3 = nn.Linear(self.hidden_layers_size[1], self.hidden_layers_size[2])
-        self.layer_3_activation = nn.ReLU()
-
         # output layer 
-        self.output_layer = nn.Linear(self.hidden_layers_size[2], self.num_output_classes)
+        self.output_layer = nn.Linear(self.hidden_layers_size[1], self.num_output_classes)
 
         # for flatten of input
         self.flat = nn.Flatten()
@@ -253,10 +249,6 @@ class MyFCNN(nn.Module):
         # # hidden layer 2
         x = self.hidden_layer_2(x)
         x = self.layer_2_activation(x)
-
-        # # hidden layer 3
-        x = self.hidden_layer_3(x)
-        x = self.layer_3_activation(x)
 
         # output layer
         x = self.output_layer(x)
@@ -290,9 +282,9 @@ class MyCNN(nn.Module):
         self.layer_1_maxpool = MyMaxPool2D(kernel_size=2, stride=2)
 
         # LAYER 2
-        self.layer_2_conv = MyConv2D(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1, bias=True)
-        self.layer_2_relu = nn.ReLU()
-        self.layer_2_maxpool = MyMaxPool2D(kernel_size=2, stride=2)
+        # self.layer_2_conv = MyConv2D(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1, bias=True)
+        # self.layer_2_relu = nn.ReLU()
+        # self.layer_2_maxpool = MyMaxPool2D(kernel_size=2, stride=2)
 
         # LAYER 3
         # self.layer_3_conv = MyConv2D(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1, bias=True)
@@ -303,9 +295,9 @@ class MyCNN(nn.Module):
         self.flat = nn.Flatten()
 
         # OUTPUT LAYER
-        # self.fully_connected_hidden_layer = nn.Linear(128 * 4 * 4, 256) # flattened input to first FC layer. 
-        # self.fully_connected_relu = nn.ReLU()
-        self.fully_connected_layer_out = nn.Linear(64 * 8 * 8, self.num_output_classes)
+        self.fully_connected_hidden_layer = nn.Linear(32 * 16 * 16, 256) # flattened input to first FC layer. 
+        self.fully_connected_relu = nn.ReLU()
+        self.fully_connected_layer_out = nn.Linear(256, self.num_output_classes)
 
     
     def __call__(self, x):
@@ -331,9 +323,9 @@ class MyCNN(nn.Module):
         x = self.layer_1_maxpool(x)
 
         # hidden layer 2 
-        x = self.layer_2_conv(x)
-        x = self.layer_2_relu(x)
-        x = self.layer_2_maxpool(x)
+        # x = self.layer_2_conv(x)
+        # x = self.layer_2_relu(x)
+        # x = self.layer_2_maxpool(x)
 
         # hidden layer 3 
         # x = self.layer_3_conv(x)
@@ -344,8 +336,8 @@ class MyCNN(nn.Module):
         x = self.flat(x)
 
         # FC layer to calc class scores. 
-        # x = self.fully_connected_hidden_layer(x)
-        # x = self.fully_connected_relu(x)
+        x = self.fully_connected_hidden_layer(x)
+        x = self.fully_connected_relu(x)
         x = self.fully_connected_layer_out(x)
 
         return x
@@ -365,7 +357,7 @@ def train(net, num_epoch, learning_rate, train_dataloader, test_dataloader, devi
 
     for epoch in range(num_epoch):
 
-        print("starting batch")
+        # print("starting batch")
 
         # CHECK: FIND EVIDENCE
         net.train()
@@ -843,7 +835,7 @@ if __name__ == "__main__":
         device = 'cuda'
     
     # FCNN
-    my_fcnn = MyFCNN(hidden_layers_size=[1024, 512, 256], num_output_classes=100)
+    my_fcnn = MyFCNN(hidden_layers_size=[2048, 1024], num_output_classes=100)
     my_fcnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_fcnn, num_epoch=epochs, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
 
     # PLOTTING
@@ -854,7 +846,7 @@ if __name__ == "__main__":
 
     # CNN 
     my_cnn = MyCNN(num_output_classes=100)
-    cnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_cnn, num_epoch=epochs, learning_rate=0.01, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
+    cnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_cnn, num_epoch=epochs, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
 
     # PLOTTING
     num_epochs = len(train_loss)
