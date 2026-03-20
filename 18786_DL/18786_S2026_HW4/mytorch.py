@@ -4,6 +4,8 @@ import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 
+from google.colab import drive
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -795,6 +797,8 @@ if __name__ == "__main__":
     batch_size = 64
     epochs = 10
     learning_rate = 0.01
+
+    drive.mount('/content/drive')
     data_root = "/content/drive/MyDrive/data"
 
     # TODO check: 
