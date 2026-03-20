@@ -492,7 +492,7 @@ def visualize_preds(model, model_str, dataset, classes, device):
 
             plt.subplot(1, 5, image_pos + 1) # create subplot w axes for current iamge
             plt.imshow(to_pil_image(input))
-            plt.title(f"Ground Truth: {classes[label]} | Pred: {classes[prediction]}")
+            plt.title(f"Ground Truth: {classes[label]} | Pred: {classes[prediction]}", fontsize=18)
 
             plt.axis("off") # ADDED to remove tick marks
 
@@ -500,7 +500,7 @@ def visualize_preds(model, model_str, dataset, classes, device):
             image_pos += 1
     
     plt.tight_layout() # Added for subplot adjusting
-    plt.savefig(f"{model_str}_predictions", bbox_inches="tight")
+    plt.savefig(f"{model_str}_predictions", dpi=300, bbox_inches="tight")
 
     plt.close()
 
