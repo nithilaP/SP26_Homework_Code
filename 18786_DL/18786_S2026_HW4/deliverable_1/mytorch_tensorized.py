@@ -294,6 +294,9 @@ class MyCNN(nn.Module):
         # for flatten before fc layer
         self.flat = nn.Flatten()
 
+        # dropout layer
+        self.dropout = nn.Dropout(p=0.5)
+
         # OUTPUT LAYER
         self.fully_connected_hidden_layer = nn.Linear(4096, 256) # flattened input to first FC layer. 
         self.fully_connected_relu = nn.ReLU()
@@ -835,14 +838,14 @@ if __name__ == "__main__":
         device = 'cuda'
     
     # FCNN
-    my_fcnn = MyFCNN(hidden_layers_size=[512, 256], num_output_classes=100)
-    my_fcnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_fcnn, num_epoch=epochs, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
+    # my_fcnn = MyFCNN(hidden_layers_size=[512, 256], num_output_classes=100)
+    # my_fcnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_fcnn, num_epoch=epochs, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
 
-    # PLOTTING
-    num_epochs = len(train_loss)
-    epochs_axis = [i for i in range(1, num_epochs + 1)]
-    generate_plots("FCNN", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
-    visualize_preds(my_fcnn, "FCNN", test_data, train_data.classes, device)
+    # # PLOTTING
+    # num_epochs = len(train_loss)
+    # epochs_axis = [i for i in range(1, num_epochs + 1)]
+    # generate_plots("FCNN", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
+    # visualize_preds(my_fcnn, "FCNN", test_data, train_data.classes, device)
 
     # CNN 
     my_cnn = MyCNN(num_output_classes=100)
