@@ -846,7 +846,7 @@ if __name__ == "__main__":
 
     # CNN 
     my_cnn = MyCNN(num_output_classes=100)
-    cnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_cnn, num_epoch=epochs, learning_rate=0.001, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
+    cnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_cnn, num_epoch=epochs, learning_rate=0.01, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
 
     # PLOTTING
     num_epochs = len(train_loss)
