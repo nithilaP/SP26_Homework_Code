@@ -798,8 +798,8 @@ if __name__ == "__main__":
     epochs = 10
     learning_rate = 0.01
 
-    drive.mount('/content/drive')
-    data_root = "/content/drive/MyDrive/data"
+    # drive.mount('/content/drive')
+    data_root = "./data"
 
     # TODO check: 
     # init data loaders & data: https://docs.pytorch.org/vision/0.9/datasets.html#cifar
