@@ -229,15 +229,6 @@ class MyFCNN(nn.Module):
         # output layer 
         self.output_layer =  nn.Linear(self.hidden_layers_size[1], self.num_output_classes)
     
-        # layer_activations = []
-        # layer_input_size = self.input_size
-        # for i in range(num_hidden_layers):
-        #     layer_activations.append(nn.Linear(layer_input_size, self.hidden_layers_size[i]))
-        #     layer_activations.append(nn.ReLU())
-        #     layer_input_size = self.hidden_layers_size[i] #update for next iteration
-        # layer_activations.append(nn.Linear(layer_input_size, self.num_output_classes)) # last layer w output
-
-
     def __call__(self, x):
         
         return self.forward(x)
@@ -307,6 +298,7 @@ class MyCNN(nn.Module):
         self.layer_3_maxpool = MyMaxPool2D(kernel_size=2, stride=2)
 
         # OUTPUT LAYER
+        # TODO: CHANGE NAMING TO FC FROM SLIDES
         self.fc_1 = nn.Linear(128 * 4 * 4, 256) # assuming hidden layer dim
         self.output_layer_activation = nn.ReLU()
         self.output_layer_func = nn.Linear(256, self.num_output_classes)
@@ -464,7 +456,7 @@ def generate_plots(model_str, epochs, train_loss, train_accuracy, test_loss, tes
     plt.legend()
     plt.savefig(f"{model_str}_accuracy_plot")
 
-
+# Visualization: https://medium.com/@vikrampande783/visualizing-convolutional-networks-787810e1f6ea
 def visualize_predictions(model, dataset, classes, device, model_name, num_images=5):
     model.eval()
 
@@ -819,19 +811,18 @@ if __name__ == "__main__":
         device = 'cuda'
     
     # FCNN
-    my_fcnn = MyFCNN(hidden_layers_size=[1024, 512], num_output_classes=100)
-    my_fcnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_fcnn, num_epoch=epochs, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
+    # my_fcnn = MyFCNN(hidden_layers_size=[1024, 512], num_output_classes=100)
+    # my_fcnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_fcnn, num_epoch=epochs, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
 
     # PLOTTING
-    num_epochs = len(train_loss)
-    epochs_axis = [i for i in range(1, num_epochs + 1)]
-    generate_plots("FCNN", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
-    visualize_predictions(my_fcnn, test_data, train_data.classes, device, "FCNN", num_images=5)
-
+    # num_epochs = len(train_loss)
+    # epochs_axis = [i for i in range(1, num_epochs + 1)]
+    # generate_plots("FCNN", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
+    # visualize_predictions(my_fcnn, test_data, train_data.classes, device, "FCNN", num_images=5)
 
     # CNN 
     my_cnn = MyCNN(num_output_classes=100)
-    cnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_cnn, num_epoch=1, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
+    cnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_cnn, num_epoch=epochs, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
 
     # PLOTTING
     num_epochs = len(train_loss)
