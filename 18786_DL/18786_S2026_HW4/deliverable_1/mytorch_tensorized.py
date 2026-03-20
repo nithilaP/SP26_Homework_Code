@@ -44,11 +44,11 @@ class MyConv2D(nn.Module):
         # ----- TODO -----
 
         # shape of weight: [out_channels, in_channels, kernel_size, kernel_size]
-        self.W = nn.Parameter(torch.randn(out_channels, in_channels, kernel_size, kernel_size))
+        self.W = nn.Parameter(0.01 * torch.randn(out_channels, in_channels, kernel_size, kernel_size))
 
         # shape of bias: [out_channels]
         if (bias == True):
-            self.b = nn.Parameter(torch.randn(out_channels))
+            self.b = nn.Parameter(torch.zeros(out_channels))
         else:    
             self.b = None
 
@@ -476,7 +476,7 @@ def visualize_preds(model, model_str, dataset, classes, device):
     selected_images = [5, 10, 95, 331, 789]
 
     # define figure
-    fig = plt.figure(figsize=(30, 6))
+    fig = plt.figure(figsize=(30, 10))
 
     image_pos = 0
     with torch.no_grad():
@@ -500,8 +500,8 @@ def visualize_preds(model, model_str, dataset, classes, device):
             image_pos += 1
     
     plt.tight_layout() # Added for subplot adjusting
+    plt.savefig(f"{model_str}_predictions", bbox_inches="tight")
 
-    plt.savefig(f"{model_str}_predictions")
     plt.close()
 
 if __name__ == "__main__":
@@ -846,7 +846,7 @@ if __name__ == "__main__":
 
     # CNN 
     my_cnn = MyCNN(num_output_classes=100)
-    cnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_cnn, num_epoch=epochs, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
+    cnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_cnn, num_epoch=epochs, learning_rate=0.001, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
 
     # PLOTTING
     num_epochs = len(train_loss)
