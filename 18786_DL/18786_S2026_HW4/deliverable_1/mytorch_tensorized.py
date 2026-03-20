@@ -295,7 +295,7 @@ class MyCNN(nn.Module):
         self.flat = nn.Flatten()
 
         # dropout layer
-        self.dropout = nn.Dropout(p=0.5)
+        self.dropout = nn.Dropout(p=0.25)
 
         # OUTPUT LAYER
         self.fully_connected_hidden_layer = nn.Linear(4096, 256) # flattened input to first FC layer. 
