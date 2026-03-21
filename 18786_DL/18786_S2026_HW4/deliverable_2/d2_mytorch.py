@@ -229,7 +229,7 @@ def visualize_preds(model, model_str, dataset, classes, device):
     selected_images = [5, 10, 95, 129, 267, 331, 490, 671, 789, 890]
 
     # define figure
-    fig = plt.figure(figsize=(30, 30))
+    fig = plt.figure(figsize=(20, 10))
 
     image_pos = 0
     with torch.no_grad():
@@ -243,8 +243,15 @@ def visualize_preds(model, model_str, dataset, classes, device):
             _, prediction = torch.max(output, 1)
             prediction = prediction.item() # -> make tensor into int
 
-            plt.subplot(1, 10, image_pos + 1) # create subplot w axes for current iamge
-            plt.imshow(to_pil_image(input))
+            plt.subplot(2, 5, image_pos + 1) # create subplot w axes for current iamge
+
+
+            image = input.cpu().permute(1,2,0).numpy()
+            image = np.clip(image, 0, 1)
+            plt.imshow(image)
+
+            # plt.imshow(to_pil_image(input))
+            
             plt.title(f"Ground Truth: {classes[label]} | Pred: {classes[prediction]}")
 
             plt.axis("off") # ADDED to remove tick marks
