@@ -107,4 +107,4 @@ if __name__ == "__main__":
         # device = torch.cuda.current_device()
         device = 'cuda'
 
-    run_baseline("..\2007_001239.jpg", "2007_image", device)
+    run_baseline("../2007_001239.jpg", "2007_image", device)
