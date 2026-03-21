@@ -34,7 +34,7 @@ def run_baseline(input_image, image_name, device):
             subimages.append(input_image.crop(patch_vals))
 
     # set up model: https://docs.pytorch.org/vision/stable/models.html 
-    baseline_model = resnet18(weights=ResNet18_Weights.DEFAULT)
+    baseline_model = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
     baseline_model.eval() # set model to eval mode
     baseline_model.to(device) # for GPU
 
@@ -60,7 +60,7 @@ def run_baseline(input_image, image_name, device):
             input_batch = input_tensor.unsqueeze(0)
             input_batch = input_batch.to(device)
 
-            # put image through model
+            # put image through model -> outputs 1000 scores
             model_output = baseline_model(input_batch)
 
             # model_output = unnormalized scores -> run softmas to get probabilities
@@ -74,8 +74,8 @@ def run_baseline(input_image, image_name, device):
         # validate detected cat or dog
         # ImageNet Classes: https://github.com/pytorch/hub/blob/master/imagenet_classes.txt (for torch pretrained models -> ResNet18)
         # Dog: 152 (Chihuahua) to 269 (Mexican hairless)
-        # Cat: 283 (tiger cat) to 294 (cheetah)
-        if (score > 0.3 and ((152 <= prediction <= 269) or (283 <= prediction <= 294))): # hardcoded confidence threshold to 0.3
+        # Cat: 282 (tabby) to 286 (Egyptian cat)
+        if (score > 0.3 and ((152 <= prediction <= 269) or (282 <= prediction <= 286))): # hardcoded confidence threshold to 0.3
             dog_cat_found.append({"image": image_i, "score": score, "prediction": prediction, "subimage_coord": patch_coord[curr_index]})
         
         curr_index += 1
