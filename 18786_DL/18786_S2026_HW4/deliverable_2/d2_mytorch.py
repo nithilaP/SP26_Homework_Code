@@ -245,13 +245,16 @@ def visualize_preds(model, model_str, dataset, classes, device):
 
             plt.subplot(2, 5, image_pos + 1) # create subplot w axes for current iamge
 
-
+            # Rearranges it into (height, weight, channel) and to numpy array
+            # -> https://stackoverflow.com/questions/53623472/how-do-i-display-a-single-image-in-pytorch
             image = input.cpu().permute(1,2,0).numpy()
+
+            # Clip data: https://stackoverflow.com/questions/49643907/clipping-input-data-to-the-valid-range-for-imshow-with-rgb-data-0-1-for-floa
             image = np.clip(image, 0, 1)
             plt.imshow(image)
 
             # plt.imshow(to_pil_image(input))
-            
+
             plt.title(f"Ground Truth: {classes[label]} | Pred: {classes[prediction]}")
 
             plt.axis("off") # ADDED to remove tick marks
@@ -273,7 +276,7 @@ if __name__ == "__main__":
 
     # TUNABLE PARAM FOR ABLATION STUDY 
     batch_size = 64
-    epochs = 10
+    epochs = 9
     learning_rate = 0.01
     momentum = 0.9
     weight_decay = 0
