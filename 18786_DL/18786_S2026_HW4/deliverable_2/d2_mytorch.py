@@ -89,7 +89,7 @@ class Baseline(nn.Module):
 
         return x
 
-# DELIVERABLE 2: OPTIMIZED CNN CLASS IMPLEMENTATION
+# BasicAlexNET
 class Basic_AlexNET(nn.Module):
     def __init__(self, num_output_classes=None):
 
@@ -187,6 +187,105 @@ class Basic_AlexNET(nn.Module):
 
         return x
 
+# Smaller FC Layer AlexNET
+class Basic_AlexNET(nn.Module):
+    def __init__(self, num_output_classes=None):
+
+        """
+        My custom CNN, designed for CIFAR-100. 
+
+        Pattern: 
+        - Conv
+        - Activation (ReLU)
+        - Max Pooling
+
+        [input]
+        * num_output_classes   : number of classes for output
+        """
+        super().__init__()
+
+        self.num_output_classes = num_output_classes
+        if (num_output_classes == None):
+            self.num_output_classes = 100        
+
+        # d1 baseline: 2 (conv + batch_norm + relu + pool) + flatten + fc + relu + dropout + fc
+        # alexnet : 5 Conv w batch_norm, 3 FC 
+        # nn.Conv2d: https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html
+        # nn.BatchNorm2d: https://docs.pytorch.org/docs/stable/generated/torch.nn.BatchNorm2d.html
+        # nn.ReLU: https://docs.pytorch.org/docs/stable/generated/torch.nn.ReLU.html
+        # nn.Linear: https://docs.pytorch.org/docs/stable/generated/torch.nn.Linear.html
+        # nn.Dropout: https://docs.pytorch.org/docs/stable/generated/torch.nn.Dropout.html
+        self.conv_layers = nn.Sequential(
+            
+            # LAYER 1 
+            # Conv(3→96) → BN(96) → ReLU → MaxPool
+            nn.Conv2d(in_channels=3, out_channels=96, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.BatchNorm2d(num_features=96),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+
+            # LAYER 2 
+            # Conv(96→256) → BN(256) → ReLU → MaxPool
+            nn.Conv2d(in_channels=96, out_channels=256, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.BatchNorm2d(num_features=256),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+
+            # Conv(256→384) → BN(384) → ReLU
+            nn.Conv2d(in_channels=256, out_channels=384, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.BatchNorm2d(num_features=384),
+            nn.ReLU(),
+
+            # Conv(384→384) → BN(384) → ReLU
+            nn.Conv2d(in_channels=384, out_channels=384, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.BatchNorm2d(num_features=384),
+            nn.ReLU(),
+
+            # Conv(384→256) → BN(256) → ReLU → MaxPool
+            nn.Conv2d(in_channels=384, out_channels=256, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.BatchNorm2d(num_features=256),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
+
+        self.fc_layers = nn.Sequential(
+            # for flatten before fc layer
+            nn.Flatten(),
+
+            # FC HIDDEN LAYER 1 
+            nn.Linear(256 * 4 * 4, 1024),
+            nn.ReLU(),
+            nn.Dropout(p=0.25),
+
+            # FC OUTPUT LAYER 
+            nn.Linear(1024, 512),
+            nn.ReLU(),
+            nn.Dropout(p=0.25),
+            nn.Linear(512, self.num_output_classes),
+        )
+    
+    def __call__(self, x):
+        
+        return self.forward(x)
+    
+    def forward(self, x):
+
+        """
+        [input]
+        x (torch.tensor)      : (batch_size, in_channels, input_height, input_width)
+
+        [output]
+        output (torch.tensor) : (batch_size, out_channels, output_height, output_width)
+
+        """
+        # print("TEST: forward pass")
+
+        x = self.conv_layers(x)
+        x = self.fc_layers(x)
+
+        return x
+
+
 
 # Train the Model: 
 # -> https://docs.pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
@@ -204,8 +303,6 @@ def train(net, num_epoch, learning_rate, momentum, weight_decay, scheduler_step_
     test_accuracy = []
 
     for epoch in range(num_epoch):
-
-        print("starting batch")
 
         # CHECK: FIND EVIDENCE
         net.train()
@@ -379,7 +476,7 @@ if __name__ == "__main__":
     learning_rate = 0.01
     momentum = 0.9
     weight_decay = 0.0005
-    scheduler_step_size = 10
+    scheduler_step_size = 20
     scheduler_gamma = 0.1
 
     # data transformations: experiment with augmentations here (random crop, etc)
