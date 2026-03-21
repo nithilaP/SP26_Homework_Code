@@ -276,7 +276,7 @@ if __name__ == "__main__":
 
     # TUNABLE PARAM FOR ABLATION STUDY 
     batch_size = 64
-    epochs = 9
+    epochs = 10
     learning_rate = 0.01
     momentum = 0.9
     weight_decay = 0
