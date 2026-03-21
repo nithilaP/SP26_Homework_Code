@@ -84,12 +84,12 @@ def run_baseline(input_image, image_name, device):
     bbox_creation = ImageDraw.Draw(input_image) 
     for found_object in dog_cat_found: 
 
-        x_min, y_min, x_max, y_max = dog_cat_found["subimage_coord"]
+        x_min, y_min, x_max, y_max = found_object["subimage_coord"]
         box_xyxy = [x_min, y_min, x_max, y_max] 
         bbox_creation.rectangle(xy=box_xyxy) # takes box coordinates in xyxy
 
         prediction_text = "dog"
-        if (283 <= dog_cat_found["prediction"] <= 294):
+        if (283 <= found_object["prediction"] <= 294):
             prediction_text = "cat"
         
         print(f"[INFO] Drawing box: {box_xyxy} (XYXY), label: {prediction_text}")
