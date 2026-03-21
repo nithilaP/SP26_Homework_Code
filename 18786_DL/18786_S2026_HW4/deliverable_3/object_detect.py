@@ -10,12 +10,7 @@ import torch.nn.functional as F
 from torchvision import datasets, transforms
 from torchvision.models import resnet18, ResNet18_Weights
 
-# DELIVERABLE 3:
-class Baseline(nn.Module):
-    '''
-    Docstring for Baseline
-    '''
-
+# DELIVERABLE 3: baseline is to split image into 5 patches & classify
 def run_baseline(input_image, image_name, device):
 
     # INPUT PROCESSING 
@@ -80,7 +75,7 @@ def run_baseline(input_image, image_name, device):
         # ImageNet Classes: https://github.com/pytorch/hub/blob/master/imagenet_classes.txt (for torch pretrained models -> ResNet18)
         # Dog: 152 (Chihuahua) to 269 (Mexican hairless)
         # Cat: 283 (tiger cat) to 294 (cheetah)
-        if (score > 0.3 & ((152 <= prediction <= 269) | (283 <= prediction <= 294))): # hardcoded confidence threshold to 0.3
+        if (score > 0.3 and ((152 <= prediction <= 269) or (283 <= prediction <= 294))): # hardcoded confidence threshold to 0.3
             dog_cat_found.append({"image": image_i, "score": score, "prediction": prediction, "subimage_coord": patch_coord[curr_index]})
         
         curr_index += 1
@@ -99,7 +94,7 @@ def run_baseline(input_image, image_name, device):
         
         print(f"[INFO] Drawing box: {box_xyxy} (XYXY), label: {prediction_text}")
         label_location = (x_min + 5, y_min + 5)  #offset of label from the box 
-        bbox_creation.text(label_location[0], label_location[1], f"{prediction_text}")
+        bbox_creation.text(label_location, f"{prediction_text}")
 
     input_image.save(f"{image_name}_baseline_image")
 
