@@ -71,6 +71,9 @@ def run_baseline(input_image, image_name, device):
             score = score.item() # 
             prediction = prediction.item()
 
+            print(f"[INFO] {image_name} subimage_prediction: {prediction}")
+
+
         # validate detected cat or dog
         # ImageNet Classes: https://github.com/pytorch/hub/blob/master/imagenet_classes.txt (for torch pretrained models -> ResNet18)
         # Dog: 152 (Chihuahua) to 269 (Mexican hairless)
