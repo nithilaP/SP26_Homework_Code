@@ -77,8 +77,11 @@ def run_baseline(input_image, image_name, device):
             prediction = prediction.item()
 
         # validate detected cat or dog
-        if (score > 0.3): # hardcoded confidence threshold to 0.3
-            dog_cat_found.append({"image": image_i, "score": score, "prediction": prediction, "subimage_location": patch_coord[curr_index]})
+        # ImageNet Classes: https://github.com/pytorch/hub/blob/master/imagenet_classes.txt (for torch pretrained models -> ResNet18)
+        # Dog: 152 (Chihuahua) to 269 (Mexican hairless)
+        # Cat: 283 (tiger cat) to 294 (cheetah)
+        if (score > 0.3 & ((152 <= prediction <= 269) | (283 <= prediction <= 294))): # hardcoded confidence threshold to 0.3
+            dog_cat_found.append({"image": image_i, "score": score, "prediction": prediction, "subimage_coord": patch_coord[curr_index]})
         
         curr_index += 1
     
@@ -86,12 +89,19 @@ def run_baseline(input_image, image_name, device):
     bbox_creation = ImageDraw.Draw(input_image) 
     for found_object in dog_cat_found: 
 
-        x_min, y_min, x_max, y_max = dog_cat_found["subimage_location"]
-        bbox_creation.rectangle([x_min, y_min, x_max, y_max]) # takes box coordinates in xyxy 
-        label_location = (x_min + 5, y_min + 5)  #offset of label from the box 
-        bbox_creation.text(label_location[0], label_location[1], f"{prediction}")
+        x_min, y_min, x_max, y_max = dog_cat_found["subimage_coord"]
+        box_xyxy = [x_min, y_min, x_max, y_max] 
+        bbox_creation.rectangle(xy=box_xyxy) # takes box coordinates in xyxy
 
-        input_image.save(f"{image_name}_baseline_image")
+        prediction_text = "dog"
+        if (283 <= dog_cat_found["prediction"] <= 294):
+            prediction_text = "cat"
+        
+        print(f"[INFO] Drawing box: {box_xyxy} (XYXY), label: {prediction_text}")
+        label_location = (x_min + 5, y_min + 5)  #offset of label from the box 
+        bbox_creation.text(label_location[0], label_location[1], f"{prediction_text}")
+
+    input_image.save(f"{image_name}_baseline_image")
 
 
 if __name__ == "__main__":
