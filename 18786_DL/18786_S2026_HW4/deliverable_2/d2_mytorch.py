@@ -710,7 +710,7 @@ if __name__ == "__main__":
         device = 'cuda'
     
     # baseline CNN 
-    my_baseline_cnn = Baseline(num_output_classes=100)
+    my_baseline_cnn = Deeper_Conv_AlexNET(num_output_classes=100)
     my_baseline_cnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_baseline_cnn, num_epoch=epochs, learning_rate=learning_rate, momentum=momentum, weight_decay=weight_decay, 
                                                                       scheduler_step_size=scheduler_step_size, scheduler_gamma=scheduler_gamma,train_dataloader=train_dataloader, 
                                                                       test_dataloader=test_dataloader, device=device)
@@ -718,6 +718,6 @@ if __name__ == "__main__":
     # PLOTTING
     num_epochs = len(train_loss)
     epochs_axis = [i for i in range(1, num_epochs + 1)]
-    generate_plots("CNN", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
-    visualize_preds(my_cnn, "CNN", test_data, train_data.classes, device)
+    generate_plots("Deeper_Conv_AlexNET", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
+    visualize_preds(my_baseline_cnn, "Deeper_Conv_AlexNET", test_data, train_data.classes, device)
 
