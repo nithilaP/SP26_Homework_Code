@@ -424,7 +424,6 @@ class Deeper_Conv_AlexNET(nn.Module):
             nn.Conv2d(in_channels=3, out_channels=96, kernel_size=3, stride=1, padding=1, bias=True),
             nn.BatchNorm2d(num_features=96),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
 
             # LAYER 2 
             nn.Conv2d(in_channels=96, out_channels=96, kernel_size=3, stride=1, padding=1, bias=True),
