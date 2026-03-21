@@ -96,7 +96,7 @@ def run_baseline(input_image, image_name, device):
         label_location = (x_min + 5, y_min + 5)  #offset of label from the box 
         bbox_creation.text(label_location, f"{prediction_text}")
 
-    input_image.save(f"{image_name}_baseline_image")
+    input_image.save(f"{image_name}_baseline_image.png")
 
 
 if __name__ == "__main__":
