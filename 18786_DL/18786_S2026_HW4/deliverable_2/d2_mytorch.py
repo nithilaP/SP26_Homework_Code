@@ -585,7 +585,7 @@ class No_Dropout_Smaller_FC_AlexNET(nn.Module):
 
         return x
 
-# Smaller FC Layer AlexNET
+# Bigger Dropout Layer AlexNET
 class Bigger_Dropout_AlexNet(nn.Module):
     def __init__(self, num_output_classes=None):
 
@@ -682,7 +682,6 @@ class Bigger_Dropout_AlexNet(nn.Module):
         x = self.fc_layers(x)
 
         return x
-
 
 # Train the Model: 
 # -> https://docs.pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
@@ -872,7 +871,7 @@ if __name__ == "__main__":
     epochs = 50
     learning_rate = 0.01
     momentum = 0.9
-    weight_decay = 0.0005
+    weight_decay = 0
     scheduler_step_size = 20
     scheduler_gamma = 0.1
 
@@ -903,7 +902,7 @@ if __name__ == "__main__":
         device = 'cuda'
     
     # baseline CNN 
-    my_baseline_cnn = Bigger_Dropout_AlexNet(num_output_classes=100)
+    my_baseline_cnn = Smaller_FC_AlexNET(num_output_classes=100)
     my_baseline_cnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_baseline_cnn, num_epoch=epochs, learning_rate=learning_rate, momentum=momentum, weight_decay=weight_decay, 
                                                                       scheduler_step_size=scheduler_step_size, scheduler_gamma=scheduler_gamma,train_dataloader=train_dataloader, 
                                                                       test_dataloader=test_dataloader, device=device)
