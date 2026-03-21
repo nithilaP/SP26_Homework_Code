@@ -635,7 +635,7 @@ if __name__ == "__main__":
 
     # baseline CNN 
     my_deeper_fc_alexnet_cnn = Deeper_FC_AlexNET(num_output_classes=100)
-    my_deeper_fc_alexnet_cnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_smaller_fc_alexnet_cnn, num_epoch=epochs, learning_rate=learning_rate, momentum=momentum, weight_decay=weight_decay, 
+    my_deeper_fc_alexnet_cnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_deeper_fc_alexnet_cnn, num_epoch=epochs, learning_rate=learning_rate, momentum=momentum, weight_decay=weight_decay, 
                                                                       scheduler_step_size=scheduler_step_size, scheduler_gamma=scheduler_gamma,train_dataloader=train_dataloader, 
                                                                       test_dataloader=test_dataloader, device=device)
 
