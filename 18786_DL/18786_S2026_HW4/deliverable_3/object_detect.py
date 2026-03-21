@@ -25,16 +25,16 @@ def run_baseline(input_image, image_name, device):
     # input_image = model_input.convert("RGB")
 
     # split image into 5 by 5 non-overlapping patches
-    image_width = input_image.image_size[0]
-    image_height = input_image.image_size[1]
+    image_width = input_image.size[0]
+    image_height = input_image.size[1]
 
     patch_width = image_width // 5 
     patch_height = image_height // 5
     patch_coord = []
     subimages = [] # array w coordinates of each sub-images
-    for i in range(5):
-        for j in range(5):
-            patch_vals = (patch_width * i, patch_height * j, patch_width * j + patch_width, patch_height * i + patch_height)
+    for i in range(5): # i: top -> bottom 
+        for j in range(5): # j: left -> right
+            patch_vals = (patch_width * j, patch_height * i, patch_width * j + patch_width, patch_height * i + patch_height)
             patch_coord.append(patch_vals)
             subimages.append(input_image.crop(patch_vals))
 
@@ -45,37 +45,50 @@ def run_baseline(input_image, image_name, device):
 
     # iterate through all images, classify objects
     # https://pytorch.org/hub/pytorch_vision_resnet/
+    # All pretrained model expect input imges to be atleast H =224 x W=224:
+    #   https://pytorch.org/hub/pytorch_vision_resnet/#:~:text=All%20pre%2Dtrained%20models%20expect,0.229%2C%200.224%2C%200.225%5D%20.
     preprocess_transform = transforms.Compose([
+        transforms.Resize(256), 
+        transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
-    input_tensor = preprocess_transform(input_image)
-    input_batch = input_tensor.unsqeeze(0)
-    input_batch = input_batch.to(device)
+
     dog_cat_found = []
     curr_index = 0
     for image_i in subimages:
         # classify with the model
         with torch.no_grad(): 
-            model_output = baseline_model(image_i)
+            
+            # preprocess the image
+            input_tensor = preprocess_transform(image_i)
+            input_batch = input_tensor.unsqueeze(0)
+            input_batch = input_batch.to(device)
+
+            # put image through model
+            model_output = baseline_model(input_batch)
+
+            # model_output = unnormalized scores -> run softmas to get probabilities
             probabilities = F.softmax(model_output[0], dim=0)
-            score, prediction = torch.max(probabilities, 1)
-            score = score.item()
+
+            # get index with highest score / energy -> choose as prediction
+            score, prediction = torch.max(probabilities, dim=0)
+            score = score.item() # 
             prediction = prediction.item()
 
         # validate detected cat or dog
-        if (score > 0.75): # hardcoded confidence threshold to 0.75
+        if (score > 0.3): # hardcoded confidence threshold to 0.3
             dog_cat_found.append({"image": image_i, "score": score, "prediction": prediction, "subimage_location": patch_coord[curr_index]})
         
         curr_index += 1
     
     # create bounding box around identified cat and dog
-    bbox_creation = ImageDraw.Draw(input_image)
+    bbox_creation = ImageDraw.Draw(input_image) 
     for found_object in dog_cat_found: 
 
-        x1, y1, x2, y2 = dog_cat_found["subimage_location"]
-        bbox_creation.rectangle([x1, y1, x2, y2])
-        label_location = (x1 + 5, y1 + 5)
+        x_min, y_min, x_max, y_max = dog_cat_found["subimage_location"]
+        bbox_creation.rectangle([x_min, y_min, x_max, y_max]) # takes box coordinates in xyxy 
+        label_location = (x_min + 5, y_min + 5)  #offset of label from the box 
         bbox_creation.text(label_location[0], label_location[1], f"{prediction}")
 
         input_image.save(f"{image_name}_baseline_image")

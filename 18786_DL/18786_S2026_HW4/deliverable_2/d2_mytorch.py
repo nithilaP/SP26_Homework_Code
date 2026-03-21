@@ -489,6 +489,102 @@ class Deeper_Conv_AlexNET(nn.Module):
 
         return x
 
+# No Dropout with Smaller FC Layer AlexNET
+class No_Dropout_Smaller_FC_AlexNET(nn.Module):
+    def __init__(self, num_output_classes=None):
+
+        """
+        My custom CNN, designed for CIFAR-100. 
+
+        Pattern: 
+        - Conv
+        - Activation (ReLU)
+        - Max Pooling
+
+        [input]
+        * num_output_classes   : number of classes for output
+        """
+        super().__init__()
+
+        self.num_output_classes = num_output_classes
+        if (num_output_classes == None):
+            self.num_output_classes = 100        
+
+        # d1 baseline: 2 (conv + batch_norm + relu + pool) + flatten + fc + relu + dropout + fc
+        # alexnet : 5 Conv w batch_norm, 3 FC 
+        # nn.Conv2d: https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html
+        # nn.BatchNorm2d: https://docs.pytorch.org/docs/stable/generated/torch.nn.BatchNorm2d.html
+        # nn.ReLU: https://docs.pytorch.org/docs/stable/generated/torch.nn.ReLU.html
+        # nn.Linear: https://docs.pytorch.org/docs/stable/generated/torch.nn.Linear.html
+        # nn.Dropout: https://docs.pytorch.org/docs/stable/generated/torch.nn.Dropout.html
+        self.conv_layers = nn.Sequential(
+            
+            # LAYER 1 
+            # Conv(3→96) → BN(96) → ReLU → MaxPool
+            nn.Conv2d(in_channels=3, out_channels=96, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.BatchNorm2d(num_features=96),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+
+            # LAYER 2 
+            # Conv(96→256) → BN(256) → ReLU → MaxPool
+            nn.Conv2d(in_channels=96, out_channels=256, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.BatchNorm2d(num_features=256),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+
+            # Conv(256→384) → BN(384) → ReLU
+            nn.Conv2d(in_channels=256, out_channels=384, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.BatchNorm2d(num_features=384),
+            nn.ReLU(),
+
+            # Conv(384→384) → BN(384) → ReLU
+            nn.Conv2d(in_channels=384, out_channels=384, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.BatchNorm2d(num_features=384),
+            nn.ReLU(),
+
+            # Conv(384→256) → BN(256) → ReLU → MaxPool
+            nn.Conv2d(in_channels=384, out_channels=256, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.BatchNorm2d(num_features=256),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
+
+        self.fc_layers = nn.Sequential(
+            # for flatten before fc layer
+            nn.Flatten(),
+
+            # FC HIDDEN LAYER 1 
+            nn.Linear(256 * 4 * 4, 1024),
+            nn.ReLU(),
+
+            # FC OUTPUT LAYER 
+            nn.Linear(1024, 512),
+            nn.ReLU(),
+            nn.Linear(512, self.num_output_classes),
+        )
+    
+    def __call__(self, x):
+        
+        return self.forward(x)
+    
+    def forward(self, x):
+
+        """
+        [input]
+        x (torch.tensor)      : (batch_size, in_channels, input_height, input_width)
+
+        [output]
+        output (torch.tensor) : (batch_size, out_channels, output_height, output_width)
+
+        """
+        # print("TEST: forward pass")
+
+        x = self.conv_layers(x)
+        x = self.fc_layers(x)
+
+        return x
+
 
 # Train the Model: 
 # -> https://docs.pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
@@ -709,7 +805,7 @@ if __name__ == "__main__":
         device = 'cuda'
     
     # baseline CNN 
-    my_baseline_cnn = Deeper_Conv_AlexNET(num_output_classes=100)
+    my_baseline_cnn = No_Dropout_Smaller_FC_AlexNET(num_output_classes=100)
     my_baseline_cnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_baseline_cnn, num_epoch=epochs, learning_rate=learning_rate, momentum=momentum, weight_decay=weight_decay, 
                                                                       scheduler_step_size=scheduler_step_size, scheduler_gamma=scheduler_gamma,train_dataloader=train_dataloader, 
                                                                       test_dataloader=test_dataloader, device=device)
@@ -717,6 +813,6 @@ if __name__ == "__main__":
     # PLOTTING
     num_epochs = len(train_loss)
     epochs_axis = [i for i in range(1, num_epochs + 1)]
-    generate_plots("Deeper_Conv_AlexNET", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
-    visualize_preds(my_baseline_cnn, "Deeper_Conv_AlexNET", test_data, train_data.classes, device)
+    generate_plots("No_Dropout_Smaller_FC_AlexNET", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
+    visualize_preds(my_baseline_cnn, "No_Dropout_Smaller_FC_AlexNET", test_data, train_data.classes, device)
 
