@@ -188,7 +188,7 @@ class Basic_AlexNET(nn.Module):
         return x
 
 # Smaller FC Layer AlexNET
-class Basic_AlexNET(nn.Module):
+class Smaller_FC_AlexNET(nn.Module):
     def __init__(self, num_output_classes=None):
 
         """
@@ -518,13 +518,25 @@ if __name__ == "__main__":
     # visualize_preds(my_cnn, "CNN", test_data, train_data.classes, device)
 
     # baseline CNN 
-    my_basic_alexnet_cnn = Basic_AlexNET(num_output_classes=100)
-    my_basic_alexnet_cnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_basic_alexnet_cnn, num_epoch=epochs, learning_rate=learning_rate, momentum=momentum, weight_decay=weight_decay, 
+    # my_basic_alexnet_cnn = Basic_AlexNET(num_output_classes=100)
+    # my_basic_alexnet_cnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_basic_alexnet_cnn, num_epoch=epochs, learning_rate=learning_rate, momentum=momentum, weight_decay=weight_decay, 
+    #                                                                   scheduler_step_size=scheduler_step_size, scheduler_gamma=scheduler_gamma,train_dataloader=train_dataloader, 
+    #                                                                   test_dataloader=test_dataloader, device=device)
+
+    # PLOTTING
+    # num_epochs = len(train_loss)
+    # epochs_axis = [i for i in range(1, num_epochs + 1)]
+    # generate_plots("AlexNet_CNN", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
+    # visualize_preds(my_basic_alexnet_cnn, "AlexNet_CNN", test_data, train_data.classes, device)
+
+    # baseline CNN 
+    my_smaller_fc_alexnet_cnn = Basic_AlexNET(num_output_classes=100)
+    my_smaller_fc_alexnet_cnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_smaller_fc_alexnet_cnn, num_epoch=epochs, learning_rate=learning_rate, momentum=momentum, weight_decay=weight_decay, 
                                                                       scheduler_step_size=scheduler_step_size, scheduler_gamma=scheduler_gamma,train_dataloader=train_dataloader, 
                                                                       test_dataloader=test_dataloader, device=device)
 
     # PLOTTING
     num_epochs = len(train_loss)
     epochs_axis = [i for i in range(1, num_epochs + 1)]
-    generate_plots("AlexNet_CNN", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
-    visualize_preds(my_basic_alexnet_cnn, "AlexNet_CNN", test_data, train_data.classes, device)
+    generate_plots("Smaller_FC_AlexNet_CNN", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
+    visualize_preds(my_smaller_fc_alexnet_cnn, "Smaller_FC_AlexNet_CNN", test_data, train_data.classes, device)
