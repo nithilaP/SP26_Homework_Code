@@ -346,8 +346,6 @@ def overlap_and_merge_implementation(input_image, image_name, device):
 
             if (distance < patch_width * 1.0):
 
-            # if ((abs(center_x - center_j_x) < patch_width * 0.5) and (abs(center_y - center_j_y) < patch_height * 0.5)):
-
                 # do the merge
                 # Update merge_x_min etc and center_x and center_y
                 merge_x_min = min(merge_x_min, merge_x_j_min)
@@ -409,7 +407,7 @@ def overlap_and_merge_implementation(input_image, image_name, device):
         # ImageNet Classes: https://github.com/pytorch/hub/blob/master/imagenet_classes.txt (for torch pretrained models -> ResNet18)
         # Dog: 152 (Chihuahua) to 269 (Mexican hairless)
         # Cat: 281 (tabby) to 293 (Cheetah)
-        if (score > 0.5 and ((151 <= prediction <= 268) or (281 <= prediction <= 293))): # hardcoded confidence threshold to 0.3
+        if (score > 0.8 and ((151 <= prediction <= 268) or (281 <= prediction <= 293))): # hardcoded confidence threshold to 0.3
 
             pred_label = "dog"
             if (281 <= prediction <= 293):
@@ -455,8 +453,8 @@ if __name__ == "__main__":
     # run_baseline("../2007_001239.jpg", "dog_image", device)
     # run_baseline("../2008_002152.jpg", "cat_image", device)
 
-    overlapping_patches_implementation("../2007_001239.jpg", "dog_image_overlap", device)
-    overlapping_patches_implementation("../2008_002152.jpg", "cat_image_overlap", device)
+    # overlapping_patches_implementation("../2007_001239.jpg", "dog_image_overlap", device)
+    # overlapping_patches_implementation("../2008_002152.jpg", "cat_image_overlap", device)
 
     overlap_and_merge_implementation("../2007_001239.jpg", "dog_image_overlap_and_merge", device)
     overlap_and_merge_implementation("../2008_002152.jpg", "cat_image_overlap_and_merge", device)
