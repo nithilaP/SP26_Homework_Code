@@ -341,7 +341,7 @@ def overlap_and_merge_implementation(input_image, image_name, device):
             # distance eq 
             distance = ((center_x - center_j_x) ** 2 + (center_y - center_j_y) ** 2) ** 0.5
 
-            if (distance < patch_width):
+            if (distance < patch_width * 0.6):
 
                 # do the merge
                 # Update merge_x_min etc and center_x and center_y
