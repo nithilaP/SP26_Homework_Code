@@ -453,8 +453,8 @@ if __name__ == "__main__":
     # run_baseline("../2007_001239.jpg", "dog_image", device)
     # run_baseline("../2008_002152.jpg", "cat_image", device)
 
-    # overlapping_patches_implementation("../2007_001239.jpg", "dog_image_overlap", device)
-    # overlapping_patches_implementation("../2008_002152.jpg", "cat_image_overlap", device)
+    overlapping_patches_implementation("../2007_001239.jpg", "dog_image_overlap", device)
+    overlapping_patches_implementation("../2008_002152.jpg", "cat_image_overlap", device)
 
     overlap_and_merge_implementation("../2007_001239.jpg", "dog_image_overlap_and_merge", device)
     overlap_and_merge_implementation("../2008_002152.jpg", "cat_image_overlap_and_merge", device)
