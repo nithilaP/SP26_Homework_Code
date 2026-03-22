@@ -870,11 +870,11 @@ if __name__ == "__main__":
     # TUNABLE PARAM FOR ABLATION STUDY 
     batch_size = 128
     epochs = 50
-    learning_rate = 0.001
+    learning_rate = 0.01
     momentum = 0.9
     weight_decay = 0.0005
     scheduler_step_size = 20
-    scheduler_gamma = 0.01
+    scheduler_gamma = 0.1
 
     # data transformations: experiment with augmentations here (random crop, etc)
     # normalization values used for CIFAR-100: 
