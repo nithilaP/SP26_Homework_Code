@@ -239,9 +239,9 @@ def overlap_and_merge_implementation(input_image, image_name, device):
             patch_coord.append(patch_vals)
             subimages.append(input_image.crop(patch_vals))
 
-            starting_y += patch_height // 2 # move over 1/5 of a patch for the next patch
+            starting_y += patch_height // 3 # move over 1/5 of a patch for the next patch
         starting_y = 0 # reset y once all vertical patches on that x axis are done
-        starting_x += patch_width // 2 # move over 1/5 of a patch height for the next patch
+        starting_x += patch_width // 3 # move over 1/5 of a patch height for the next patch
 
     print(f"number of patches: {len(patch_coord)}")
 
