@@ -872,7 +872,7 @@ if __name__ == "__main__":
     learning_rate = 0.001
     momentum = 0.9
     weight_decay = 0.0005
-    scheduler_step_size = 20
+    scheduler_step_size = 10
     scheduler_gamma = 0.1
 
     # data transformations: experiment with augmentations here (random crop, etc)
@@ -910,6 +910,6 @@ if __name__ == "__main__":
     # PLOTTING
     num_epochs = len(train_loss)
     epochs_axis = [i for i in range(1, num_epochs + 1)]
-    generate_plots("Smaller_lr_AlexNET", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
-    visualize_preds(my_baseline_cnn, "Smaller_lr_AlexNET", test_data, train_data.classes, device)
+    generate_plots("LR_Scheduler_Step_10_AlexNET", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
+    visualize_preds(my_baseline_cnn, "LR_Scheduler_Step_10_AlexNET", test_data, train_data.classes, device)
 
