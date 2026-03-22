@@ -71,7 +71,7 @@ def run_baseline(input_image, image_name, device):
             score = score.item() # 
             prediction = prediction.item()
 
-            print(f"[INFO] {image_name} subimage_prediction: {prediction}| prediction_name: {ResNet18_Weights.DEFAULT.meta["categories"][prediction]}| score: {score}")
+            print(f"{image_name}:: subimage_prediction: {prediction}| prediction_name: {ResNet18_Weights.DEFAULT.meta["categories"][prediction]}| score: {score}")
 
 
         # validate detected cat or dog
