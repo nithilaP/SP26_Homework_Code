@@ -71,7 +71,7 @@ def run_baseline(input_image, image_name, device):
             score = score.item() # 
             prediction = prediction.item()
 
-            print(f"[INFO] {image_name} subimage_prediction: {prediction}")
+            print(f"[INFO] {image_name} subimage_prediction: {prediction} | score: {score}")
 
 
         # validate detected cat or dog
