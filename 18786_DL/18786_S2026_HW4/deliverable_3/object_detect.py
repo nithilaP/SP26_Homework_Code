@@ -116,13 +116,29 @@ def overlapping_patches_implementation(input_image, image_name, device):
 
     patch_width = image_width // 5 
     patch_height = image_height // 5
-    patch_coord = []
+    patch_coord = [] # with overlapping patches, need to generate more patches
     subimages = [] # array w coordinates of each sub-images
-    for i in range(5): # i: top -> bottom 
-        for j in range(5): # j: left -> right
-            patch_vals = (patch_width * j, patch_height * i, patch_width * j + patch_width, patch_height * i + patch_height)
+
+    # generate sliding windows of patches and add to the list 
+    starting_x = 0; 
+    starting_y = 0; 
+
+    while (starting_x < image_width + patch_width):
+        while (starting_y < image_height - patch_height):
+
+            patch_vals = (starting_x, starting_y, starting_x + patch_width, starting_y + patch_height);
             patch_coord.append(patch_vals)
             subimages.append(input_image.crop(patch_vals))
+
+            starting_y += patch_height // 5 # move over 1/5 of a patch for the next patch
+        starting_y = 0 # reset y once all vertical patches on that x axis are done
+        starting_x += patch_width // 5 # move over 1/5 of a patch height for the next patch
+
+    # for i in range(5): # i: top -> bottom 
+    #     for j in range(5): # j: left -> right
+    #         patch_vals = (patch_width * j, patch_height * i, patch_width * j + patch_width, patch_height * i + patch_height)
+    #         patch_coord.append(patch_vals)
+    #         subimages.append(input_image.crop(patch_vals))
 
     # set up model: https://docs.pytorch.org/vision/stable/models.html 
     baseline_model = resnet18(weights=ResNet18_Weights.DEFAULT) # DEFAULT = IMAGENET1K_V1
@@ -173,9 +189,6 @@ def overlapping_patches_implementation(input_image, image_name, device):
             dog_cat_found.append({"image": image_i, "score": score, "prediction": prediction, "subimage_coord": patch_coord[curr_index], "image_label": ResNet18_Weights.DEFAULT.meta["categories"][prediction]})
         
         curr_index += 1
-
-    # add in merging step: 
-    # After we 
     
     # create bounding box around identified cat and dog
     bbox_creation = ImageDraw.Draw(input_image) 
