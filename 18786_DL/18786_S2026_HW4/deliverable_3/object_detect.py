@@ -97,7 +97,7 @@ def run_baseline(input_image, image_name, device):
         
         print(f"subimage: {box_xyxy}, label: {prediction_text}, prediction_name: {found_object["image_label"]}")
         label_location = (x_min + 5, y_min + 5)  #offset of label from the box 
-        bbox_creation.text(label_location, f"{prediction_text}")
+        bbox_creation.text(label_location, f"{prediction_text} | {found_object["image_label"]}")
 
     input_image.save(f"{image_name}_baseline_image.png")
 
