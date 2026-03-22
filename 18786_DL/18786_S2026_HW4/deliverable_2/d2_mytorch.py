@@ -871,7 +871,7 @@ if __name__ == "__main__":
     epochs = 50
     learning_rate = 0.01
     momentum = 0.9
-    weight_decay = 0
+    weight_decay = 0.001
     scheduler_step_size = 20
     scheduler_gamma = 0.1
 
@@ -910,6 +910,6 @@ if __name__ == "__main__":
     # PLOTTING
     num_epochs = len(train_loss)
     epochs_axis = [i for i in range(1, num_epochs + 1)]
-    generate_plots("Bigger_Dropout_AlexNet", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
-    visualize_preds(my_baseline_cnn, "Bigger_Dropout_AlexNet", test_data, train_data.classes, device)
+    generate_plots("Bigger_Weight_Decay_AlexNet", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
+    visualize_preds(my_baseline_cnn, "Bigger_Weight_Decay_AlexNet", test_data, train_data.classes, device)
 
