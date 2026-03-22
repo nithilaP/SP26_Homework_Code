@@ -123,7 +123,7 @@ def overlapping_patches_implementation(input_image, image_name, device):
     starting_x = 0; 
     starting_y = 0; 
 
-    while (starting_x < image_width + patch_width):
+    while (starting_x < image_width - patch_width):
         while (starting_y < image_height - patch_height):
 
             patch_vals = (starting_x, starting_y, starting_x + patch_width, starting_y + patch_height);
@@ -202,11 +202,11 @@ def overlapping_patches_implementation(input_image, image_name, device):
         if (281 <= found_object["prediction"] <= 285):
             prediction_text = "cat"
         
-        print(f"subimage: {box_xyxy}, label: {prediction_text}, prediction_name: {found_object["image_label"]}")
+        print(f"subimage: {box_xyxy}, label: {prediction_text}, prediction_name: {found_object['image_label']}")
         label_location = (x_min + 5, y_min + 5)  #offset of label from the box 
-        bbox_creation.text(label_location, f"{prediction_text} | {found_object["image_label"]}")
+        bbox_creation.text(label_location, f"{prediction_text} | {found_object['image_label']}")
 
-    input_image.save(f"{image_name}_baseline_image.png")
+    input_image.save(f"{image_name}_overlapping_patches_image.png")
 
 
 if __name__ == "__main__":
