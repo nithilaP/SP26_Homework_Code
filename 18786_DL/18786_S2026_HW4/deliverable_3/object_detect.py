@@ -95,7 +95,7 @@ def run_baseline(input_image, image_name, device):
         if (283 <= found_object["prediction"] <= 294):
             prediction_text = "cat"
         
-        print(f"[INFO] Drawing box: {box_xyxy} (XYXY), label: {prediction_text}")
+        print(f"subimage: {box_xyxy}, label: {prediction_text}")
         label_location = (x_min + 5, y_min + 5)  #offset of label from the box 
         bbox_creation.text(label_location, f"{prediction_text}")
 
