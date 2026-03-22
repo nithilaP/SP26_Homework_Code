@@ -689,7 +689,9 @@ class Bigger_Dropout_AlexNet(nn.Module):
 def train(net, num_epoch, learning_rate, momentum, weight_decay, scheduler_step_size, scheduler_gamma, train_dataloader, test_dataloader, device):
     net = net.to(device)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(net.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
+    # optimizer = optim.SGD(net.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
+    optimizer = optim.Adam(net.parameters(), lr=learning_rate, weight_decay=weight_decay)
+
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=scheduler_step_size, gamma=scheduler_gamma)
 
     train_loss = []
@@ -910,6 +912,6 @@ if __name__ == "__main__":
     # PLOTTING
     num_epochs = len(train_loss)
     epochs_axis = [i for i in range(1, num_epochs + 1)]
-    generate_plots("LR_Scheduler_Step_10_AlexNET", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
-    visualize_preds(my_baseline_cnn, "LR_Scheduler_Step_10_AlexNET", test_data, train_data.classes, device)
+    generate_plots("Adam_Optim_AlexNet", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
+    visualize_preds(my_baseline_cnn, "Adam_Optim_AlexNet", test_data, train_data.classes, device)
 
