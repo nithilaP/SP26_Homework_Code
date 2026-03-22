@@ -224,5 +224,8 @@ if __name__ == "__main__":
     # for i in range(len(category)):
     #     print(i, category[i])
 
-    run_baseline("../2007_001239.jpg", "dog_image", device)
-    run_baseline("../2008_002152.jpg", "cat_image", device)
+    # run_baseline("../2007_001239.jpg", "dog_image", device)
+    # run_baseline("../2008_002152.jpg", "cat_image", device)
+
+    overlapping_patches_implementation("../2007_001239.jpg", "dog_image", device)
+    overlapping_patches_implementation("../2008_002152.jpg", "cat_image", device)
