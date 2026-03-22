@@ -300,6 +300,12 @@ def overlap_and_merge_implementation(input_image, image_name, device):
             dog_cat_found.append({"image": image_i, "score": score, "prediction": prediction, "subimage_coord": patch_coord[curr_index], "image_label": ResNet18_Weights.DEFAULT.meta["categories"][prediction]})
         
         curr_index += 1
+
+    # merge boxes that are around each other
+    merged_found=[]
+    
+
+    # redo the detection on this
     
     # create bounding box around identified cat and dog
     bbox_creation = ImageDraw.Draw(input_image) 

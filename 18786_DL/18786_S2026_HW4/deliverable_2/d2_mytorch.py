@@ -872,8 +872,8 @@ if __name__ == "__main__":
     learning_rate = 0.001
     momentum = 0.9
     weight_decay = 0.0005
-    scheduler_step_size = 10
-    scheduler_gamma = 0.1
+    scheduler_step_size = 20
+    scheduler_gamma = 0.01
 
     # data transformations: experiment with augmentations here (random crop, etc)
     # normalization values used for CIFAR-100: 
