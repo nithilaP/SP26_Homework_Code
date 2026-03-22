@@ -367,6 +367,7 @@ def overlap_and_merge_implementation(input_image, image_name, device):
 
         already_merged[i] = True # update for next few iterations
 
+    print(f"Number of merged boxes: {len(merged_found)}")
     # redo the detection on this
     dog_cat_found_w_merged_box = []
     curr_index = 0
