@@ -425,7 +425,7 @@ def overlap_and_merge_implementation(input_image, image_name, device):
         label_location = (x_min + 5, y_min + 5)  #offset of label from the box 
         bbox_creation.text(label_location, f"{prediction_text} | {found_object['image_label']}")
 
-    input_image.save(f"{image_name}_overlap_and_merge_image.png")
+    input_image.save(f"{image_name}_image.png")
 
 
 if __name__ == "__main__":
