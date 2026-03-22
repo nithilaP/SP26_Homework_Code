@@ -345,6 +345,7 @@ def overlap_and_merge_implementation(input_image, image_name, device):
             distance = ((center_x - center_j_x) ** 2 + (center_y - center_j_y) ** 2) ** 0.5
 
             if (distance < patch_width * 1.0):
+
             # if ((abs(center_x - center_j_x) < patch_width * 0.5) and (abs(center_y - center_j_y) < patch_height * 0.5)):
 
                 # do the merge
@@ -361,7 +362,7 @@ def overlap_and_merge_implementation(input_image, image_name, device):
                 # update merge tracker 
                 already_merged[j] = True
 
-                # update best score tracker
+                #
                 if dog_cat_found[j]["score"] > curr_box_score:
                     curr_box_pred = dog_cat_found[j]["prediction"]
                     curr_box_pred_label = dog_cat_found[j]["image_label"]
@@ -408,7 +409,7 @@ def overlap_and_merge_implementation(input_image, image_name, device):
         # ImageNet Classes: https://github.com/pytorch/hub/blob/master/imagenet_classes.txt (for torch pretrained models -> ResNet18)
         # Dog: 152 (Chihuahua) to 269 (Mexican hairless)
         # Cat: 281 (tabby) to 293 (Cheetah)
-        if (score > 0.8 and ((151 <= prediction <= 268) or (281 <= prediction <= 293))): # hardcoded confidence threshold to 0.3
+        if (score > 0.5 and ((151 <= prediction <= 268) or (281 <= prediction <= 293))): # hardcoded confidence threshold to 0.3
 
             pred_label = "dog"
             if (281 <= prediction <= 293):
