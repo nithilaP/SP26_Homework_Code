@@ -887,7 +887,9 @@ if __name__ == "__main__":
     # test_transformation = transforms.Compose([transforms.ToTensor(), 
     #                                            transforms.Normalize((0.485, 0.456, 0.406),(0.229, 0.224, 0.225))])
 
-    train_transformation = transforms.Compose([transforms.ToTensor(), 
+    train_transformation = transforms.Compose([transforms.RandomCrop(32, padding=2),
+                                               transforms.RandomHorizontalFlip(),
+                                               transforms.ToTensor(), 
                                                transforms.Normalize((0.5071, 0.4867, 0.4408),(0.2675, 0.2565, 0.2761))])
     test_transformation = transforms.Compose([transforms.ToTensor(), 
                                                transforms.Normalize((0.5071, 0.4867, 0.4408),(0.2675, 0.2565, 0.2761))])
@@ -917,6 +919,6 @@ if __name__ == "__main__":
     # PLOTTING
     num_epochs = len(train_loss)
     epochs_axis = [i for i in range(1, num_epochs + 1)]
-    generate_plots("CIFAR100_Norm_AlexNet", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
-    visualize_preds(my_baseline_cnn, "CIFAR100_Norm_AlexNet", test_data, train_data.classes, device)
+    generate_plots("Data_Aug_ResNet_inspo_AlexNet", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
+    visualize_preds(my_baseline_cnn, "Data_Aug_ResNet_inspo_AlexNet", test_data, train_data.classes, device)
 
