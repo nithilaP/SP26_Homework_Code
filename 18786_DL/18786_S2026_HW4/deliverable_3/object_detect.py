@@ -79,7 +79,7 @@ def run_baseline(input_image, image_name, device):
         # Dog: 152 (Chihuahua) to 269 (Mexican hairless)
         # Cat: 282 (tabby) to 286 (Egyptian cat)
         if (score > 0.3 and ((152 <= prediction <= 269) or (282 <= prediction <= 286))): # hardcoded confidence threshold to 0.3
-            dog_cat_found.append({"image": image_i, "score": score, "prediction": prediction, "subimage_coord": patch_coord[curr_index]})
+            dog_cat_found.append({"image": image_i, "score": score, "prediction": prediction, "subimage_coord": patch_coord[curr_index], "image_label": ResNet18_Weights.DEFAULT.meta["categories"][prediction]})
         
         curr_index += 1
     
@@ -95,7 +95,7 @@ def run_baseline(input_image, image_name, device):
         if (283 <= found_object["prediction"] <= 294):
             prediction_text = "cat"
         
-        print(f"subimage: {box_xyxy}, label: {prediction_text}, prediction_name: {ResNet18_Weights.DEFAULT.meta["categories"][prediction]}")
+        print(f"subimage: {box_xyxy}, label: {prediction_text}, prediction_name: {found_object["image_label"]}")
         label_location = (x_min + 5, y_min + 5)  #offset of label from the box 
         bbox_creation.text(label_location, f"{prediction_text}")
 
