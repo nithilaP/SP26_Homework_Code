@@ -123,8 +123,8 @@ def overlapping_patches_implementation(input_image, image_name, device):
     starting_x = 0; 
     starting_y = 0; 
 
-    while (starting_x < image_width - patch_width):
-        while (starting_y < image_height - patch_height):
+    while (starting_x <= image_width - patch_width):
+        while (starting_y <= image_height - patch_height):
 
             patch_vals = (starting_x, starting_y, starting_x + patch_width, starting_y + patch_height);
             patch_coord.append(patch_vals)
@@ -239,9 +239,9 @@ def overlap_and_merge_implementation(input_image, image_name, device):
             patch_coord.append(patch_vals)
             subimages.append(input_image.crop(patch_vals))
 
-            starting_y += patch_height // 3 # move over 1/5 of a patch for the next patch
+            starting_y += patch_height // 2 # move over 1/5 of a patch for the next patch
         starting_y = 0 # reset y once all vertical patches on that x axis are done
-        starting_x += patch_width // 3 # move over 1/5 of a patch height for the next patch
+        starting_x += patch_width // 2 # move over 1/5 of a patch height for the next patch
 
     print(f"number of patches: {len(patch_coord)}")
 
@@ -296,7 +296,7 @@ def overlap_and_merge_implementation(input_image, image_name, device):
         # ImageNet Classes: https://github.com/pytorch/hub/blob/master/imagenet_classes.txt (for torch pretrained models -> ResNet18)
         # Dog: 152 (Chihuahua) to 269 (Mexican hairless)
         # Cat: 281 (tabby) to 293 (Cheetah)
-        if (score > 0.5 and ((151 <= prediction <= 268) or (281 <= prediction <= 293))): # hardcoded confidence threshold to 0.3
+        if (score > 0.3 and ((151 <= prediction <= 268) or (281 <= prediction <= 293))): # hardcoded confidence threshold to 0.3
 
             pred_label = "dog"
             if (281 <= prediction<= 293):
@@ -341,7 +341,7 @@ def overlap_and_merge_implementation(input_image, image_name, device):
             # distance eq 
             distance = ((center_x - center_j_x) ** 2 + (center_y - center_j_y) ** 2) ** 0.5
 
-            if (distance < patch_width * 0.6):
+            if (distance < patch_width * 0.4):
 
                 # do the merge
                 # Update merge_x_min etc and center_x and center_y
@@ -425,7 +425,7 @@ def overlap_and_merge_implementation(input_image, image_name, device):
         label_location = (x_min + 5, y_min + 5)  #offset of label from the box 
         bbox_creation.text(label_location, f"{prediction_text} | {found_object['image_label']}")
 
-    input_image.save(f"{image_name}_overlapping_patches_image.png")
+    input_image.save(f"{image_name}_overlap_and_merge_image.png")
 
 
 if __name__ == "__main__":
