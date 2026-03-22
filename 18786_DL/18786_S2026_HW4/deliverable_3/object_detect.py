@@ -232,8 +232,8 @@ def overlap_and_merge_implementation(input_image, image_name, device):
     starting_x = 0; 
     starting_y = 0; 
 
-    while (starting_x < image_width - patch_width):
-        while (starting_y < image_height - patch_height):
+    while (starting_x <= image_width - patch_width):
+        while (starting_y <= image_height - patch_height):
 
             patch_vals = (starting_x, starting_y, starting_x + patch_width, starting_y + patch_height);
             patch_coord.append(patch_vals)
@@ -324,6 +324,9 @@ def overlap_and_merge_implementation(input_image, image_name, device):
 
         # tracking var for loop
         x_min, y_min, x_max, y_max = found_object["subimage_coord"]
+        curr_box_pred = found_object["prediction"]
+        curr_box_pred_label = found_object["image_label"]
+        curr_box_score = found_object["score"]
         for j in range(i+1, len(dog_cat_found)):
 
             # if already merged move on. 
@@ -356,11 +359,17 @@ def overlap_and_merge_implementation(input_image, image_name, device):
 
                 # update merge tracker 
                 already_merged[j] = True
-            
+
+                #
+                if dog_cat_found[j]["score"] > curr_box_score:
+                    curr_box_pred = dog_cat_found[j]["prediction"]
+                    curr_box_pred_label = dog_cat_found[j]["image_label"]
+                    curr_box_score = dog_cat_found[j]["score"]
+
         merged_vals = (merge_x_min, merge_y_min, merge_x_max, merge_y_max)
 
-        merged_found.append({"image": found_object["image"], "score": found_object["score"], "prediction": found_object["prediction"],
-                             "subimage_coord":merged_vals, "image_label": found_object["image_label"], 
+        merged_found.append({"score": curr_box_score, "prediction": curr_box_pred,
+                             "subimage_coord": merged_vals, "image_label": curr_box_pred_label, 
                              "prediction_label": found_object["prediction_label"]})
         
         merged_found_subimages.append(input_image.crop(merged_vals))

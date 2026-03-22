@@ -881,6 +881,7 @@ if __name__ == "__main__":
     #   Normalize accorindg to ImageNet values:  mean = [0.485, 0.456, 0.406] and std = [0.229, 0.224, 0.225]
     # -> https://stackoverflow.com/questions/58151507/why-pytorch-officially-use-mean-0-485-0-456-0-406-and-std-0-229-0-224-0-2
     # -> https://pytorch.org/vision/stable/models.html
+    
     # train_transformation = transforms.Compose([transforms.ToTensor(), 
     #                                            transforms.Normalize((0.485, 0.456, 0.406),(0.229, 0.224, 0.225))])
     # test_transformation = transforms.Compose([transforms.ToTensor(), 
