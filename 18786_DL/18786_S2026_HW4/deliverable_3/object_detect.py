@@ -92,7 +92,7 @@ def run_baseline(input_image, image_name, device):
         bbox_creation.rectangle(xy=box_xyxy) # takes box coordinates in xyxy
 
         prediction_text = "dog"
-        if (283 <= found_object["prediction"] <= 294):
+        if (281 <= found_object["prediction"] <= 285):
             prediction_text = "cat"
         
         print(f"subimage: {box_xyxy}, label: {prediction_text}, prediction_name: {found_object["image_label"]}")
