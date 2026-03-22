@@ -890,9 +890,9 @@ if __name__ == "__main__":
     train_transformation = transforms.Compose([transforms.RandomCrop(32, padding=2),
                                                transforms.RandomHorizontalFlip(),
                                                transforms.ToTensor(), 
-                                               transforms.Normalize((0.5071, 0.4867, 0.4408),(0.2675, 0.2565, 0.2761))])
+                                               transforms.Normalize((0.485, 0.456, 0.406),(0.229, 0.224, 0.225))])
     test_transformation = transforms.Compose([transforms.ToTensor(), 
-                                               transforms.Normalize((0.5071, 0.4867, 0.4408),(0.2675, 0.2565, 0.2761))])
+                                               transforms.Normalize((0.485, 0.456, 0.406),(0.229, 0.224, 0.225))])
 
     # train_transformation_normalized = transforms.Compose([transforms.ToTensor()])
     # test_transformation = transforms.Compose([transforms.ToTensor()])
