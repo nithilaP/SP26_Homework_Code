@@ -186,7 +186,7 @@ def overlapping_patches_implementation(input_image, image_name, device):
         # validate detected cat or dog
         # ImageNet Classes: https://github.com/pytorch/hub/blob/master/imagenet_classes.txt (for torch pretrained models -> ResNet18)
         # Dog: 152 (Chihuahua) to 269 (Mexican hairless)
-        # Cat: 282 (tabby) to 286 (Egyptian cat)
+        # Cat: 281 (tabby) to 293 (Cheetah)
         if (score > 0.5 and ((151 <= prediction <= 268) or (281 <= prediction <= 285))): # hardcoded confidence threshold to 0.3
             dog_cat_found.append({"image": image_i, "score": score, "prediction": prediction, "subimage_coord": patch_coord[curr_index], "image_label": ResNet18_Weights.DEFAULT.meta["categories"][prediction]})
         
