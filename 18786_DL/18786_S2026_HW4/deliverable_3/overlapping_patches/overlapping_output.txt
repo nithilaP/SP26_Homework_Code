@@ -359,3 +359,206 @@ subimage: [99, 150, 199, 225], label: cat, prediction_name: lynx
 subimage: [99, 175, 199, 250], label: cat, prediction_name: lynx
 
 
+-----------------------------------------------------------------------------------
+
+number of patches: 156
+dog_image_overlap_and_merge:: subimage_prediction: 831| prediction_name: studio couch| score: 0.15162456035614014
+dog_image_overlap_and_merge:: subimage_prediction: 516| prediction_name: cradle| score: 0.10321450978517532
+dog_image_overlap_and_merge:: subimage_prediction: 746| prediction_name: puck| score: 0.045352816581726074
+dog_image_overlap_and_merge:: subimage_prediction: 978| prediction_name: seashore| score: 0.05134809762239456
+dog_image_overlap_and_merge:: subimage_prediction: 979| prediction_name: valley| score: 0.04712533950805664
+dog_image_overlap_and_merge:: subimage_prediction: 669| prediction_name: mosquito net| score: 0.0752076655626297
+dog_image_overlap_and_merge:: subimage_prediction: 831| prediction_name: studio couch| score: 0.16035915911197662
+dog_image_overlap_and_merge:: subimage_prediction: 750| prediction_name: quilt| score: 0.15070714056491852
+dog_image_overlap_and_merge:: subimage_prediction: 591| prediction_name: handkerchief| score: 0.11196909099817276
+dog_image_overlap_and_merge:: subimage_prediction: 66| prediction_name: horned viper| score: 0.0486501082777977
+dog_image_overlap_and_merge:: subimage_prediction: 66| prediction_name: horned viper| score: 0.35072001814842224
+dog_image_overlap_and_merge:: subimage_prediction: 66| prediction_name: horned viper| score: 0.12047666311264038
+dog_image_overlap_and_merge:: subimage_prediction: 841| prediction_name: sweatshirt| score: 0.15186533331871033
+dog_image_overlap_and_merge:: subimage_prediction: 68| prediction_name: sidewinder| score: 0.18723571300506592
+dog_image_overlap_and_merge:: subimage_prediction: 715| prediction_name: pickelhaube| score: 0.2550453543663025
+dog_image_overlap_and_merge:: subimage_prediction: 431| prediction_name: bassinet| score: 0.13020522892475128
+dog_image_overlap_and_merge:: subimage_prediction: 630| prediction_name: Loafer| score: 0.5656160712242126
+dog_image_overlap_and_merge:: subimage_prediction: 750| prediction_name: quilt| score: 0.05142898112535477
+dog_image_overlap_and_merge:: subimage_prediction: 979| prediction_name: valley| score: 0.049287278205156326
+dog_image_overlap_and_merge:: subimage_prediction: 750| prediction_name: quilt| score: 0.07477105408906937
+dog_image_overlap_and_merge:: subimage_prediction: 728| prediction_name: plastic bag| score: 0.12348952889442444
+dog_image_overlap_and_merge:: subimage_prediction: 111| prediction_name: nematode| score: 0.12263152003288269
+dog_image_overlap_and_merge:: subimage_prediction: 111| prediction_name: nematode| score: 0.20313116908073425
+dog_image_overlap_and_merge:: subimage_prediction: 63| prediction_name: Indian cobra| score: 0.14395074546337128
+dog_image_overlap_and_merge:: subimage_prediction: 48| prediction_name: Komodo dragon| score: 0.09330502897500992
+dog_image_overlap_and_merge:: subimage_prediction: 831| prediction_name: studio couch| score: 0.24503202736377716
+dog_image_overlap_and_merge:: subimage_prediction: 885| prediction_name: velvet| score: 0.12111324816942215
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.21410945057868958
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.46321383118629456
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.6989539861679077
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.5634630918502808
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.5475611090660095
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.1701112687587738
+dog_image_overlap_and_merge:: subimage_prediction: 103| prediction_name: platypus| score: 0.09956295788288116
+dog_image_overlap_and_merge:: subimage_prediction: 474| prediction_name: cardigan| score: 0.09561165422201157
+dog_image_overlap_and_merge:: subimage_prediction: 906| prediction_name: Windsor tie| score: 0.042007241398096085
+dog_image_overlap_and_merge:: subimage_prediction: 51| prediction_name: triceratops| score: 0.13695009052753448
+dog_image_overlap_and_merge:: subimage_prediction: 831| prediction_name: studio couch| score: 0.4469669759273529
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.8240010738372803
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.9083447456359863
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.9640593528747559
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.9412405490875244
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.20757082104682922
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.4816123843193054
+dog_image_overlap_and_merge:: subimage_prediction: 726| prediction_name: plane| score: 0.1161317378282547
+dog_image_overlap_and_merge:: subimage_prediction: 103| prediction_name: platypus| score: 0.3731537461280823
+dog_image_overlap_and_merge:: subimage_prediction: 66| prediction_name: horned viper| score: 0.06678394228219986
+dog_image_overlap_and_merge:: subimage_prediction: 930| prediction_name: French loaf| score: 0.04194815829396248
+dog_image_overlap_and_merge:: subimage_prediction: 459| prediction_name: brassiere| score: 0.19815948605537415
+dog_image_overlap_and_merge:: subimage_prediction: 111| prediction_name: nematode| score: 0.06226985156536102
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.7030571103096008
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.8056511878967285
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.9137701392173767
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.8991807103157043
+dog_image_overlap_and_merge:: subimage_prediction: 211| prediction_name: vizsla| score: 0.3802308738231659
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.4484805464744568
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.530886173248291
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.1484040766954422
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.3004181385040283
+dog_image_overlap_and_merge:: subimage_prediction: 630| prediction_name: Loafer| score: 0.07346023619174957
+dog_image_overlap_and_merge:: subimage_prediction: 459| prediction_name: brassiere| score: 0.09807052463293076
+dog_image_overlap_and_merge:: subimage_prediction: 831| prediction_name: studio couch| score: 0.16372045874595642
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.7481513619422913
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.8893710374832153
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.8881211280822754
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.8943988680839539
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.7639331817626953
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.4582042396068573
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.5342704057693481
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.48549455404281616
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.6505028009414673
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.10907679796218872
+dog_image_overlap_and_merge:: subimage_prediction: 516| prediction_name: cradle| score: 0.1073877289891243
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.7671241164207458
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.954055905342102
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.9384403824806213
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.716249406337738
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.8494666218757629
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.7981711626052856
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.7123514413833618
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.24236750602722168
+dog_image_overlap_and_merge:: subimage_prediction: 909| prediction_name: wok| score: 0.15386611223220825
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.27860909700393677
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.07685314118862152
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.2683836817741394
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.7817957997322083
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.8411549925804138
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.942747175693512
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.7366612553596497
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.9302724599838257
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.9460734128952026
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.8216869831085205
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.26602301001548767
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.22036337852478027
+dog_image_overlap_and_merge:: subimage_prediction: 237| prediction_name: miniature pinscher| score: 0.31278637051582336
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.2301538735628128
+dog_image_overlap_and_merge:: subimage_prediction: 831| prediction_name: studio couch| score: 0.5161536335945129
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.8941033482551575
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.8979948163032532
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.6096555590629578
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.7009439468383789
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.4821779429912567
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.5999500155448914
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.32543522119522095
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.1880970150232315
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.17701056599617004
+dog_image_overlap_and_merge:: subimage_prediction: 262| prediction_name: Brabancon griffon| score: 0.19571729004383087
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.24536238610744476
+dog_image_overlap_and_merge:: subimage_prediction: 516| prediction_name: cradle| score: 0.5651091933250427
+dog_image_overlap_and_merge:: subimage_prediction: 739| prediction_name: potter's wheel| score: 0.11675656586885452
+dog_image_overlap_and_merge:: subimage_prediction: 739| prediction_name: potter's wheel| score: 0.07084649056196213
+dog_image_overlap_and_merge:: subimage_prediction: 111| prediction_name: nematode| score: 0.18835364282131195
+dog_image_overlap_and_merge:: subimage_prediction: 700| prediction_name: paper towel| score: 0.12510628998279572
+dog_image_overlap_and_merge:: subimage_prediction: 243| prediction_name: bull mastiff| score: 0.0753205195069313
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.11750557273626328
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.13148614764213562
+dog_image_overlap_and_merge:: subimage_prediction: 808| prediction_name: sombrero| score: 0.09866771101951599
+dog_image_overlap_and_merge:: subimage_prediction: 502| prediction_name: clog| score: 0.06070060655474663
+dog_image_overlap_and_merge:: subimage_prediction: 171| prediction_name: Italian greyhound| score: 0.17471802234649658
+dog_image_overlap_and_merge:: subimage_prediction: 171| prediction_name: Italian greyhound| score: 0.16481733322143555
+dog_image_overlap_and_merge:: subimage_prediction: 691| prediction_name: oxygen mask| score: 0.2147626429796219
+dog_image_overlap_and_merge:: subimage_prediction: 770| prediction_name: running shoe| score: 0.20778699219226837
+dog_image_overlap_and_merge:: subimage_prediction: 502| prediction_name: clog| score: 0.17503458261489868
+dog_image_overlap_and_merge:: subimage_prediction: 700| prediction_name: paper towel| score: 0.19257205724716187
+dog_image_overlap_and_merge:: subimage_prediction: 700| prediction_name: paper towel| score: 0.12929129600524902
+dog_image_overlap_and_merge:: subimage_prediction: 700| prediction_name: paper towel| score: 0.20633333921432495
+dog_image_overlap_and_merge:: subimage_prediction: 588| prediction_name: hamper| score: 0.39660269021987915
+dog_image_overlap_and_merge:: subimage_prediction: 515| prediction_name: cowboy hat| score: 0.2006288766860962
+dog_image_overlap_and_merge:: subimage_prediction: 615| prediction_name: knee pad| score: 0.2083645462989807
+dog_image_overlap_and_merge:: subimage_prediction: 906| prediction_name: Windsor tie| score: 0.34047290682792664
+dog_image_overlap_and_merge:: subimage_prediction: 906| prediction_name: Windsor tie| score: 0.09864833205938339
+dog_image_overlap_and_merge:: subimage_prediction: 237| prediction_name: miniature pinscher| score: 0.14527298510074615
+dog_image_overlap_and_merge:: subimage_prediction: 906| prediction_name: Windsor tie| score: 0.29534587264060974
+dog_image_overlap_and_merge:: subimage_prediction: 678| prediction_name: neck brace| score: 0.15213938057422638
+dog_image_overlap_and_merge:: subimage_prediction: 678| prediction_name: neck brace| score: 0.168983593583107
+dog_image_overlap_and_merge:: subimage_prediction: 515| prediction_name: cowboy hat| score: 0.2688353657722473
+dog_image_overlap_and_merge:: subimage_prediction: 700| prediction_name: paper towel| score: 0.049706000834703445
+dog_image_overlap_and_merge:: subimage_prediction: 700| prediction_name: paper towel| score: 0.06031978502869606
+dog_image_overlap_and_merge:: subimage_prediction: 700| prediction_name: paper towel| score: 0.09332609176635742
+dog_image_overlap_and_merge:: subimage_prediction: 588| prediction_name: hamper| score: 0.08250207453966141
+dog_image_overlap_and_merge:: subimage_prediction: 588| prediction_name: hamper| score: 0.12553627789020538
+dog_image_overlap_and_merge:: subimage_prediction: 588| prediction_name: hamper| score: 0.12720395624637604
+dog_image_overlap_and_merge:: subimage_prediction: 669| prediction_name: mosquito net| score: 0.09410882741212845
+dog_image_overlap_and_merge:: subimage_prediction: 588| prediction_name: hamper| score: 0.14619547128677368
+dog_image_overlap_and_merge:: subimage_prediction: 400| prediction_name: academic gown| score: 0.13604645431041718
+dog_image_overlap_and_merge:: subimage_prediction: 743| prediction_name: prison| score: 0.06104923412203789
+dog_image_overlap_and_merge:: subimage_prediction: 906| prediction_name: Windsor tie| score: 0.0751977264881134
+dog_image_overlap_and_merge:: subimage_prediction: 515| prediction_name: cowboy hat| score: 0.1316279023885727
+dog_image_overlap_and_merge:: subimage_prediction: 831| prediction_name: studio couch| score: 0.13682401180267334
+dog_image_overlap_and_merge:: subimage_prediction: 515| prediction_name: cowboy hat| score: 0.16792063415050507
+dog_image_overlap_and_merge:: subimage_prediction: 700| prediction_name: paper towel| score: 0.057599734514951706
+dog_image_overlap_and_merge:: subimage_prediction: 885| prediction_name: velvet| score: 0.0564437210559845
+dog_image_overlap_and_merge:: subimage_prediction: 615| prediction_name: knee pad| score: 0.10286911576986313
+dog_image_overlap_and_merge:: subimage_prediction: 700| prediction_name: paper towel| score: 0.13809648156166077
+dog_image_overlap_and_merge:: subimage_prediction: 474| prediction_name: cardigan| score: 0.06118226796388626
+dog_image_overlap_and_merge:: subimage_prediction: 588| prediction_name: hamper| score: 0.06204356625676155
+Number of merged boxes: 7
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.9638055562973022
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.960430920124054
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.7319589257240295
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.6505028009414673
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.8856866955757141
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.8844566345214844
+dog_image_overlap_and_merge:: subimage_prediction: 168| prediction_name: redbone| score: 0.8941033482551575
+subimage: [66, 100, 232, 250], label: dog, prediction_name: redbone
+subimage: [99, 50, 265, 200], label: dog, prediction_name: redbone
+subimage: [132, 150, 298, 275], label: dog, prediction_name: redbone
+subimage: [165, 250, 265, 325], label: dog, prediction_name: redbone
+subimage: [198, 25, 364, 175], label: dog, prediction_name: redbone
+subimage: [198, 125, 364, 250], label: dog, prediction_name: redbone
+subimage: [264, 25, 364, 100], label: dog, prediction_name: redbone
+number of patches: 156
+cat_image_overlap_and_merge:: subimage_prediction: 785| prediction_name: seat belt| score: 0.16202214360237122
+cat_image_overlap_and_merge:: subimage_prediction: 785| prediction_name: seat belt| score: 0.09642343968153
+cat_image_overlap_and_merge:: subimage_prediction: 939| prediction_name: zucchini| score: 0.16592366993427277
+cat_image_overlap_and_merge:: subimage_prediction: 777| prediction_name: scabbard| score: 0.09094162285327911
+cat_image_overlap_and_merge:: subimage_prediction: 939| prediction_name: zucchini| score: 0.12282509356737137
+cat_image_overlap_and_merge:: subimage_prediction: 785| prediction_name: seat belt| score: 0.08527258783578873
+cat_image_overlap_and_merge:: subimage_prediction: 743| prediction_name: prison| score: 0.27766525745391846
+cat_image_overlap_and_merge:: subimage_prediction: 743| prediction_name: prison| score: 0.3838702142238617
+cat_image_overlap_and_merge:: subimage_prediction: 912| prediction_name: worm fence| score: 0.2075943797826767
+cat_image_overlap_and_merge:: subimage_prediction: 171| prediction_name: Italian greyhound| score: 0.08732283860445023
+cat_image_overlap_and_merge:: subimage_prediction: 210| prediction_name: German short-haired pointer| score: 0.12498846650123596
+cat_image_overlap_and_merge:: subimage_prediction: 356| prediction_name: weasel| score: 0.3660207986831665
+cat_image_overlap_and_merge:: subimage_prediction: 785| prediction_name: seat belt| score: 0.10287334024906158
+cat_image_overlap_and_merge:: subimage_prediction: 399| prediction_name: abaya| score: 0.09079960733652115
+cat_image_overlap_and_merge:: subimage_prediction: 287| prediction_name: lynx| score: 0.04827699810266495
+cat_image_overlap_and_merge:: subimage_prediction: 285| prediction_name: Egyptian cat| score: 0.25017017126083374
+cat_image_overlap_and_merge:: subimage_prediction: 811| prediction_name: space heater| score: 0.2220926731824875
+cat_image_overlap_and_merge:: subimage_prediction: 906| prediction_name: Windsor tie| score: 0.11741730570793152
+cat_image_overlap_and_merge:: subimage_prediction: 743| prediction_name: prison| score: 0.17388348281383514
+cat_image_overlap_and_merge:: subimage_prediction: 785| prediction_name: seat belt| score: 0.1375659704208374
+cat_image_overlap_and_merge:: subimage_prediction: 743| prediction_name: prison| score: 0.07424401491880417
+cat_image_overlap_and_merge:: subimage_prediction: 765| prediction_name: rocking chair| score: 0.07802116870880127
+cat_image_overlap_and_merge:: subimage_prediction: 912| prediction_name: worm fence| score: 0.04489847645163536
+cat_image_overlap_and_merge:: subimage_prediction: 103| prediction_name: platypus| score: 0.035159237682819366
+cat_image_overlap_and_merge:: subimage_prediction: 906| prediction_name: Windsor tie| score: 0.1384652853012085
+cat_image_overlap_and_merge:: subimage_prediction: 173| prediction_name: Ibizan hound| score: 0.6117993593215942
+cat_image_overlap_and_merge:: subimage_prediction: 227| prediction_name: kelpie| score: 0.14871351420879364
+cat_image_overlap_and_merge:: subimage_prediction: 281| prediction_name: tabby| score: 0.22861424088478088
