@@ -34,7 +34,7 @@ def run_baseline(input_image, image_name, device):
             subimages.append(input_image.crop(patch_vals))
 
     # set up model: https://docs.pytorch.org/vision/stable/models.html 
-    baseline_model = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
+    baseline_model = resnet18(weights=ResNet18_Weights.DEFAULT) # DEFAULT = IMAGENET1K_V1
     baseline_model.eval() # set model to eval mode
     baseline_model.to(device) # for GPU
 
@@ -71,7 +71,7 @@ def run_baseline(input_image, image_name, device):
             score = score.item() # 
             prediction = prediction.item()
 
-            print(f"[INFO] {image_name} subimage_prediction: {prediction} | score: {score}")
+            print(f"[INFO] {image_name} subimage_prediction: {prediction}| prediction_name: {ResNet18_Weights.DEFAULT.meta["categories"][prediction]}| score: {score}")
 
 
         # validate detected cat or dog
