@@ -344,7 +344,8 @@ def overlap_and_merge_implementation(input_image, image_name, device):
             # distance eq 
             distance = ((center_x - center_j_x) ** 2 + (center_y - center_j_y) ** 2) ** 0.5
 
-            if (distance < patch_width * 1.0):
+            # if (distance < patch_width * 1.0):
+            if ((abs(center_x - center_j_x) < patch_width * 0.5) and (abs(center_y - center_j_y) < patch_height * 0.5)):
 
                 # do the merge
                 # Update merge_x_min etc and center_x and center_y
@@ -360,7 +361,7 @@ def overlap_and_merge_implementation(input_image, image_name, device):
                 # update merge tracker 
                 already_merged[j] = True
 
-                #
+                # update best score tracker
                 if dog_cat_found[j]["score"] > curr_box_score:
                     curr_box_pred = dog_cat_found[j]["prediction"]
                     curr_box_pred_label = dog_cat_found[j]["image_label"]
