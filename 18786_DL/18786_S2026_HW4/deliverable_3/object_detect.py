@@ -134,6 +134,8 @@ def overlapping_patches_implementation(input_image, image_name, device):
         starting_y = 0 # reset y once all vertical patches on that x axis are done
         starting_x += patch_width // 5 # move over 1/5 of a patch height for the next patch
 
+    print(f"number of patches: {len(patch_coord)}")
+
     # for i in range(5): # i: top -> bottom 
     #     for j in range(5): # j: left -> right
     #         patch_vals = (patch_width * j, patch_height * i, patch_width * j + patch_width, patch_height * i + patch_height)
