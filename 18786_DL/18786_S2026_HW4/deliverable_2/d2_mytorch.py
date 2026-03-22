@@ -869,7 +869,7 @@ if __name__ == "__main__":
     # TUNABLE PARAM FOR ABLATION STUDY 
     batch_size = 128
     epochs = 50
-    learning_rate = 0.1
+    learning_rate = 0.001
     momentum = 0.9
     weight_decay = 0.0005
     scheduler_step_size = 20
@@ -910,6 +910,6 @@ if __name__ == "__main__":
     # PLOTTING
     num_epochs = len(train_loss)
     epochs_axis = [i for i in range(1, num_epochs + 1)]
-    generate_plots("Bigger_lr_AlexNET", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
-    visualize_preds(my_baseline_cnn, "Bigger_lr_AlexNET", test_data, train_data.classes, device)
+    generate_plots("Smaller_lr_AlexNET", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
+    visualize_preds(my_baseline_cnn, "Smaller_lr_AlexNET", test_data, train_data.classes, device)
 
