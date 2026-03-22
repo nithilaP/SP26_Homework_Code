@@ -689,8 +689,7 @@ class Bigger_Dropout_AlexNet(nn.Module):
 def train(net, num_epoch, learning_rate, momentum, weight_decay, scheduler_step_size, scheduler_gamma, train_dataloader, test_dataloader, device):
     net = net.to(device)
     criterion = nn.CrossEntropyLoss()
-    # optimizer = optim.SGD(net.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
-    optimizer = optim.Adam(net.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    optimizer = optim.SGD(net.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
 
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=scheduler_step_size, gamma=scheduler_gamma)
 
@@ -882,10 +881,15 @@ if __name__ == "__main__":
     #   Normalize accorindg to ImageNet values:  mean = [0.485, 0.456, 0.406] and std = [0.229, 0.224, 0.225]
     # -> https://stackoverflow.com/questions/58151507/why-pytorch-officially-use-mean-0-485-0-456-0-406-and-std-0-229-0-224-0-2
     # -> https://pytorch.org/vision/stable/models.html
+    # train_transformation = transforms.Compose([transforms.ToTensor(), 
+    #                                            transforms.Normalize((0.485, 0.456, 0.406),(0.229, 0.224, 0.225))])
+    # test_transformation = transforms.Compose([transforms.ToTensor(), 
+    #                                            transforms.Normalize((0.485, 0.456, 0.406),(0.229, 0.224, 0.225))])
+
     train_transformation = transforms.Compose([transforms.ToTensor(), 
-                                               transforms.Normalize((0.485, 0.456, 0.406),(0.229, 0.224, 0.225))])
+                                               transforms.Normalize((0.5071, 0.4867, 0.4408),(0.2675, 0.2565, 0.2761))])
     test_transformation = transforms.Compose([transforms.ToTensor(), 
-                                               transforms.Normalize((0.485, 0.456, 0.406),(0.229, 0.224, 0.225))])
+                                               transforms.Normalize((0.5071, 0.4867, 0.4408),(0.2675, 0.2565, 0.2761))])
 
     # train_transformation_normalized = transforms.Compose([transforms.ToTensor()])
     # test_transformation = transforms.Compose([transforms.ToTensor()])
@@ -912,6 +916,6 @@ if __name__ == "__main__":
     # PLOTTING
     num_epochs = len(train_loss)
     epochs_axis = [i for i in range(1, num_epochs + 1)]
-    generate_plots("Adam_Optim_AlexNet", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
-    visualize_preds(my_baseline_cnn, "Adam_Optim_AlexNet", test_data, train_data.classes, device)
+    generate_plots("CIFAR100_Norm_AlexNet", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
+    visualize_preds(my_baseline_cnn, "CIFAR100_Norm_AlexNet", test_data, train_data.classes, device)
 
