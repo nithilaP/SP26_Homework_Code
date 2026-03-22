@@ -78,7 +78,7 @@ def run_baseline(input_image, image_name, device):
         # ImageNet Classes: https://github.com/pytorch/hub/blob/master/imagenet_classes.txt (for torch pretrained models -> ResNet18)
         # Dog: 152 (Chihuahua) to 269 (Mexican hairless)
         # Cat: 282 (tabby) to 286 (Egyptian cat)
-        if (score > 0.3 and ((152 <= prediction <= 269) or (282 <= prediction <= 286))): # hardcoded confidence threshold to 0.3
+        if (score > 0.15 and ((151 <= prediction <= 268) or (281 <= prediction <= 285))): # hardcoded confidence threshold to 0.3
             dog_cat_found.append({"image": image_i, "score": score, "prediction": prediction, "subimage_coord": patch_coord[curr_index], "image_label": ResNet18_Weights.DEFAULT.meta["categories"][prediction]})
         
         curr_index += 1
@@ -110,9 +110,10 @@ if __name__ == "__main__":
         # device = torch.cuda.current_device()
         device = 'cuda'
 
-    category = ResNet18_Weights.DEFAULT.meta["categories"]
-    for i in range(len(category)):
-        print(i, category[i])
+    # Determine categories: 
+    # category = ResNet18_Weights.DEFAULT.meta["categories"]
+    # for i in range(len(category)):
+    #     print(i, category[i])
 
-    # run_baseline("../2007_001239.jpg", "dog_image", device)
-    # run_baseline("../2008_002152.jpg", "cat_image", device)
+    run_baseline("../2007_001239.jpg", "dog_image", device)
+    run_baseline("../2008_002152.jpg", "cat_image", device)
