@@ -398,7 +398,7 @@ def overlap_and_merge_implementation(input_image, image_name, device):
         # ImageNet Classes: https://github.com/pytorch/hub/blob/master/imagenet_classes.txt (for torch pretrained models -> ResNet18)
         # Dog: 152 (Chihuahua) to 269 (Mexican hairless)
         # Cat: 281 (tabby) to 293 (Cheetah)
-        if (score > 0.9 and ((151 <= prediction <= 268) or (281 <= prediction <= 293))): # hardcoded confidence threshold to 0.3
+        if (score > 0.8 and ((151 <= prediction <= 268) or (281 <= prediction <= 293))): # hardcoded confidence threshold to 0.3
 
             pred_label = "dog"
             if (281 <= prediction <= 293):
