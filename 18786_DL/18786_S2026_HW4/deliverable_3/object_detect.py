@@ -110,5 +110,9 @@ if __name__ == "__main__":
         # device = torch.cuda.current_device()
         device = 'cuda'
 
-    run_baseline("../2007_001239.jpg", "dog_image", device)
-    run_baseline("../2008_002152.jpg", "cat_image", device)
+    category = ResNet18_Weights.DEFAULT.meta["categories"]
+    for i in range(len(category)):
+        print(i, category[i])
+
+    # run_baseline("../2007_001239.jpg", "dog_image", device)
+    # run_baseline("../2008_002152.jpg", "cat_image", device)
