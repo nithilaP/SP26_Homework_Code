@@ -130,9 +130,9 @@ def overlapping_patches_implementation(input_image, image_name, device):
             patch_coord.append(patch_vals)
             subimages.append(input_image.crop(patch_vals))
 
-            starting_y += patch_height // 5 # move over 1/5 of a patch for the next patch
+            starting_y += patch_height // 2 # move over 1/5 of a patch for the next patch
         starting_y = 0 # reset y once all vertical patches on that x axis are done
-        starting_x += patch_width // 5 # move over 1/5 of a patch height for the next patch
+        starting_x += patch_width // 2 # move over 1/5 of a patch height for the next patch
 
     print(f"number of patches: {len(patch_coord)}")
 
@@ -187,7 +187,7 @@ def overlapping_patches_implementation(input_image, image_name, device):
         # ImageNet Classes: https://github.com/pytorch/hub/blob/master/imagenet_classes.txt (for torch pretrained models -> ResNet18)
         # Dog: 152 (Chihuahua) to 269 (Mexican hairless)
         # Cat: 282 (tabby) to 286 (Egyptian cat)
-        if (score > 0.3 and ((151 <= prediction <= 268) or (281 <= prediction <= 285))): # hardcoded confidence threshold to 0.3
+        if (score > 0.5 and ((151 <= prediction <= 268) or (281 <= prediction <= 285))): # hardcoded confidence threshold to 0.3
             dog_cat_found.append({"image": image_i, "score": score, "prediction": prediction, "subimage_coord": patch_coord[curr_index], "image_label": ResNet18_Weights.DEFAULT.meta["categories"][prediction]})
         
         curr_index += 1
