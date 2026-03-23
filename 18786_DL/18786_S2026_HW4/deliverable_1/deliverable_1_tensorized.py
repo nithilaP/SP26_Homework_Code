@@ -81,25 +81,17 @@ class MyConv2D(nn.Module):
         # calculating dims: 
         # dim_out = (dim_in + 2P - D(K-1) - 1) / S + 1 
         # P - Padding, D - Dilation, K - Kernel Size, S - Stride length (dilation=1 in this case)
-
-        # CHECK: (left, right, top, bottom) = (self.padding, self.padding, self.padding, self.padding)
-        # input_w_padding = F.pad(x, (self.padding, self.padding, self.padding, self.padding), mode="constant", value=0)
-
         output_height = ((input_height + 2 * self.padding - (self.kernel_size -1)- 1) // self.stride + 1)
         output_width = ((input_width + 2 * self.padding - (self.kernel_size -1) -1) // self.stride + 1)
         
-        # # CHECK: Create a tensor of needed size
-        # output = torch.zeros(batch_size, self.out_channels, output_height, output_width, device=x.device, dtype=x.dtype)
-
-        # SLIDING WINDOW: can extract from tensor using unfold: https://docs.pytorch.org/docs/stable/generated/torch.Tensor.unfold.html
-        # unfold 1: (batch size, in channels, out channel, w_pad, K)
-        # unfold 2: (batch size, in channels, out channel, w_out, K, K)
+        # KERNEL WINDOW: can extract all kernel windows from tensor using unfold: https://docs.pytorch.org/docs/stable/generated/torch.Tensor.unfold.html
+        # all kernel windows and flattens -> (batch_size, (kernel_size)^2 *in_channels, num_windows)
         input_unfold = F.unfold(x, kernel_size=self.kernel_size, padding=self.padding, stride=self.stride) # get the windows in the height dim
+        input_unfold = input_unfold.transpose(1, 2) # NEED: makes it (batch_size, num_windows, (kernel_size)^2 *in_channels)
 
-        # reshape
+        # reshape: https://www.geeksforgeeks.org/python/how-does-the-view-method-work-in-python-pytorch/
+        # makes all w from (out_channels, in_channels, kernel_size, kernel_size) -> (out_channels, (kernel_size)^2 *in_channels) for matmul 
         w_flat = self.W.view(self.out_channels, -1)
-
-        input_unfold = input_unfold.transpose(1, 2)
 
         # do convolution 
         output = torch.matmul(input_unfold, w_flat.t())
@@ -108,9 +100,10 @@ class MyConv2D(nn.Module):
         if self.b != None: 
             output += self.b.view(1,1,self.out_channels)
 
+        # reshape into desired output: https://www.geeksforgeeks.org/python/how-does-the-view-method-work-in-python-pytorch/
         output = output.view(batch_size, output_height, output_width, self.out_channels)
 
-        # standard conv output 
+        # rearrange into standard conv output 
         output = output.permute(0,3,1,2).contiguous()
 
         return output

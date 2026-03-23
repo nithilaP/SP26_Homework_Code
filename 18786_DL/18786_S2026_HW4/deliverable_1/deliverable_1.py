@@ -44,17 +44,17 @@ class MyConv2D(nn.Module):
         # ----- TODO -----
 
         # shape of weight: [out_channels, in_channels, kernel_size, kernel_size]
-        self.W = nn.Parameter(torch.randn(out_channels, in_channels, kernel_size, kernel_size))
+        # multiply by 0.01 -> make the weights small for training, avoid convolution from exploding
+        self.W = nn.Parameter(0.01 * torch.randn(out_channels, in_channels, kernel_size, kernel_size))
 
         # shape of bias: [out_channels]
         if (bias == True):
-            self.b = nn.Parameter(torch.randn(out_channels))
+            self.b = nn.Parameter(torch.zeros(out_channels))
         else:    
             self.b = None
 
         # raise NotImplementedError
             
-    
     def __call__(self, x):
         
         return self.forward(x)
@@ -78,18 +78,18 @@ class MyConv2D(nn.Module):
         input_height = x.shape[2]
         input_width = x.shape[3]
 
-        # calculating dims: 
+        # Dims Calculations: 
         # dim_out = (dim_in + 2P - D(K-1) - 1) / S + 1 
         # P - Padding, D - Dilation, K - Kernel Size, S - Stride length (dilation=1 in this case)
-
-        # CHECK: (left, right, top, bottom) = (self.padding, self.padding, self.padding, self.padding)
-        input_w_padding = F.pad(x, (self.padding, self.padding, self.padding, self.padding), mode="constant", value=0)
-
         output_height = ((input_height + 2 * self.padding - (self.kernel_size -1)- 1) // self.stride + 1)
         output_width = ((input_width + 2 * self.padding - (self.kernel_size -1) -1) // self.stride + 1)
         
-        # CHECK: Create a tensor of needed size
+        # Create a tensor of needed size for output 
         output = torch.zeros(batch_size, self.out_channels, output_height, output_width, device=x.device, dtype=x.dtype)
+
+        # add padding around input image
+        # (left, right, top, bottom) = (self.padding, self.padding, self.padding, self.padding)
+        input_w_padding = F.pad(x, (self.padding, self.padding, self.padding, self.padding), mode="constant", value=0)
 
         # iterate through each dimension of output tensor
         for batch in range(batch_size): 
@@ -97,16 +97,15 @@ class MyConv2D(nn.Module):
                 for output_i in range(output_height):
                     for output_j in range(output_width):
 
-                        # CHECK: determine the kernel window 
+                        # determine the kernel window from the padded input  
                         kernel_window = input_w_padding[batch, :, (output_i * self.stride):(output_i * self.stride + self.kernel_size),  (output_j * self.stride):(output_j * self.stride + self.kernel_size)]
 
-                        # CHECK: compute the convolution 
+                        # perform one convolution output value: sum(filter * input window)
                         output[batch, out_channel, output_i, output_j] = torch.sum(self.W[out_channel] * kernel_window)
-                        if self.b != None: 
+                        if self.b != None: # check and add bias term
                             output[batch, out_channel, output_i, output_j] += self.b[out_channel]
 
         return output
-        # raise NotImplementedError
 
 # MAXPOOL2D CLASS IMPLEMENTATION 
 class MyMaxPool2D(nn.Module):
@@ -132,7 +131,6 @@ class MyMaxPool2D(nn.Module):
             self.stride = stride
 
         # raise NotImplementedError
-
 
     def __call__(self, x):
         
@@ -836,24 +834,24 @@ if __name__ == "__main__":
         # device = torch.cuda.current_device()
         device = 'cuda'
     
-    # FCNN
-    my_fcnn = MyFCNN(hidden_layers_size=[1024, 512], num_output_classes=100)
-    my_fcnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_fcnn, num_epoch=epochs, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
+    # # FCNN
+    # my_fcnn = MyFCNN(hidden_layers_size=[1024, 512], num_output_classes=100)
+    # my_fcnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_fcnn, num_epoch=epochs, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
 
-    # PLOTTING
-    num_epochs = len(train_loss)
-    epochs_axis = [i for i in range(1, num_epochs + 1)]
-    generate_plots("FCNN", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
-    visualize_preds(my_fcnn, "FCNN", test_data, train_data.classes, device)
+    # # PLOTTING
+    # num_epochs = len(train_loss)
+    # epochs_axis = [i for i in range(1, num_epochs + 1)]
+    # generate_plots("FCNN", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
+    # visualize_preds(my_fcnn, "FCNN", test_data, train_data.classes, device)
 
-    # CNN 
-    my_cnn = MyCNN(num_output_classes=100)
-    cnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_cnn, num_epoch=epochs, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
+    # # CNN 
+    # my_cnn = MyCNN(num_output_classes=100)
+    # cnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_cnn, num_epoch=epochs, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
 
-    # PLOTTING
-    num_epochs = len(train_loss)
-    epochs_axis = [i for i in range(1, num_epochs + 1)]
-    generate_plots("CNN", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
-    visualize_preds(my_cnn, "CNN", test_data, train_data.classes, device)
+    # # PLOTTING
+    # num_epochs = len(train_loss)
+    # epochs_axis = [i for i in range(1, num_epochs + 1)]
+    # generate_plots("CNN", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
+    # visualize_preds(my_cnn, "CNN", test_data, train_data.classes, device)
 
 
