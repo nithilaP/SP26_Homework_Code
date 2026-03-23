@@ -53,7 +53,7 @@ unsigned int count_triangles() {
       for(unsigned int i = 1; i<N-1; i++) {
         unsigned int local_i = i;
 
-        #pragma omp task firstprivate(local_i)
+        #pragma omp task
         {
 
           unsigned int local_delta = 0;
