@@ -1,0 +1,5 @@
+18786_DL/18786_S2026_HW4/deliverable_4/annotations_trainval2017.zip
+*.zip
+__pycache__/
+*.pt
+*.pth
