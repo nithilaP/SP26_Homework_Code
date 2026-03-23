@@ -360,9 +360,6 @@ def train(net, num_epoch, learning_rate, train_dataloader, test_dataloader, devi
 
     for epoch in range(num_epoch):
 
-        # print("starting batch")
-
-        # CHECK: FIND EVIDENCE
         net.train()
 
         curr_loss = 0.0
@@ -402,7 +399,6 @@ def train(net, num_epoch, learning_rate, train_dataloader, test_dataloader, devi
         train_accuracy_i = curr_correct / curr_total
         train_accuracy.append(train_accuracy_i)
 
-        # CHECK: FIND EVIDENCE
         net.eval()
 
         # Evaluation Section
@@ -433,13 +429,6 @@ def train(net, num_epoch, learning_rate, train_dataloader, test_dataloader, devi
 
         test_accuracy_i = test_correct / test_total
         test_accuracy.append(test_accuracy_i)
-
-        # CHECK: REMOVE -> ONLY FOR TRACKING / TRAINING
-        print(
-            f"Epoch [{epoch+1}/{num_epoch}] | "
-            f"Train Loss: {train_loss_i:.4f} | Train Acc: {train_accuracy_i:.4f} | "
-            f"Test Loss: {test_loss_i:.4f} | Test Acc: {test_accuracy_i:.4f}"
-        )
 
     return net, train_loss, train_accuracy, test_loss, test_accuracy
     
@@ -533,18 +522,12 @@ if __name__ == "__main__":
 
         conv = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=True)
         # need to copy the weight into torch conv
-        # TODO: CHECK IN 
         conv.weight.data = my_conv.W.data.clone()
         conv.bias.data = my_conv.b.data.clone()
         out_conv = conv(x)
         print("conv output: ", out_conv.shape)
 
-        # check if the shapes match 
-        shape_check = (out_my_conv.shape == out_conv.shape)
-        print("Compare Shapes: ", shape_check)
-
         # compare the outputs 
-        # TODO: CHECK
         compare_output = torch.allclose(out_my_conv, out_conv, atol=1e-5)
         print("Compare Output: ", compare_output)
     
@@ -566,27 +549,17 @@ if __name__ == "__main__":
 
         my_conv = MyConv2D(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=True)
         out_my_conv = my_conv(x)
-        print("my_conv output: ", out_my_conv.shape)
 
         conv = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=True)
         # need to copy the weight into torch conv
-        # TODO: CHECK IN 
         conv.weight.data = my_conv.W.data.clone()
         conv.bias.data = my_conv.b.data.clone()
         out_conv = conv(x)
-        print("conv output: ", out_conv.shape)
-
-        # check if the shapes match 
-        shape_check = (out_my_conv.shape == out_conv.shape)
-        print("Compare Shapes: ", shape_check)
 
         # compare the outputs 
-        # TODO: CHECK
         compare_output = torch.allclose(out_my_conv, out_conv, atol=1e-5)
         print("Compare Output: ", compare_output)
-    
-        # CONV TEST 2
-    
+        
     # CONV TEST 3: stride > 1 
     def conv_test_3():
         print("Running Conv Test 3.")
@@ -605,22 +578,14 @@ if __name__ == "__main__":
 
         my_conv = MyConv2D(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=True)
         out_my_conv = my_conv(x)
-        print("my_conv output: ", out_my_conv.shape)
 
         conv = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=True)
         # need to copy the weight into torch conv
-        # TODO: CHECK IN 
         conv.weight.data = my_conv.W.data.clone()
         conv.bias.data = my_conv.b.data.clone()
         out_conv = conv(x)
-        print("conv output: ", out_conv.shape)
-
-        # check if the shapes match 
-        shape_check = (out_my_conv.shape == out_conv.shape)
-        print("Compare Shapes: ", shape_check)
 
         # compare the outputs 
-        # TODO: CHECK
         compare_output = torch.allclose(out_my_conv, out_conv, atol=1e-5)
         print("Compare Output: ", compare_output)
     
@@ -642,22 +607,14 @@ if __name__ == "__main__":
 
         my_conv = MyConv2D(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=True)
         out_my_conv = my_conv(x)
-        print("my_conv output: ", out_my_conv.shape)
 
         conv = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=True)
         # need to copy the weight into torch conv
-        # TODO: CHECK IN 
         conv.weight.data = my_conv.W.data.clone()
         conv.bias.data = my_conv.b.data.clone()
         out_conv = conv(x)
-        print("conv output: ", out_conv.shape)
-
-        # check if the shapes match 
-        shape_check = (out_my_conv.shape == out_conv.shape)
-        print("Compare Shapes: ", shape_check)
 
         # compare the outputs 
-        # TODO: CHECK
         compare_output = torch.allclose(out_my_conv, out_conv, atol=1e-5)
         print("Compare Output: ", compare_output)
 
@@ -680,23 +637,15 @@ if __name__ == "__main__":
 
         my_conv = MyConv2D(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=bias)
         out_my_conv = my_conv(x)
-        print("my_conv output: ", out_my_conv.shape)
 
         conv = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=bias)
         # need to copy the weight into torch conv
-        # TODO: CHECK IN 
         conv.weight.data = my_conv.W.data.clone()
         if (bias):
             conv.bias.data = my_conv.b.data.clone()
         out_conv = conv(x)
-        print("conv output: ", out_conv.shape)
-
-        # check if the shapes match 
-        shape_check = (out_my_conv.shape == out_conv.shape)
-        print("Compare Shapes: ", shape_check)
 
         # compare the outputs 
-        # TODO: CHECK
         compare_output = torch.allclose(out_my_conv, out_conv, atol=1e-5)
         print("Compare Output: ", compare_output)
 
@@ -722,16 +671,10 @@ if __name__ == "__main__":
 
         maxpool = nn.MaxPool2d(kernel_size=kernel_size, stride=stride)
         # need to copy the weight into torch conv
-        # TODO: CHECK IN 
         out_maxpool = maxpool(x)
         print("conv output: ", out_maxpool.shape)
 
-        # check if the shapes match 
-        shape_check = (out_my_maxpool.shape == out_maxpool.shape)
-        print("Compare Shapes: ", shape_check)
-
         # compare the outputs 
-        # TODO: CHECK
         compare_output = torch.allclose(out_my_maxpool, out_maxpool, atol=1e-5)
         print("Compare Output: ", compare_output)
     
@@ -754,17 +697,9 @@ if __name__ == "__main__":
         print("my_maxpool output: ", out_my_maxpool.shape)
 
         maxpool = nn.MaxPool2d(kernel_size=kernel_size, stride=stride)
-        # need to copy the weight into torch conv
-        # TODO: CHECK IN 
         out_maxpool = maxpool(x)
-        print("conv output: ", out_maxpool.shape)
-
-        # check if the shapes match 
-        shape_check = (out_my_maxpool.shape == out_maxpool.shape)
-        print("Compare Shapes: ", shape_check)
 
         # compare the outputs 
-        # TODO: CHECK
         compare_output = torch.allclose(out_my_maxpool, out_maxpool, atol=1e-5)
         print("Compare Output: ", compare_output)
     
@@ -787,17 +722,9 @@ if __name__ == "__main__":
         print("my_maxpool output: ", out_my_maxpool.shape)
 
         maxpool = nn.MaxPool2d(kernel_size=kernel_size, stride=stride)
-        # need to copy the weight into torch conv
-        # TODO: CHECK IN 
         out_maxpool = maxpool(x)
-        print("conv output: ", out_maxpool.shape)
-
-        # check if the shapes match 
-        shape_check = (out_my_maxpool.shape == out_maxpool.shape)
-        print("Compare Shapes: ", shape_check)
 
         # compare the outputs 
-        # TODO: CHECK
         compare_output = torch.allclose(out_my_maxpool, out_maxpool, atol=1e-5)
         print("Compare Output: ", compare_output)
 
@@ -819,11 +746,8 @@ if __name__ == "__main__":
     batch_size = 64
     epochs = 10
     learning_rate = 0.01
-
-    # drive.mount('/content/drive')
     data_root = "./data"
 
-    # TODO check: 
     # init data loaders & data: https://docs.pytorch.org/vision/0.9/datasets.html#cifar
     train_data = datasets.CIFAR100(root=data_root, train=True, download=True, transform=transforms.Compose([transforms.ToTensor()]))
     train_dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
@@ -834,18 +758,17 @@ if __name__ == "__main__":
     # set up device 
     device = 'cpu'
     if torch.cuda.is_available():
-        # device = torch.cuda.current_device()
         device = 'cuda'
     
     # FCNN
-    # my_fcnn = MyFCNN(hidden_layers_size=[512, 256], num_output_classes=100)
-    # my_fcnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_fcnn, num_epoch=epochs, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
+    my_fcnn = MyFCNN(hidden_layers_size=[512, 256], num_output_classes=100)
+    my_fcnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_fcnn, num_epoch=epochs, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
 
-    # # PLOTTING
-    # num_epochs = len(train_loss)
-    # epochs_axis = [i for i in range(1, num_epochs + 1)]
-    # generate_plots("FCNN", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
-    # visualize_preds(my_fcnn, "FCNN", test_data, train_data.classes, device)
+    # PLOTTING
+    num_epochs = len(train_loss)
+    epochs_axis = [i for i in range(1, num_epochs + 1)]
+    generate_plots("FCNN", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
+    visualize_preds(my_fcnn, "FCNN", test_data, train_data.classes, device)
 
     # CNN 
     my_cnn = MyCNN(num_output_classes=100)
