@@ -157,10 +157,10 @@ class MyMaxPool2D(nn.Module):
         
         ## Derive the output size
         # ----- TODO -----
-        # no padding value for this case. -> dim_out = (dim_in - D(K-1) - 1) / S + 1 
 
-        self.output_height   = ((self.input_height - (self.kernel_size -1) - 1) // self.stride + 1)
-        self.output_width    = ((self.input_width - (self.kernel_size -1) - 1) // self.stride + 1)
+        # no padding value for this case. -> dim_out = (dim_in - D(K-1) - 1) / S + 1 
+        self.output_height = ((self.input_height - (self.kernel_size -1) - 1) // self.stride + 1)
+        self.output_width = ((self.input_width - (self.kernel_size -1) - 1) // self.stride + 1)
         self.output_channels = self.channel
 
         output = torch.zeros(self.batch_size, self.output_channels, self.output_height, self.output_width, device=x.device, dtype=x.dtype)
@@ -175,10 +175,10 @@ class MyMaxPool2D(nn.Module):
                 for output_i in range(self.output_height):
                     for output_j in range(self.output_width):
 
-                        # CHECK: determine kernel window based on stride 
+                        # determine kernel window based on stride. 
                         kernel_window = x[batch, out_channel, (output_i * self.stride):(output_i * self.stride + self.kernel_size),  (output_j * self.stride):(output_j * self.stride + self.kernel_size)]
 
-                        # CHECK: compute the convolution 
+                        # determine the output by finding the max value in the window. 
                         output[batch, out_channel, output_i, output_j] = torch.max(kernel_window)
 
         return output
@@ -210,7 +210,7 @@ class MyFCNN(nn.Module):
 
         self.hidden_layers_size = hidden_layers_size
 
-        # hidden layer 1 on NN. 
+        # hidden layer 1 
         self.hidden_layer_1 = nn.Linear(self.input_size, self.hidden_layers_size[0])
         self.layer_1_activation = nn.ReLU()
 
@@ -239,7 +239,7 @@ class MyFCNN(nn.Module):
 
         """
 
-        # flatten input
+        # flatten input as expected.
         x = self.flat(x)
 
         # hidden layer 1 
@@ -278,25 +278,27 @@ class MyCNN(nn.Module):
 
         # LAYER 1
         self.layer_1_conv = MyConv2D(in_channels=3, out_channels=32, kernel_size=3, stride=1, padding=1, bias=True)
+        self.layer_1_batch_norm = nn.BatchNorm2d(32)
         self.layer_1_relu = nn.ReLU()
         self.layer_1_maxpool = MyMaxPool2D(kernel_size=2, stride=2)
 
         # LAYER 2
         self.layer_2_conv = MyConv2D(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1, bias=True)
+        self.layer_2_batch_norm = nn.BatchNorm2d(64)
         self.layer_2_relu = nn.ReLU()
         self.layer_2_maxpool = MyMaxPool2D(kernel_size=2, stride=2)
-
-        # LAYER 3
-        self.layer_3_conv = MyConv2D(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1, bias=True)
-        self.layer_3_relu = nn.ReLU()
-        self.layer_3_maxpool = MyMaxPool2D(kernel_size=2, stride=2)
 
         # for flatten before fc layer
         self.flat = nn.Flatten()
 
+        # dropout layer
+        self.dropout = nn.Dropout(p=0.25)
+
         # OUTPUT LAYER
-        self.fully_connected_hidden_layer = nn.Linear(128 * 4 * 4, 256) # flattened input to first FC layer. 
+        self.fully_connected_hidden_layer = nn.Linear(4096, 256) # flattened input to first FC layer. 
         self.fully_connected_relu = nn.ReLU()
+
+        # self.dropout = nn.Dropout(p=0.3)
         self.fully_connected_layer_out = nn.Linear(256, self.num_output_classes)
 
     
@@ -319,25 +321,23 @@ class MyCNN(nn.Module):
         # Hidden layer structure: conv -> relu -> pool
         # hidden layer 1 
         x = self.layer_1_conv(x)
+        x = self.layer_1_batch_norm(x)
         x = self.layer_1_relu(x)
         x = self.layer_1_maxpool(x)
 
         # hidden layer 2 
         x = self.layer_2_conv(x)
+        x = self.layer_2_batch_norm(x)
         x = self.layer_2_relu(x)
         x = self.layer_2_maxpool(x)
-
-        # hidden layer 3 
-        x = self.layer_3_conv(x)
-        x = self.layer_3_relu(x)
-        x = self.layer_3_maxpool(x)
 
         # Flatten before you apply fully connected layers
         x = self.flat(x)
 
-        # FC layer to calc class scores. 
+        # FC layer to calc class scores.
         x = self.fully_connected_hidden_layer(x)
         x = self.fully_connected_relu(x)
+        x = self.dropout(x)
         x = self.fully_connected_layer_out(x)
 
         return x
@@ -357,9 +357,6 @@ def train(net, num_epoch, learning_rate, train_dataloader, test_dataloader, devi
 
     for epoch in range(num_epoch):
 
-        print("starting batch")
-
-        # CHECK: FIND EVIDENCE
         net.train()
 
         curr_loss = 0.0
@@ -399,7 +396,6 @@ def train(net, num_epoch, learning_rate, train_dataloader, test_dataloader, devi
         train_accuracy_i = curr_correct / curr_total
         train_accuracy.append(train_accuracy_i)
 
-        # CHECK: FIND EVIDENCE
         net.eval()
 
         # Evaluation Section
@@ -430,13 +426,6 @@ def train(net, num_epoch, learning_rate, train_dataloader, test_dataloader, devi
 
         test_accuracy_i = test_correct / test_total
         test_accuracy.append(test_accuracy_i)
-
-        # CHECK: REMOVE -> ONLY FOR TRACKING / TRAINING
-        print(
-            f"Epoch [{epoch+1}/{num_epoch}] | "
-            f"Train Loss: {train_loss_i:.4f} | Train Acc: {train_accuracy_i:.4f} | "
-            f"Test Loss: {test_loss_i:.4f} | Test Acc: {test_accuracy_i:.4f}"
-        )
 
     return net, train_loss, train_accuracy, test_loss, test_accuracy
     
@@ -476,7 +465,7 @@ def visualize_preds(model, model_str, dataset, classes, device):
     selected_images = [5, 10, 95, 331, 789]
 
     # define figure
-    fig = plt.figure(figsize=(30, 6))
+    fig = plt.figure(figsize=(30, 10))
 
     image_pos = 0
     with torch.no_grad():
@@ -492,7 +481,7 @@ def visualize_preds(model, model_str, dataset, classes, device):
 
             plt.subplot(1, 5, image_pos + 1) # create subplot w axes for current iamge
             plt.imshow(to_pil_image(input))
-            plt.title(f"Ground Truth: {classes[label]} | Pred: {classes[prediction]}")
+            plt.title(f"Ground Truth: {classes[label]} | Pred: {classes[prediction]}", fontsize=18)
 
             plt.axis("off") # ADDED to remove tick marks
 
@@ -500,8 +489,8 @@ def visualize_preds(model, model_str, dataset, classes, device):
             image_pos += 1
     
     plt.tight_layout() # Added for subplot adjusting
+    plt.savefig(f"{model_str}_predictions", dpi=300, bbox_inches="tight")
 
-    plt.savefig(f"{model_str}_predictions")
     plt.close()
 
 if __name__ == "__main__":
@@ -530,18 +519,12 @@ if __name__ == "__main__":
 
         conv = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=True)
         # need to copy the weight into torch conv
-        # TODO: CHECK IN 
         conv.weight.data = my_conv.W.data.clone()
         conv.bias.data = my_conv.b.data.clone()
         out_conv = conv(x)
         print("conv output: ", out_conv.shape)
 
-        # check if the shapes match 
-        shape_check = (out_my_conv.shape == out_conv.shape)
-        print("Compare Shapes: ", shape_check)
-
         # compare the outputs 
-        # TODO: CHECK
         compare_output = torch.allclose(out_my_conv, out_conv, atol=1e-5)
         print("Compare Output: ", compare_output)
     
@@ -563,27 +546,17 @@ if __name__ == "__main__":
 
         my_conv = MyConv2D(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=True)
         out_my_conv = my_conv(x)
-        print("my_conv output: ", out_my_conv.shape)
 
         conv = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=True)
         # need to copy the weight into torch conv
-        # TODO: CHECK IN 
         conv.weight.data = my_conv.W.data.clone()
         conv.bias.data = my_conv.b.data.clone()
         out_conv = conv(x)
-        print("conv output: ", out_conv.shape)
-
-        # check if the shapes match 
-        shape_check = (out_my_conv.shape == out_conv.shape)
-        print("Compare Shapes: ", shape_check)
 
         # compare the outputs 
-        # TODO: CHECK
         compare_output = torch.allclose(out_my_conv, out_conv, atol=1e-5)
         print("Compare Output: ", compare_output)
-    
-        # CONV TEST 2
-    
+        
     # CONV TEST 3: stride > 1 
     def conv_test_3():
         print("Running Conv Test 3.")
@@ -602,22 +575,14 @@ if __name__ == "__main__":
 
         my_conv = MyConv2D(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=True)
         out_my_conv = my_conv(x)
-        print("my_conv output: ", out_my_conv.shape)
 
         conv = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=True)
         # need to copy the weight into torch conv
-        # TODO: CHECK IN 
         conv.weight.data = my_conv.W.data.clone()
         conv.bias.data = my_conv.b.data.clone()
         out_conv = conv(x)
-        print("conv output: ", out_conv.shape)
-
-        # check if the shapes match 
-        shape_check = (out_my_conv.shape == out_conv.shape)
-        print("Compare Shapes: ", shape_check)
 
         # compare the outputs 
-        # TODO: CHECK
         compare_output = torch.allclose(out_my_conv, out_conv, atol=1e-5)
         print("Compare Output: ", compare_output)
     
@@ -639,22 +604,14 @@ if __name__ == "__main__":
 
         my_conv = MyConv2D(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=True)
         out_my_conv = my_conv(x)
-        print("my_conv output: ", out_my_conv.shape)
 
         conv = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=True)
         # need to copy the weight into torch conv
-        # TODO: CHECK IN 
         conv.weight.data = my_conv.W.data.clone()
         conv.bias.data = my_conv.b.data.clone()
         out_conv = conv(x)
-        print("conv output: ", out_conv.shape)
-
-        # check if the shapes match 
-        shape_check = (out_my_conv.shape == out_conv.shape)
-        print("Compare Shapes: ", shape_check)
 
         # compare the outputs 
-        # TODO: CHECK
         compare_output = torch.allclose(out_my_conv, out_conv, atol=1e-5)
         print("Compare Output: ", compare_output)
 
@@ -677,23 +634,15 @@ if __name__ == "__main__":
 
         my_conv = MyConv2D(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=bias)
         out_my_conv = my_conv(x)
-        print("my_conv output: ", out_my_conv.shape)
 
         conv = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=bias)
         # need to copy the weight into torch conv
-        # TODO: CHECK IN 
         conv.weight.data = my_conv.W.data.clone()
         if (bias):
             conv.bias.data = my_conv.b.data.clone()
         out_conv = conv(x)
-        print("conv output: ", out_conv.shape)
-
-        # check if the shapes match 
-        shape_check = (out_my_conv.shape == out_conv.shape)
-        print("Compare Shapes: ", shape_check)
 
         # compare the outputs 
-        # TODO: CHECK
         compare_output = torch.allclose(out_my_conv, out_conv, atol=1e-5)
         print("Compare Output: ", compare_output)
 
@@ -719,16 +668,10 @@ if __name__ == "__main__":
 
         maxpool = nn.MaxPool2d(kernel_size=kernel_size, stride=stride)
         # need to copy the weight into torch conv
-        # TODO: CHECK IN 
         out_maxpool = maxpool(x)
         print("conv output: ", out_maxpool.shape)
 
-        # check if the shapes match 
-        shape_check = (out_my_maxpool.shape == out_maxpool.shape)
-        print("Compare Shapes: ", shape_check)
-
         # compare the outputs 
-        # TODO: CHECK
         compare_output = torch.allclose(out_my_maxpool, out_maxpool, atol=1e-5)
         print("Compare Output: ", compare_output)
     
@@ -751,17 +694,9 @@ if __name__ == "__main__":
         print("my_maxpool output: ", out_my_maxpool.shape)
 
         maxpool = nn.MaxPool2d(kernel_size=kernel_size, stride=stride)
-        # need to copy the weight into torch conv
-        # TODO: CHECK IN 
         out_maxpool = maxpool(x)
-        print("conv output: ", out_maxpool.shape)
-
-        # check if the shapes match 
-        shape_check = (out_my_maxpool.shape == out_maxpool.shape)
-        print("Compare Shapes: ", shape_check)
 
         # compare the outputs 
-        # TODO: CHECK
         compare_output = torch.allclose(out_my_maxpool, out_maxpool, atol=1e-5)
         print("Compare Output: ", compare_output)
     
@@ -784,17 +719,9 @@ if __name__ == "__main__":
         print("my_maxpool output: ", out_my_maxpool.shape)
 
         maxpool = nn.MaxPool2d(kernel_size=kernel_size, stride=stride)
-        # need to copy the weight into torch conv
-        # TODO: CHECK IN 
         out_maxpool = maxpool(x)
-        print("conv output: ", out_maxpool.shape)
-
-        # check if the shapes match 
-        shape_check = (out_my_maxpool.shape == out_maxpool.shape)
-        print("Compare Shapes: ", shape_check)
 
         # compare the outputs 
-        # TODO: CHECK
         compare_output = torch.allclose(out_my_maxpool, out_maxpool, atol=1e-5)
         print("Compare Output: ", compare_output)
 
@@ -816,11 +743,8 @@ if __name__ == "__main__":
     batch_size = 64
     epochs = 10
     learning_rate = 0.01
-
-    # drive.mount('/content/drive')
     data_root = "./data"
 
-    # TODO check: 
     # init data loaders & data: https://docs.pytorch.org/vision/0.9/datasets.html#cifar
     train_data = datasets.CIFAR100(root=data_root, train=True, download=True, transform=transforms.Compose([transforms.ToTensor()]))
     train_dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
@@ -831,27 +755,24 @@ if __name__ == "__main__":
     # set up device 
     device = 'cpu'
     if torch.cuda.is_available():
-        # device = torch.cuda.current_device()
         device = 'cuda'
     
-    # # FCNN
-    # my_fcnn = MyFCNN(hidden_layers_size=[1024, 512], num_output_classes=100)
-    # my_fcnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_fcnn, num_epoch=epochs, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
+    # FCNN
+    my_fcnn = MyFCNN(hidden_layers_size=[512, 256], num_output_classes=100)
+    my_fcnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_fcnn, num_epoch=epochs, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
 
-    # # PLOTTING
-    # num_epochs = len(train_loss)
-    # epochs_axis = [i for i in range(1, num_epochs + 1)]
-    # generate_plots("FCNN", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
-    # visualize_preds(my_fcnn, "FCNN", test_data, train_data.classes, device)
+    # PLOTTING
+    num_epochs = len(train_loss)
+    epochs_axis = [i for i in range(1, num_epochs + 1)]
+    generate_plots("FCNN", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
+    visualize_preds(my_fcnn, "FCNN", test_data, train_data.classes, device)
 
-    # # CNN 
-    # my_cnn = MyCNN(num_output_classes=100)
-    # cnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_cnn, num_epoch=epochs, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
+    # CNN 
+    my_cnn = MyCNN(num_output_classes=100)
+    cnn, train_loss, train_accuracy, test_loss, test_accuracy = train(net=my_cnn, num_epoch=epochs, learning_rate=learning_rate, train_dataloader=train_dataloader, test_dataloader=test_dataloader, device=device)
 
-    # # PLOTTING
-    # num_epochs = len(train_loss)
-    # epochs_axis = [i for i in range(1, num_epochs + 1)]
-    # generate_plots("CNN", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
-    # visualize_preds(my_cnn, "CNN", test_data, train_data.classes, device)
-
-
+    # PLOTTING
+    num_epochs = len(train_loss)
+    epochs_axis = [i for i in range(1, num_epochs + 1)]
+    generate_plots("CNN", epochs_axis, train_loss=train_loss, train_accuracy=train_accuracy, test_loss=test_loss, test_accuracy=test_accuracy)
+    visualize_preds(my_cnn, "CNN", test_data, train_data.classes, device)
