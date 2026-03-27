@@ -17,7 +17,7 @@ from ultralytics import YOLO
 
 import random
 
-def get_image_path(imgs, image_id, coco_val):
+def get_image_path(imgs, image_id, coco_value):
     curr_img_info = imgs[image_id]
     file_name = curr_img_info["file_name"]
 
@@ -33,7 +33,7 @@ def get_image_path(imgs, image_id, coco_val):
     if not isinstance(file_name, str):
         raise TypeError(f"Expected file_name to be str, got {type(file_name)}: {file_name}")
 
-    return os.path.join(coco_val, file_name)
+    return os.path.join(coco_value, file_name)
 
 if __name__ == '__main__':
 
@@ -286,18 +286,18 @@ if __name__ == '__main__':
             curr_highest_coco_i = -1
 
             coco_j = 0 # index tracker
-            for coco_val in coco_classes:
+            for coco_value in coco_classes:
 
-                if coco_val['image_id'] != yolo_prediction['image_id']:
+                if coco_value['image_id'] != yolo_prediction['image_id']:
                     coco_j += 1
                     continue
 
                 # get the values 
                 
-                coco_x_min = coco_val['bbox'][0]
-                coco_y_min = coco_val['bbox'][1]
-                coco_x_max = coco_val['bbox'][2]
-                coco_y_max = coco_val['bbox'][3]
+                coco_x_min = coco_value['bbox'][0]
+                coco_y_min = coco_value['bbox'][1]
+                coco_x_max = coco_value['bbox'][2]
+                coco_y_max = coco_value['bbox'][3]
 
                 yolo_x_min = yolo_prediction['bbox'][0]
                 yolo_y_min = yolo_prediction['bbox'][1]
@@ -403,18 +403,18 @@ if __name__ == '__main__':
             curr_highest_coco_i = -1
 
             coco_j = 0 # index tracker
-            for coco_val in coco_classes:
+            for coco_value in coco_classes:
 
-                if coco_val['image_id'] != faster_rcnn_prediction['image_id']:
+                if coco_value['image_id'] != faster_rcnn_prediction['image_id']:
                     coco_j += 1
                     continue
 
                 # get the values 
                 
-                coco_x_min = coco_val['bbox'][0]
-                coco_y_min = coco_val['bbox'][1]
-                coco_x_max = coco_val['bbox'][2]
-                coco_y_max = coco_val['bbox'][3]
+                coco_x_min = coco_value['bbox'][0]
+                coco_y_min = coco_value['bbox'][1]
+                coco_x_max = coco_value['bbox'][2]
+                coco_y_max = coco_value['bbox'][3]
 
                 faster_rcnn_x_min = faster_rcnn_prediction['bbox'][0]
                 faster_rcnn_y_min = faster_rcnn_prediction['bbox'][1]
@@ -494,10 +494,10 @@ if __name__ == '__main__':
 
         # get image info 
         curr_img_info = imgs[latency_image_id]
-        # curr_image_path = os.path.join(coco_val, curr_img_info["file_name"])
+        # curr_image_path = os.path.join(coco_value, curr_img_info["file_name"])
         # curr_image = Image.open(curr_image_path).convert("RGB")
 
-        curr_image_path = get_image_path(imgs, latency_image_id, coco_val)
+        curr_image_path = get_image_path(imgs, latency_image_id, coco_value)
 
         # file_name = curr_img_info["file_name"]
 
@@ -515,7 +515,7 @@ if __name__ == '__main__':
         # if not isinstance(file_name, str):
         #     raise TypeError(f"file_name must be a string, got {type(file_name)} -> {file_name}")
 
-        # curr_image_path = os.path.join(coco_val, file_name)
+        # curr_image_path = os.path.join(coco_value, file_name)
         curr_image = Image.open(curr_image_path).convert("RGB")
 
         # ADDED FOR GPU USAGE
@@ -549,7 +549,7 @@ if __name__ == '__main__':
 
         # get image info 
         curr_img_info = imgs[latency_image_id]
-        curr_image_path = os.path.join(coco_val, curr_img_info["file_name"])
+        curr_image_path = os.path.join(coco_value, curr_img_info["file_name"])
         curr_image = Image.open(curr_image_path).convert("RGB")
 
         # ADDED FOR GPU USAGE
