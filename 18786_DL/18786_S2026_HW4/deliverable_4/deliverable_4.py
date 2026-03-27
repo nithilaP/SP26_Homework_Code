@@ -132,7 +132,9 @@ if __name__ == '__main__':
 
 
         curr_annotations = imgToAnns.get(all_image_ids[i], [])
-        print("number of annotations:", len(curr_annotations))
+        # print("number of annotations:", len(curr_annotations))
+        if (i + 1) % 100 == 0:
+            print("processed:", i + 1)
 
         # convert boxes from coco format to [x_min, y_min, x_max, y_max]
         coco_bbox = [] 
@@ -162,7 +164,9 @@ if __name__ == '__main__':
             total_coco_data_bbox.append(bbox)
         for bbox in yolo_bbox:
             total_yolo_data_bbox.append(bbox)
-
+            
+    print("total gt boxes:", len(total_coco_data_bbox))
+    print("total yolo boxes:", len(total_yolo_data_bbox))
     # DEBUGGING: 
     # print("first few gt boxes:", coco_bbox[:3])
     # print("first few yolo boxes:", yolo_bbox[:3])
