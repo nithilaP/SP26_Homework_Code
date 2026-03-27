@@ -24,7 +24,6 @@ if __name__ == '__main__':
     # set up device 
     device = 'cpu'
     if torch.cuda.is_available():
-        # device = torch.cuda.current_device()
         device = 'cuda'
 
     # coco data path
