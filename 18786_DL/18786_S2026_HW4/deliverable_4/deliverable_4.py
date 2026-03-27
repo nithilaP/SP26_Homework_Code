@@ -90,8 +90,8 @@ if __name__ == '__main__':
     # go through all images: load image, get annotations, convert to bouding box 
     # for i in range(len(all_image_ids)):
 
-    for i in range(min(20, len(all_image_ids))):
-        
+    for i in range(min(100, len(all_image_ids))):
+
         # get image info 
         curr_img = imgs[all_image_ids[i]]
         curr_image_path = os.path.join(coco_val, curr_img["file_name"])
