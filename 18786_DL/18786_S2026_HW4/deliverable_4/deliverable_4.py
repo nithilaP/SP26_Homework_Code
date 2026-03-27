@@ -82,22 +82,28 @@ if __name__ == '__main__':
         cat_id_to_name[cat_id] = cats[cat_id]["name"]
         cat_name_to_id[cats[cat_id]["name"]] = cat_id
 
+    # trackign variables 
+    total_coco_data_bbox = []
+    total_yolo_data_bbox = []
+    total_faster_rcnn_data_bbox = []
+
     # go through all images: load image, get annotations, convert to bouding box 
     # for i in range(len(all_image_ids)):
 
-    # FOR DEBUGGING: 
-    for i in range(min(10, len(all_image_ids))):
-
+    for i in range(min(20, len(all_image_ids))):
+        
         # get image info 
         curr_img = imgs[all_image_ids[i]]
         curr_image_path = os.path.join(coco_val, curr_img["file_name"])
         curr_image = Image.open(curr_image_path).convert("RGB")
 
         # DEBUG
-        print("\nimage number:", i + 1)
-        print("image id:", all_image_ids[i])
-        print("file name:", curr_img["file_name"])
-        print("image size:", curr_image.size)
+        # print("\nimage number:", i + 1)
+        # print("image id:", all_image_ids[i])
+        # print("file name:", curr_img["file_name"])
+        # print("image size:", curr_image.size)
+        if (i + 1) % 100 == 0:
+            print("processed:", i + 1)
 
         # ADD IN YOLO OUPUT PREDICTION
         yolo_output = yolo_model.predict(curr_image, verbose=False, device=device)
@@ -122,7 +128,7 @@ if __name__ == '__main__':
                     yolo_bbox.append({'bbox': [float(yolo_bbox_i[j][0]), float(yolo_bbox_i[j][1]), float(yolo_bbox_i[j][2]), float(yolo_bbox_i[j][3])], 
                                       'category_name': class_name, 
                                       'category_id': cat_name_to_id[class_name], 
-                                      'score': float(yolo_scores_i[j])})
+                                      'score': float(yolo_scores_i[j]), 'image_id': all_image_ids[i],})
 
 
         curr_annotations = imgToAnns.get(all_image_ids[i], [])
@@ -149,11 +155,151 @@ if __name__ == '__main__':
             # bbox: [x_min, y_min, x_max, y_max]
             # category_name: (for yolo class name and coco dataset category comparison)
             # category_id: id from coco annotation
-            coco_bbox.append({'bbox': [x_min, y_min, x_max, y_max], 'category_name': cat_id_to_name[category_id],'category_id': category_id})
+            coco_bbox.append({'bbox': [x_min, y_min, x_max, y_max], 'category_name': cat_id_to_name[category_id],'category_id': category_id, 'image_id': all_image_ids[i],})
 
-            # DEBUGGING: 
-            print("first few gt boxes:", coco_bbox[:3])
-            print("first few yolo boxes:", yolo_bbox[:3])
+        # for each image, add to total list
+        for bbox in coco_bbox:
+            total_coco_data_bbox.append(bbox)
+        for bbox in yolo_bbox:
+            total_yolo_data_bbox.append(bbox)
+
+    # DEBUGGING: 
+    # print("first few gt boxes:", coco_bbox[:3])
+    # print("first few yolo boxes:", yolo_bbox[:3])
+
+    ## do the mAP50 Calculation 
+    '''
+    1. Loop over all classes. 
+    2. get the dataset coco bbox and yolo bbox items for each class 
+    3. using confidence val, sort predictions to build curve
+    4. find IoU for all coco bbox and yolo bbox that match in id, store box that has the highest IoU
+    5. determine if tp or fp & set flag in array. 
+    6. calculate precision 
+    7. map out precision curve & calculate area under curve 
+    8. take map avg for all the classes 
+    '''
+
+    class_avg_prec = [] # compute AP per class 
+    acc_AP = 0
+    valid_classes = 0
+    for c in sorted(list(cats.keys())): 
+
+        coco_classes = []
+        for coco in total_coco_data_bbox:
+            if coco['category_id'] == c:
+                coco_classes.append(coco)
+
+        yolo_classes = []
+        for yolo in total_yolo_data_bbox:
+            if yolo['category_id'] == c:
+                yolo_classes.append(yolo)
+        
+        # check if coco_class empty for that category 
+        if len(coco_classes) == 0:
+            continue
+
+        # 3. using confidence val, sort predictions to build curve
+        # yolo_scores = []
+        # yolo_curve = sorted(yolo_classes, reverse=True)
+        yolo_curve = sorted(yolo_classes, key=lambda x: x['score'], reverse=True)
+
+        coco_in_curve = [False] * len(coco_classes) # bool array to track which blocks have already been matched
+        true_positive = [0] * len(yolo_curve)
+        false_positive = [0] * len(yolo_curve)
+        # true_positive_num = 0
+        # false_positive_num = 0
+
+        yolo_i = 0 # index tracker
+        for yolo_prediction in yolo_curve:
+
+            curr_highest_iou = 0.0
+            curr_highest_coco_i = -1
+
+            coco_j = 0 # index tracker
+            for coco_val in coco_classes:
+
+                if coco_val['image_id'] != yolo_prediction['image_id']:
+                    coco_j += 1
+                    continue
+
+                # get the values 
+                
+                coco_x_min = coco_val['bbox'][0]
+                coco_y_min = coco_val['bbox'][1]
+                coco_x_max = coco_val['bbox'][2]
+                coco_y_max = coco_val['bbox'][3]
+
+                yolo_x_min = yolo_prediction['bbox'][0]
+                yolo_y_min = yolo_prediction['bbox'][1]
+                yolo_x_max = yolo_prediction['bbox'][2]
+                yolo_y_max = yolo_prediction['bbox'][3]
+
+                overlap_x_min = max(coco_x_min, yolo_x_min)
+                overlap_y_min = max(coco_y_min, yolo_y_min)
+
+                overlap_x_max = min(coco_x_max, yolo_x_max)
+                overlap_y_max = min(coco_y_max, yolo_y_max)
+
+                overlap_area = max(0.0, overlap_x_max - overlap_x_min) * max(0.0, overlap_y_max - overlap_y_min) 
+                coco_area = max(0.0, coco_x_max - coco_x_min) * max(0.0, coco_y_max - coco_y_min) 
+                yolo_area = max(0.0, yolo_x_max - yolo_x_min) * max(0.0, yolo_y_max - yolo_y_min) 
+                union_area = (coco_area + yolo_area) - overlap_area
+                if (union_area >0):
+                    IoU = overlap_area / union_area
+                else: 
+                    IoU = 0.0
+
+                # track best 
+                if (IoU > curr_highest_iou):
+                    curr_highest_iou = IoU
+                    curr_highest_coco_i = coco_j
+                
+                coco_j += 1
+
+            # update true_prediction and false_prediction 
+            if (curr_highest_iou >= 0.5) and (coco_in_curve[curr_highest_coco_i] != True) and (curr_highest_coco_i !=-1):
+                true_positive[yolo_i] = True
+                false_positive[yolo_i] = False
+                # true_positive_num += 1
+                coco_in_curve[curr_highest_coco_i] = True
+            else: 
+                true_positive[yolo_i] = False
+                false_positive[yolo_i] = True
+                # false_positive_num += 1
+
+            # update trackign car 
+            yolo_i += 1
+
+
+        cummalative_sum_truep = np.cumsum(true_positive)
+        cummalative_sum_falsep = np.cumsum(false_positive)
+        precision = cummalative_sum_truep / (cummalative_sum_truep + cummalative_sum_falsep + 1e-8)
+        recall = cummalative_sum_truep / len(coco_classes)
+
+        #  CHECK!!!
+        recall = np.concatenate(([0.0], recall, [1.0]))
+        precision = np.concatenate(([1.0], precision, [0.0]))
+
+        for i in range(len(precision) - 2, -1, -1):
+            precision[i] = max(precision[i], precision[i + 1])
+
+        ap = 0.0
+        for i in range(len(recall) - 1):
+            ap += (recall[i + 1] - recall[i]) * precision[i + 1]
+
+        class_avg_prec.append(ap)
+        acc_AP += ap
+        valid_classes += 1
+
+    mAP50 = acc_AP / valid_classes
+    print("mAP50:", mAP50)
+
+                
+
+
+
+        
+
 
 
 
