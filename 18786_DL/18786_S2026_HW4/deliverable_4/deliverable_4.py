@@ -17,7 +17,7 @@ from ultralytics import YOLO
 
 import random
 
-def get_image_path(imgs, image_id, coco_value):
+def get_image_path(imgs, image_id, coco_val_dir):
     curr_img_info = imgs[image_id]
     file_name = curr_img_info["file_name"]
 
@@ -33,7 +33,7 @@ def get_image_path(imgs, image_id, coco_value):
     if not isinstance(file_name, str):
         raise TypeError(f"Expected file_name to be str, got {type(file_name)}: {file_name}")
 
-    return os.path.join(coco_value, file_name)
+    return os.path.join(coco_val_dir, file_name)
 
 if __name__ == '__main__':
 
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     faster_rcnn_model.eval()
     faster_rcnn_categories = torchvision.models.detection.FasterRCNN_ResNet50_FPN_Weights.DEFAULT.meta["categories"]
 
-    coco_val = '/content/val2017'
+    coco_val_dir = '/content/val2017'
     annotation_file = '/content/annotations/instances_val2017.json'
 
     # set up mappings from coco json 
@@ -124,7 +124,7 @@ if __name__ == '__main__':
         # curr_img_info = imgs[all_image_ids[i]]
         # curr_image_path = os.path.join(coco_val, curr_img_info["file_name"])
         image_id = eval_image_ids[i]
-        curr_image_path = get_image_path(imgs, image_id, coco_val)
+        curr_image_path = get_image_path(imgs, image_id, coco_val_dir)
         curr_image = Image.open(curr_image_path).convert("RGB")
 
         # DEBUG
@@ -494,10 +494,10 @@ if __name__ == '__main__':
 
         # get image info 
         curr_img_info = imgs[latency_image_id]
-        # curr_image_path = os.path.join(coco_value, curr_img_info["file_name"])
+        # curr_image_path = os.path.join(coco_val_dir, curr_img_info["file_name"])
         # curr_image = Image.open(curr_image_path).convert("RGB")
 
-        curr_image_path = get_image_path(imgs, latency_image_id, coco_value)
+        curr_image_path = get_image_path(imgs, latency_image_id, coco_val_dir)
 
         # file_name = curr_img_info["file_name"]
 
@@ -515,7 +515,7 @@ if __name__ == '__main__':
         # if not isinstance(file_name, str):
         #     raise TypeError(f"file_name must be a string, got {type(file_name)} -> {file_name}")
 
-        # curr_image_path = os.path.join(coco_value, file_name)
+        # curr_image_path = os.path.join(coco_val_dir, file_name)
         curr_image = Image.open(curr_image_path).convert("RGB")
 
         # ADDED FOR GPU USAGE
@@ -549,7 +549,7 @@ if __name__ == '__main__':
 
         # get image info 
         curr_img_info = imgs[latency_image_id]
-        curr_image_path = os.path.join(coco_value, curr_img_info["file_name"])
+        curr_image_path = os.path.join(coco_val_dir, curr_img_info["file_name"])
         curr_image = Image.open(curr_image_path).convert("RGB")
 
         # ADDED FOR GPU USAGE
