@@ -15,10 +15,9 @@ from ultralytics import YOLO
 
 import random
 
-def add_bbox(image, yolo_model, output_classes):
+def add_bbox(image, yolo_model):
 
     curr_image = Image.open(image)
-    # curr_image = curr_image.convert("RGB") # fix: now every image = 3 channels
 
     # inferencing
     yolo_output = yolo_model.predict(curr_image, verbose=False, device='cuda')
@@ -94,7 +93,7 @@ if __name__ == '__main__':
     # add annotations by annotation id & image_id -> list of annotations
     if 'annotations' in dataset: 
         for ann in dataset['annotations']:
-            # CHECK IF IF CLAUSE BELOW NEEDED.
+
             if ann['image_id'] not in imgToAnns:
                 imgToAnns[ann['image_id']] = []
             imgToAnns[ann['image_id']].append(ann)
@@ -138,7 +137,6 @@ if __name__ == '__main__':
         curr_img = imgs[all_image_ids[image_id_i]]
         curr_image_path = os.path.join(coco_dir, curr_img["file_name"])
         curr_image = Image.open(curr_image_path)
-        # curr_image = curr_image.convert("RGB") # fix: now every image = 3 channels
 
         # populate list for annotations for this image id
         curr_annotations = []
@@ -150,8 +148,8 @@ if __name__ == '__main__':
         coco_bbox = [] 
         for curr_annotation in curr_annotations:
 
-            if curr_annotation.get("iscrowd", 0) == 1: 
-                continue 
+            # if curr_annotation.get("iscrowd", 0) == 1: 
+            #     continue 
 
             x = curr_annotation['bbox'][0]
             y = curr_annotation['bbox'][1]
@@ -330,7 +328,6 @@ if __name__ == '__main__':
         recall = np.concatenate(([0.0], recall, [1.0]))
         precision = np.concatenate(([1.0], precision, [0.0]))
 
-        # 
         for i in range(len(precision)-1, 0, -1):
             precision[i-1] = max(precision[i-1], precision[i])
 
@@ -381,5 +378,5 @@ if __name__ == '__main__':
     ex_classes = ["dog", "cat"]
     ex_model.set_classes(ex_classes)
 
-    add_bbox(dog_path, ex_model, ex_classes)
-    add_bbox(cat_path, ex_model, ex_classes)
+    add_bbox(dog_path, ex_model)
+    add_bbox(cat_path, ex_model)

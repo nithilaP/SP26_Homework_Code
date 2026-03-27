@@ -59,7 +59,7 @@ if __name__ == '__main__':
     # add annotations by annotation id & image_id -> list of annotations
     if 'annotations' in dataset: 
         for ann in dataset['annotations']:
-            # CHECK IF IF CLAUSE BELOW NEEDED.
+
             if ann['image_id'] not in imgToAnns:
                 imgToAnns[ann['image_id']] = []
             imgToAnns[ann['image_id']].append(ann)
@@ -76,13 +76,6 @@ if __name__ == '__main__':
     if 'categories' in dataset: 
         for cat in dataset['categories']:
             cats[cat['id']] = cat
-
-    # For debugging
-    print("number of images:", len(imgs))
-    print("number of annotations:", len(anns))
-    print("number of categories:", len(cats))
-    
-    print("index created!")
 
     # create mappings for categories 
     cat_id_to_name = {}
@@ -104,7 +97,6 @@ if __name__ == '__main__':
         curr_img = imgs[all_image_ids[image_id_i]]
         curr_image_path = os.path.join(coco_dir, curr_img["file_name"])
         curr_image = Image.open(curr_image_path)
-        # curr_image = curr_image.convert("RGB") # fix: now every image = 3 channels
 
         # populate list for annotations for this image id
         curr_annotations = []
@@ -116,8 +108,9 @@ if __name__ == '__main__':
         coco_bbox = [] 
         for curr_annotation in curr_annotations:
 
-            if curr_annotation.get("iscrowd", 0) == 1: 
-                continue 
+            # # increased mAP when added -> 
+            # if curr_annotation.get("iscrowd", 0) == 1: 
+            #     continue 
 
             x = curr_annotation['bbox'][0]
             y = curr_annotation['bbox'][1]
@@ -199,10 +192,6 @@ if __name__ == '__main__':
 
             for frcnn_output_i in range(len(faster_rcnn_bbox_i)):
                 class_name = torchvision.models.detection.FasterRCNN_ResNet50_FPN_Weights.DEFAULT.meta["categories"][int(faster_rcnn_labels_i[frcnn_output_i])]
-
-                # # skip empty labels
-                # if class_name == 'N/A':
-                #     continue
 
                 # get the class name from yolo -> coco category id
                 if class_name in cat_name_to_id:
@@ -340,7 +329,6 @@ if __name__ == '__main__':
         recall = np.concatenate(([0.0], recall, [1.0]))
         precision = np.concatenate(([1.0], precision, [0.0]))
 
-        # 
         for i in range(len(precision)-1, 0, -1):
             precision[i-1] = max(precision[i-1], precision[i])
 
@@ -455,8 +443,6 @@ if __name__ == '__main__':
         # add vals at the end for bounds. (end points)
         recall = np.concatenate(([0.0], recall, [1.0]))
         precision = np.concatenate(([1.0], precision, [0.0]))
-
-        # 
         for i in range(len(precision)-1, 0, -1):
             precision[i-1] = max(precision[i-1], precision[i])
 
@@ -510,7 +496,6 @@ if __name__ == '__main__':
         curr_img = imgs[latency_image_id]
         curr_image_path = os.path.join(coco_dir, curr_img["file_name"])
         curr_image = Image.open(curr_image_path)
-        # curr_image = curr_image.convert("RGB") # fix: now every image = 3 channels
 
         torch.cuda.synchronize() # sync gpu ops
 
