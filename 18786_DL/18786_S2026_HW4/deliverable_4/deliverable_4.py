@@ -470,7 +470,26 @@ if __name__ == '__main__':
 
         # get image info 
         curr_img_info = imgs[latency_image_id]
-        curr_image_path = os.path.join(coco_val, curr_img_info["file_name"])
+        # curr_image_path = os.path.join(coco_val, curr_img_info["file_name"])
+        # curr_image = Image.open(curr_image_path).convert("RGB")
+
+        file_name = curr_img_info["file_name"]
+
+        # debug / safety
+        if isinstance(file_name, dict):
+            print("BAD curr_img_info:", curr_img_info)
+            # try common nested forms
+            if "file_name" in file_name:
+                file_name = file_name["file_name"]
+            elif "name" in file_name:
+                file_name = file_name["name"]
+            else:
+                raise TypeError(f"file_name is still not usable: {file_name}")
+
+        if not isinstance(file_name, str):
+            raise TypeError(f"file_name must be a string, got {type(file_name)} -> {file_name}")
+
+        curr_image_path = os.path.join(coco_val, file_name)
         curr_image = Image.open(curr_image_path).convert("RGB")
 
         # ADDED FOR GPU USAGE
