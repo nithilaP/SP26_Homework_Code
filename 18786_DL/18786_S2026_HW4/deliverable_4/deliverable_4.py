@@ -105,9 +105,13 @@ if __name__ == '__main__':
 
         yolo_bbox = []
         if len(yolo_result.boxes) > 0:
-            yolo_bbox_i = yolo_result.boxes.xyxy.cpu().numpy()
-            yolo_scores_i = yolo_result.boxes.conf.xyxy.cpu().numpy()
-            yolo_labels_i = yolo_result.boxes.cls.xyxy.cpu().numpy()
+            ## dim:
+            #  yolo_bbox_i -> [b, 4]
+            #  yolo_scores_i -> [b]
+            #  yolo_labels_i -> [b]
+            yolo_bbox_i = yolo_result.boxes.xyxy.cpu().numpy() 
+            yolo_scores_i = yolo_result.boxes.conf.cpu().numpy()
+            yolo_labels_i = yolo_result.boxes.cls.cpu().numpy()
 
             for j in range(len(yolo_bbox_i)):
                 class_name = yolo_model.names[int(yolo_labels_i[j])]
