@@ -14,6 +14,8 @@ import json
 import os
 from ultralytics import YOLO
 
+import random
+
 if __name__ == '__main__':
 
     ## COCO LOADER ##
@@ -164,7 +166,7 @@ if __name__ == '__main__':
             total_coco_data_bbox.append(bbox)
         for bbox in yolo_bbox:
             total_yolo_data_bbox.append(bbox)
-            
+
     print("total gt boxes:", len(total_coco_data_bbox))
     print("total yolo boxes:", len(total_yolo_data_bbox))
     # DEBUGGING: 
@@ -298,6 +300,39 @@ if __name__ == '__main__':
     mAP50 = acc_AP / valid_classes
     print("mAP50:", mAP50)
 
+    # measure latency: latency as the amount of time it takes from inputting an image to getting detection 
+    #                      results with a batch size of 1, averaged across 100 random images from COCO
+    random.seed(0)
+    images_for_latency = random.sample(all_image_ids, 100)
+
+    yolo_latency_times = []
+    for latency_image_id in images_for_latency:
+
+        # get image info 
+        curr_img = imgs[latency_image_id]
+        curr_image_path = os.path.join(coco_val, curr_img["file_name"])
+        curr_image = Image.open(curr_image_path).convert("RGB")
+
+        # ADDED FOR GPU USAGE
+        if device  == 'cuda': 
+            torch.cuda.synchronize()
+
+        # measure time elapsed 
+        start = time.time()
+
+        yolo_model.predict(curr_img, verbose=False, device=device)
+        if device == 'cuda':
+            torch.cuda.synchronize()
+        
+        end = time.time()
+
+        curr_latency = end - start
+        yolo_latency_times.append(curr_latency)
+
+    avg_yolo_latency_times = np.mean(yolo_latency_times)
+
+    print("YOLO average latency (seconds):", avg_yolo_latency_times)
+    print("YOLO average latency (milliseconds):", avg_yolo_latency_times * 1000.0)
                 
 
 
