@@ -88,9 +88,9 @@ if __name__ == '__main__':
     total_faster_rcnn_data_bbox = []
 
     # go through all images: load image, get annotations, convert to bouding box 
-    # for i in range(len(all_image_ids)):
+    for i in range(len(all_image_ids)):
 
-    for i in range(min(100, len(all_image_ids))):
+    # for i in range(min(100, len(all_image_ids))):
 
         # get image info 
         curr_img = imgs[all_image_ids[i]]
