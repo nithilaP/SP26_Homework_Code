@@ -313,12 +313,12 @@ if __name__ == '__main__':
     # ---------------------------------------------------
     catdog_prompt_classes = ["cat", "dog"]
 
-    image1_path = "/content/cat_dog_1.jpg"
-    image2_path = "/content/cat_dog_2.jpg"
+    dog_path = "../2007_001239.jpg"
+    cat_path = "../2008_002152.jpg"
 
-    if os.path.exists(image1_path):
+    if os.path.exists(dog_path):
         draw_world_boxes(
-            image_path=image1_path,
+            image_path=dog_path,
             model=yolo_world_model,
             prompt_classes=catdog_prompt_classes,
             output_path="/content/cat_dog_1_world_output.jpg",
@@ -326,11 +326,11 @@ if __name__ == '__main__':
             conf_threshold=0.25
         )
     else:
-        print("could not find:", image1_path)
+        print("could not find:", dog_path)
 
-    if os.path.exists(image2_path):
+    if os.path.exists(cat_path):
         draw_world_boxes(
-            image_path=image2_path,
+            image_path=cat_path,
             model=yolo_world_model,
             prompt_classes=catdog_prompt_classes,
             output_path="/content/cat_dog_2_world_output.jpg",
@@ -338,4 +338,4 @@ if __name__ == '__main__':
             conf_threshold=0.25
         )
     else:
-        print("could not find:", image2_path)
+        print("could not find:", cat_path)

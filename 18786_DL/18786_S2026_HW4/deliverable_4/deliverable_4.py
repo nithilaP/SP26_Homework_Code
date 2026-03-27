@@ -97,19 +97,19 @@ if __name__ == '__main__':
     total_faster_rcnn_data_bbox = []
 
     # go through all images: load image, get annotations, convert to bouding box 
-    for i in range(len(all_image_ids)):
+    # for i in range(len(all_image_ids)):
 
-    # for i in range(min(100, len(all_image_ids))):
+    for i in range(min(100, len(all_image_ids))):
 
         # get image info 
-        curr_img = imgs[all_image_ids[i]]
-        curr_image_path = os.path.join(coco_val, curr_img["file_name"])
+        curr_img_info = imgs[all_image_ids[i]]
+        curr_image_path = os.path.join(coco_val, curr_img_info["file_name"])
         curr_image = Image.open(curr_image_path).convert("RGB")
 
         # DEBUG
         # print("\nimage number:", i + 1)
         # print("image id:", all_image_ids[i])
-        # print("file name:", curr_img["file_name"])
+        # print("file name:", curr_img_info["file_name"])
         # print("image size:", curr_image.size)
         # if (i + 1) % 100 == 0:
         #     print("processed:", i + 1)
@@ -469,8 +469,8 @@ if __name__ == '__main__':
     for latency_image_id in images_for_latency:
 
         # get image info 
-        curr_img = imgs[latency_image_id]
-        curr_image_path = os.path.join(coco_val, curr_img["file_name"])
+        curr_img_info = imgs[latency_image_id]
+        curr_image_path = os.path.join(coco_val, curr_img_info["file_name"])
         curr_image = Image.open(curr_image_path).convert("RGB")
 
         # ADDED FOR GPU USAGE
@@ -503,8 +503,8 @@ if __name__ == '__main__':
     for latency_image_id in images_for_latency:
 
         # get image info 
-        curr_img = imgs[latency_image_id]
-        curr_image_path = os.path.join(coco_val, curr_img["file_name"])
+        curr_img_info = imgs[latency_image_id]
+        curr_image_path = os.path.join(coco_val, curr_img_info["file_name"])
         curr_image = Image.open(curr_image_path).convert("RGB")
 
         # ADDED FOR GPU USAGE
