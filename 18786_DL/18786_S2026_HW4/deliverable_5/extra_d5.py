@@ -160,7 +160,7 @@ if __name__ == '__main__':
     # DELIVERABLE 5 MODEL: YOLOv8s-world
     yolo_world_model = YOLO("yolov8s-world.pt")
 
-    coco_val = '/content/val2017'
+    coco_dir = '/content/val2017'
     annotation_file = '/content/annotations/instances_val2017.json'
 
     # load COCO annotations
@@ -216,7 +216,7 @@ if __name__ == '__main__':
     # evaluate over all COCO val images
     for i in range(len(all_image_ids)):
         curr_img = imgs[all_image_ids[i]]
-        curr_image_path = os.path.join(coco_val, curr_img["file_name"])
+        curr_image_path = os.path.join(coco_dir, curr_img["file_name"])
         curr_image = Image.open(curr_image_path).convert("RGB")
 
         # YOLO-WORLD prediction
@@ -288,7 +288,7 @@ if __name__ == '__main__':
     yolo_world_latency_times = []
     for latency_image_id in images_for_latency:
         curr_img = imgs[latency_image_id]
-        curr_image_path = os.path.join(coco_val, curr_img["file_name"])
+        curr_image_path = os.path.join(coco_dir, curr_img["file_name"])
         curr_image = Image.open(curr_image_path).convert("RGB")
 
         if device == 'cuda':
