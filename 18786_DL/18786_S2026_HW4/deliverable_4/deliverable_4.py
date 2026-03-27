@@ -123,9 +123,8 @@ if __name__ == '__main__':
         # get image info 
         # curr_img_info = imgs[all_image_ids[i]]
         # curr_image_path = os.path.join(coco_val, curr_img_info["file_name"])
-        image_id = imgs[eval_image_ids[i]]
+        image_id = eval_image_ids[i]
         curr_image_path = get_image_path(imgs, image_id, coco_val)
-
         curr_image = Image.open(curr_image_path).convert("RGB")
 
         # DEBUG
