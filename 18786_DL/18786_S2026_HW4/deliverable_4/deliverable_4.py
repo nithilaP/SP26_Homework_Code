@@ -17,6 +17,24 @@ from ultralytics import YOLO
 
 import random
 
+def get_image_path(imgs, image_id, coco_val):
+    curr_img_info = imgs[image_id]
+    file_name = curr_img_info["file_name"]
+
+    if isinstance(file_name, dict):
+        print("BAD curr_img_info:", curr_img_info)
+        if "file_name" in file_name:
+            file_name = file_name["file_name"]
+        elif "name" in file_name:
+            file_name = file_name["name"]
+        else:
+            raise TypeError(f"file_name is not a valid string: {file_name}")
+
+    if not isinstance(file_name, str):
+        raise TypeError(f"Expected file_name to be str, got {type(file_name)}: {file_name}")
+
+    return os.path.join(coco_val, file_name)
+
 if __name__ == '__main__':
 
     ## COCO LOADER ##
@@ -104,7 +122,8 @@ if __name__ == '__main__':
 
         # get image info 
         curr_img_info = imgs[all_image_ids[i]]
-        curr_image_path = os.path.join(coco_val, curr_img_info["file_name"])
+        # curr_image_path = os.path.join(coco_val, curr_img_info["file_name"])
+        curr_image_path = get_image_path(imgs, image_id, coco_val)
         curr_image = Image.open(curr_image_path).convert("RGB")
 
         # DEBUG
@@ -477,23 +496,25 @@ if __name__ == '__main__':
         # curr_image_path = os.path.join(coco_val, curr_img_info["file_name"])
         # curr_image = Image.open(curr_image_path).convert("RGB")
 
-        file_name = curr_img_info["file_name"]
+        curr_image_path = get_image_path(imgs, latency_image_id, coco_val)
 
-        # debug / safety
-        if isinstance(file_name, dict):
-            print("BAD curr_img_info:", curr_img_info)
-            # try common nested forms
-            if "file_name" in file_name:
-                file_name = file_name["file_name"]
-            elif "name" in file_name:
-                file_name = file_name["name"]
-            else:
-                raise TypeError(f"file_name is still not usable: {file_name}")
+        # file_name = curr_img_info["file_name"]
 
-        if not isinstance(file_name, str):
-            raise TypeError(f"file_name must be a string, got {type(file_name)} -> {file_name}")
+        # # debug / safety
+        # if isinstance(file_name, dict):
+        #     print("BAD curr_img_info:", curr_img_info)
+        #     # try common nested forms
+        #     if "file_name" in file_name:
+        #         file_name = file_name["file_name"]
+        #     elif "name" in file_name:
+        #         file_name = file_name["name"]
+        #     else:
+        #         raise TypeError(f"file_name is still not usable: {file_name}")
 
-        curr_image_path = os.path.join(coco_val, file_name)
+        # if not isinstance(file_name, str):
+        #     raise TypeError(f"file_name must be a string, got {type(file_name)} -> {file_name}")
+
+        # curr_image_path = os.path.join(coco_val, file_name)
         curr_image = Image.open(curr_image_path).convert("RGB")
 
         # ADDED FOR GPU USAGE
