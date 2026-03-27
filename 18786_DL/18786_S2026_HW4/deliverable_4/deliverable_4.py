@@ -99,7 +99,8 @@ if __name__ == '__main__':
     # go through all images: load image, get annotations, convert to bouding box 
     # for i in range(len(all_image_ids)):
 
-    for i in range(min(100, len(all_image_ids))):
+    eval_image_ids = all_image_ids[:min(100, len(all_image_ids))]
+    for i in range(min(100, len(eval_image_ids))):
 
         # get image info 
         curr_img_info = imgs[all_image_ids[i]]
@@ -423,7 +424,7 @@ if __name__ == '__main__':
                 coco_j += 1
 
             # update true_prediction and false_prediction 
-            if (curr_highest_iou >= 0.5) and (coco_in_curve[curr_highest_coco_i] != True) and (curr_highest_coco_i !=-1):
+            if (curr_highest_coco_i !=-1) and (curr_highest_iou >= 0.5) and (coco_in_curve[curr_highest_coco_i] != True):
                 true_positive[faster_rcnn_i] = True
                 false_positive[faster_rcnn_i] = False
                 # true_positive_num += 1
@@ -463,7 +464,10 @@ if __name__ == '__main__':
     # YOLO measure latency: latency as the amount of time it takes from inputting an image to getting detection 
     #                      results with a batch size of 1, averaged across 100 random images from COCO
     random.seed(0)
-    images_for_latency = random.sample(all_image_ids, 100)
+    # images_for_latency = random.sample(all_image_ids, 100)
+
+    latency_count = min(100, len(eval_image_ids))
+    images_for_latency = random.sample(eval_image_ids, latency_count)
 
     yolo_latency_times = []
     for latency_image_id in images_for_latency:
