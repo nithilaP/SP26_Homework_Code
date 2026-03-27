@@ -121,14 +121,16 @@ def compute_map50(cats, total_coco_data_bbox, total_pred_data_bbox):
 
     return acc_AP / valid_classes
 
-
 def draw_world_boxes(image_path, model, prompt_classes, output_path, device='cpu', conf_threshold=0.25):
     image = Image.open(image_path).convert("RGB")
-    draw = ImageDraw.Draw(image)
 
+    # set text prompts
     model.set_classes(prompt_classes)
+
     results = model.predict(image, verbose=False, device=device)
     result = results[0]
+
+    draw = ImageDraw.Draw(image)
 
     if len(result.boxes) > 0:
         boxes = result.boxes.xyxy.cpu().numpy()
@@ -148,7 +150,6 @@ def draw_world_boxes(image_path, model, prompt_classes, output_path, device='cpu
 
     image.save(output_path)
     print("saved visualization to:", output_path)
-
 
 if __name__ == '__main__':
 
@@ -311,6 +312,11 @@ if __name__ == '__main__':
     # PART 2: cat/dog prompt on two images
     # Replace these with your actual two image paths
     # ---------------------------------------------------
+
+    # separate fresh model for cat/dog visualization
+    catdog_model = YOLO("yolov8s-world.pt")
+    catdog_device = "cpu"
+
     catdog_prompt_classes = ["cat", "dog"]
 
     dog_path = "../2007_001239.jpg"
@@ -319,10 +325,10 @@ if __name__ == '__main__':
     if os.path.exists(dog_path):
         draw_world_boxes(
             image_path=dog_path,
-            model=yolo_world_model,
+            model=catdog_model,
             prompt_classes=catdog_prompt_classes,
-            output_path="/content/cat_dog_1_world_output.jpg",
-            device=device,
+            output_path="/content/dog_world_output.jpg",
+            device=catdog_device,
             conf_threshold=0.25
         )
     else:
@@ -331,10 +337,10 @@ if __name__ == '__main__':
     if os.path.exists(cat_path):
         draw_world_boxes(
             image_path=cat_path,
-            model=yolo_world_model,
+            model=catdog_model,
             prompt_classes=catdog_prompt_classes,
-            output_path="/content/cat_dog_2_world_output.jpg",
-            device=device,
+            output_path="/content/cat_world_output.jpg",
+            device=catdog_device,
             conf_threshold=0.25
         )
     else:
