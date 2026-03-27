@@ -1,15 +1,12 @@
-import sys
 import numpy as np
 import time
-from PIL import Image, ImageDraw
 import matplotlib.pyplot as plt
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 import torchvision
-from torchvision import datasets, transforms, models
+from torchvision import transforms
 
 import json
 import os
