@@ -60,7 +60,6 @@ def add_bbox(image, yolo_model):
             bbox_creation.text(label_location, f"{class_name} | {yolo_scores_i[yolo_output_i]:.2f}")
 
     curr_image.save(f"{image}_output.jpg")
-    print(f"saved visualization to: {image}_output.jpg")
 
 if __name__ == '__main__':
 
@@ -147,9 +146,6 @@ if __name__ == '__main__':
         # convert boxes from coco format -> [x_min, y_min, x_max, y_max]
         coco_bbox = [] 
         for curr_annotation in curr_annotations:
-
-            # if curr_annotation.get("iscrowd", 0) == 1: 
-            #     continue 
 
             x = curr_annotation['bbox'][0]
             y = curr_annotation['bbox'][1]
@@ -327,8 +323,7 @@ if __name__ == '__main__':
         # add vals at the end for bounds. (end points)
         recall = np.concatenate(([0.0], recall, [1.0]))
         precision = np.concatenate(([1.0], precision, [0.0]))
-
-        for i in range(len(precision)-1, 0, -1):
+        for i in range(len(precision)-1, 0, -1): # envelope
             precision[i-1] = max(precision[i-1], precision[i])
 
         # calculate the area under the curve. 
