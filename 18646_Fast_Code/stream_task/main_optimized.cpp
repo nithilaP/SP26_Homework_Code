@@ -6,7 +6,7 @@
  */
 
 #define LAYERS 10
-#define NUM_STREAMS 10 
+#define NUM_STREAMS 4 
 
 using namespace std;
 
@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
 
   volatile int sens_data_buf_full[NUM_STREAMS]; // track if streams are full 
   volatile int receive_processed_data[NUM_STREAMS]; // 
+  volatile int slot_free[NUM_STREAMS];
 
   /* allocate buffers */
   for (int i = 0; i < NUM_STREAMS; i++){
@@ -106,6 +107,7 @@ int main(int argc, char *argv[])
     /* set flags */
     sens_data_buf_full[i] = 0;
     receive_processed_data[i] = 0;
+    slot_free[i] = 1;
   }
   
 //   recv_buffer = (float*)malloc(sizeof(float)*256);
@@ -162,6 +164,9 @@ int main(int argc, char *argv[])
 
       for (int runs = 0; runs < runlen; runs++){
 
+        while (slot_free[(runs % NUM_STREAMS)] != 1){};
+        slot_free[(runs % NUM_STREAMS)] =0;
+
         /* wait until the buffer is full*/
         while (sens_data_buf_full[(runs % NUM_STREAMS)] != 1){};
 
@@ -210,6 +215,7 @@ int main(int argc, char *argv[])
         printf("%d %e\n", runs, *result[(runs % NUM_STREAMS)]);
 
         receive_processed_data[(runs % NUM_STREAMS)] =0;
+        slot_free[(runs % NUM_STREAMS)] =1;
 
       }
     }
