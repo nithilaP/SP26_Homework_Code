@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
 
         printf("%d %e\n", runs, *result[(runs % NUM_STREAMS)]);
 
-        running_total += *result[(runs % NUM_STREAMS)]
+        running_total += *result[(runs % NUM_STREAMS)];
         // cudaMemset(devcat[(runs % NUM_STREAMS)], 0, sizeof(float))
 
         receive_processed_data[(runs % NUM_STREAMS)] =0;
