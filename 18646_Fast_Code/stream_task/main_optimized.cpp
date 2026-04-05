@@ -1,7 +1,12 @@
 #include <omp.h>
 #include <iostream>
 
+/** Big Idea: Use Streams to Do the operations for each buffer of data (allocate multiple buffers).
+ * 
+ */
+
 #define LAYERS 10
+#define NUM_STREAMS 10 
 
 using namespace std;
 
@@ -51,8 +56,8 @@ __global__ void gpu_kernel(float *in_buff, float *weights, float *out_cat)
 
 int main(int argc, char *argv[])
 {
-  float *recv_buffer, *dev_buff, *weight, *dev_weight;
-  float category, *dev_cat;
+//   float *recv_buffer, *dev_buff, *weight, *dev_weight;
+//   float category, *dev_cat;
   double st, et;
 
   if (argc <= 1) exit(-1);
@@ -60,21 +65,60 @@ int main(int argc, char *argv[])
   int runlen = atoi(argv[1]);
 
   if (!runlen) exit(-1);
-  
-  
-  recv_buffer = (float*)malloc(sizeof(float)*256);
-  weight = (float*)malloc(sizeof(float)*256*256*LAYERS);
 
-  //initialized weights
-  for (int i = 0; i < LAYERS; ++i)
+  /* create a buffer for each stream */
+  float* recv_buffer[NUM_STREAMS];
+  float* out_buffer[NUM_STREAMS];
+  float* dev_buff[NUM_STREAMS];
+  float* dev_cat[NUM_STREAMS];
+
+  /** cuda streams
+   * 
+   * cudaStream_t streams[4];
+   * cudaStreamCreateWithFlags(&streams[i],
+   * cudaStreamNonBlocking);
+   * ...
+   * kernel_call<<<grid, block, smem_size, streams[i]>>>
+   * ...
+   * cudaStreamSynchronize(stream[i]);
+   * cudaStreamDestroy(streams[i]);
+   * 
+   * Copying data can be performed asynchronously per stream: cudaMemcpyAsync(dst, src, size, direction, stream
+   */
+
+  cudaStream_t streams[NUM_STREAMS];
+
+  volatile bool sens_data_buf_full[NUM_STREAMS]; // track if streams are full 
+  volatile bool receive_processed_data[NUM_STREAMS]; // 
+
+  /* allocate buffers */
+  for (int i = 0; i < NUM_STREAMS; i++)}{
+    cudaMalloc(&recv_buffer[i], sizeof(float)*256);
+    cudaMalloc(&out_buffer[i], sizeof(float));
+    cudaMalloc(&dev_buff[i], sizeof(float)*256);
+    cudaMalloc(&dev_cat[i], sizeof(float));
+
+    cudaStreamCreateWithFlag(&streams[i], cudaStreamNonBlocking);
+
+    /* set flags */
+    sens_data_buf_full[i] = false;
+    receive_processed_data[i] = false;
+  }
+  
+//   recv_buffer = (float*)malloc(sizeof(float)*256);
+    
+    weight = (float*)malloc(sizeof(float)*256*256*LAYERS);
+    //initialized weights
+    for (int i = 0; i < LAYERS; ++i)
     {
-      for (int j = 0; j < 256*256; ++j)
-	weight[i*256*256 + j] = (i + 1.0)*1e-5;
+        for (int j = 0; j < 256*256; ++j){
+            weight[i*256*256 + j] = (i + 1.0)*1e-5;
+        }
     }
   
   cudaMalloc(&dev_weight, sizeof(float)*256*256*LAYERS);
-  cudaMalloc(&dev_buff, sizeof(float)*256);
-  cudaMalloc(&dev_cat, sizeof(float));
+//   cudaMalloc(&dev_buff, sizeof(float)*256);
+//   cudaMalloc(&dev_cat, sizeof(float));
 
   cudaMemcpy(dev_weight, weight, sizeof(float)*256*256*LAYERS, 
 	     cudaMemcpyHostToDevice);
@@ -82,35 +126,110 @@ int main(int argc, char *argv[])
   //create any streams or parallelization data structure above this line
   st = omp_get_wtime();
   
-  for (int runs = 0; runs != runlen; ++runs)
-    {
-      //simulate receiving input from sensor
-      for (int i = 0; i < 256; ++i)
-	{
-	  recv_buffer[i] = (runs+i)*1e-3;
-	}
-      
-      //once buffer is full, send it to the GPU for processing
-      cudaMemcpy(dev_buff, recv_buffer, sizeof(float)*256, cudaMemcpyHostToDevice);
+  /* synchronize w OpemMp parallel */
+  #pragma omp parallel num_threads(3)
+  {
 
-      //Call GPU Kernel
-      gpu_kernel<<<1, 256>>>(dev_buff, dev_weight, dev_cat);
-      
-      //copy result from GPU to CPU
-      cudaDeviceSynchronize();      
-      cudaMemcpy(&category, dev_cat, sizeof(float), cudaMemcpyDeviceToHost);
+    int thread_id = omp_get_thread_num();
 
-  
-      printf("%d %e\n", runs, category);
+    /* first thread does the sensor reads sequentially */
+    if (thread_id == 0){
+
+    for (int runs = 0; runs != runlen; ++runs)
+        {
+        //simulate receiving input from sensor
+        
+        // wait until the buffer is ready
+        while (sens_data_buf_full[(run % NUM_STREAMS)] != 0){};
+
+        /**
+         * Simulates reading from a sensor — fills 256 floats with simple values
+         * This must stay sequential per the assignment requirements
+         */
+        for (int i = 0; i < 256; ++i)
+        {
+            recv_buffer[(run % NUM_STREAMS)][i] = (runs+i)*1e-3;
+        }
+
+        sens_data_buf_full[(run % NUM_STREAMS)] =1;
+        }
+
+
+    } 
+    else if (thread_id == 1){
+
+        /* wait until the buffer is full*/
+        while (sens_data_buf_full[(run % NUM_STREAMS)] != 1){};
+
+                //once buffer is full, send it to the GPU for processing
+        /**
+         * Copies sensor data CPU → GPU
+         * This is synchronous — CPU blocks here until the copy finishes
+         */
+        // cudaMemcpy(dev_buff, recv_buffer, sizeof(float)*256, cudaMemcpyHostToDevice);
+        cudaMemsetAsync(dev_cat[(run % NUM_STREAMS)], 0, sizeof(float), streams[s]);
+        cudaMemcpyAsync(dev_buff[(run % NUM_STREAMS)], recv_buffer[(run % NUM_STREAMS)], sizeof(float) * 256, cudaMemcpyHostToDevice, streams[s])
+
+        /**
+         * Launches the kernel: 1 block, 256 threads
+         * The <<<1, 256>>> syntax is CUDA's launch config — no stream specified means it uses stream 0 (default), 
+         *      so it runs sequentially after everything before it
+         */
+        //Call GPU Kernel
+        gpu_kernel<<<1, 256, streams[(run % NUM_STREAMS)]>>>(dev_buff[(run % NUM_STREAMS)], dev_weight[(run % NUM_STREAMS)], dev_cat[(run % NUM_STREAMS)]);
+        
+        /**
+         * cudaDeviceSynchronize() — CPU waits here until the GPU fully finishes
+         * Then copies result back from GPU -> CPU
+         * Prints the run number and result
+         */
+        //copy result from GPU to CPU
+        cudaDeviceSynchronize(); 
+        cudaMemcpyAsync(result[(run % NUM_STREAMS)], dev_cat[(run % NUM_STREAMS)], sizeof(float), cudaMemcpyDeviceToHost, streams[s])
+     
+        // cudaMemcpy(&category, dev_cat, sizeof(float), cudaMemcpyDeviceToHost);
+        // printf("%d %e\n", runs, category);
+
+        sens_data_buf_full[(run % NUM_STREAMS)] =0;
+        receive_processed_data[(run % NUM_STREAMS)] =1;
+
     }
+    else if (thread_id == 2){
 
+    for (int runs = 0; runs != runlen; ++runs)
+    {
+
+        while ( receive_processed_data[(run % NUM_STREAMS)] == 0){}
+
+        cudaStreamSynchronize(streams[s]);
+
+        printf("%d %e\n", run, *result[s]);
+
+        receive_processed_data[(run % NUM_STREAMS)] =0;
+
+    }
+  }
+
+  /* join all threads*/
   cudaDeviceSynchronize();
     
   et = omp_get_wtime();
 
   //remember to clean up your streams and data structure you have introduced. 
 
+  for (int i =  ; i < NUM_STREAMS; i++){
 
+    cudaStreamSynchronize(streams[i]);
+
+    cudaStreamDestroy(streams[i]);
+
+    cudaFreeHost(recv_buffer[i]);
+    cudaFreeHost(result[i]);
+
+    cudaFree(dev_buff[i]);
+    cudaFree(dev_cat[i]);
+
+  }
 
   
   //do not change the code below this line  
