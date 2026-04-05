@@ -241,8 +241,8 @@ int main(int argc, char *argv[])
   cout<<(et-st)<<" seconds for "<<runlen<<" runs"<<endl;
 
   cudaFree(dev_weight);
-  cudaFree(dev_buff);
-  cudaFree(dev_cat);
+  // cudaFree(dev_buff);
+  // cudaFree(dev_cat);
 
-  free(recv_buffer);
+  // free(recv_buffer);
 }
