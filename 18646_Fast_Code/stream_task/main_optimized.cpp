@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
          * This is synchronous — CPU blocks here until the copy finishes
          */
         // cudaMemcpy(dev_buff, recv_buffer, sizeof(float)*256, cudaMemcpyHostToDevice);
-        cudaMemsetAsync(dev_cat[(runs % NUM_STREAMS)], 0, sizeof(float), streams[(runs % NUM_STREAMS)]);
+        // cudaMemsetAsync(dev_cat[(runs % NUM_STREAMS)], 0, sizeof(float), streams[(runs % NUM_STREAMS)]);
         cudaMemcpyAsync(dev_buff[(runs % NUM_STREAMS)], recv_buffer[(runs % NUM_STREAMS)], sizeof(float) * 256, cudaMemcpyHostToDevice, streams[(runs % NUM_STREAMS)]);
 
         /**
@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
       for (int runs = 0; runs != runlen; ++runs)
       {
 
-        float running_total = 0.0f;
+        // float running_total = 0.0f;
 
         while (receive_processed_data[(runs % NUM_STREAMS)] !=1){}
 
@@ -216,8 +216,8 @@ int main(int argc, char *argv[])
 
         printf("%d %e\n", runs, *result[(runs % NUM_STREAMS)]);
 
-        running_total += *result[(runs % NUM_STREAMS)];
-        // cudaMemset(devcat[(runs % NUM_STREAMS)], 0, sizeof(float))
+        // running_total += *result[(runs % NUM_STREAMS)];
+        cudaMemset(devcat[(runs % NUM_STREAMS)], 0, sizeof(float))
 
         receive_processed_data[(runs % NUM_STREAMS)] =0;
         slot_free[(runs % NUM_STREAMS)] =1;
