@@ -59,6 +59,7 @@ int main(int argc, char *argv[])
 //   float *recv_buffer, *dev_buff, *weight, *dev_weight;
 //   float category, *dev_cat;
   float *weight, *dev_weight; // used by all streams
+  float* dev_cat; 
 
   double st, et;
 
@@ -72,7 +73,7 @@ int main(int argc, char *argv[])
   float* recv_buffer[NUM_STREAMS];
   float* result[NUM_STREAMS];
   float* dev_buff[NUM_STREAMS];
-  float* dev_cat[NUM_STREAMS];
+  // float* dev_cat[NUM_STREAMS];
 
   /** cuda streams
    * 
@@ -100,8 +101,8 @@ int main(int argc, char *argv[])
     cudaMallocHost(&result[i], sizeof(float));
 
     cudaMalloc(&dev_buff[i], sizeof(float)*256);
-    cudaMalloc(&dev_cat[i], sizeof(float));
-
+    // cudaMalloc(&dev_cat[i], sizeof(float));
+    cudaMalloc(&dev_cat, sizeof(float));
     cudaStreamCreateWithFlags(&streams[i], cudaStreamNonBlocking);
 
     /* set flags */
@@ -176,7 +177,7 @@ int main(int argc, char *argv[])
          * This is synchronous — CPU blocks here until the copy finishes
          */
         // cudaMemcpy(dev_buff, recv_buffer, sizeof(float)*256, cudaMemcpyHostToDevice);
-        cudaMemsetAsync(dev_cat[(runs % NUM_STREAMS)], 0, sizeof(float), streams[(runs % NUM_STREAMS)]);
+        // cudaMemsetAsync(dev_cat[(runs % NUM_STREAMS)], 0, sizeof(float), streams[(runs % NUM_STREAMS)]);
         cudaMemcpyAsync(dev_buff[(runs % NUM_STREAMS)], recv_buffer[(runs % NUM_STREAMS)], sizeof(float) * 256, cudaMemcpyHostToDevice, streams[(runs % NUM_STREAMS)]);
 
         /**
@@ -185,7 +186,7 @@ int main(int argc, char *argv[])
          *      so it runs sequentially after everything before it
          */
         //Call GPU Kernel
-        gpu_kernel<<<1, 256, 0, streams[(runs % NUM_STREAMS)]>>>(dev_buff[(runs % NUM_STREAMS)], dev_weight, dev_cat[(runs % NUM_STREAMS)]);
+        gpu_kernel<<<1, 256, 0, streams[(runs % NUM_STREAMS)]>>>(dev_buff[(runs % NUM_STREAMS)], dev_weight, dev_cat);
         
         /**
          * cudaDeviceSynchronize() — CPU waits here until the GPU fully finishes
@@ -194,7 +195,7 @@ int main(int argc, char *argv[])
          */
         //copy result from GPU to CPU
         // cudaDeviceSynchronize(); 
-        cudaMemcpyAsync(result[(runs % NUM_STREAMS)], dev_cat[(runs % NUM_STREAMS)], sizeof(float), cudaMemcpyDeviceToHost, streams[(runs % NUM_STREAMS)]);
+        cudaMemcpyAsync(result[(runs % NUM_STREAMS)], dev_cat, sizeof(float), cudaMemcpyDeviceToHost, streams[(runs % NUM_STREAMS)]);
      
         // cudaMemcpy(&category, dev_cat, sizeof(float), cudaMemcpyDeviceToHost);
         // printf("%d %e\n", runs, category);
@@ -237,7 +238,7 @@ int main(int argc, char *argv[])
     cudaFreeHost(result[i]);
 
     cudaFree(dev_buff[i]);
-    cudaFree(dev_cat[i]);
+    cudaFree(dev_cat);
 
   }
 
