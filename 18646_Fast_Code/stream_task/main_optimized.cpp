@@ -95,9 +95,10 @@ int main(int argc, char *argv[])
   /* track if corresponding buffer for each stream is full. (thread 0 -> thread 1) */
   volatile bool sens_data_buf_full[NUM_STREAMS]; // false -> buffer open for new data, true -> buffer full 
   /* track if we got the processed data for each buffer. (thread 1 -> thread 2) */
-  volatile bool receive_processed_data[NUM_STREAMS]; // 
+  volatile bool receive_processed_data[NUM_STREAMS]; // false -> 
   /* track if a buffer slot is free to be filled w new data. (thread 2 <-> thread 1) */
   volatile bool slot_free[NUM_STREAMS]; // 
+
   /* allocate buffers */
   for (int i = 0; i < NUM_STREAMS; i++){
     cudaMallocHost(&recv_buffer[i], sizeof(float)*256);
@@ -162,13 +163,10 @@ int main(int argc, char *argv[])
         /* wait until the buffer is full*/
         while (sens_data_buf_full[(runs % NUM_STREAMS)] != true){};
 
-                //once buffer is full, send it to the GPU for processing
         /**
          * Copies sensor data CPU → GPU
          * This is synchronous — CPU blocks here until the copy finishes
          */
-        // cudaMemcpy(dev_buff, recv_buffer, sizeof(float)*256, cudaMemcpyHostToDevice);
-        // cudaMemsetAsync(dev_cat[(runs % NUM_STREAMS)], 0, sizeof(float), streams[(runs % NUM_STREAMS)]);
         cudaMemcpyAsync(dev_buff[(runs % NUM_STREAMS)], recv_buffer[(runs % NUM_STREAMS)], sizeof(float) * 256, cudaMemcpyHostToDevice, streams[(runs % NUM_STREAMS)]);
 
         /**
@@ -200,8 +198,8 @@ int main(int argc, char *argv[])
 
         printf("%d %e\n", runs, *result[(runs % NUM_STREAMS)]);
 
+        /* reset all flags and clear tracking variables */
         cudaMemset(dev_cat[(runs % NUM_STREAMS)], 0, sizeof(float)); // zeros out the slot before it gets reused.
-
         receive_processed_data[(runs % NUM_STREAMS)] = false;
         slot_free[(runs % NUM_STREAMS)] = true;
       }
@@ -220,11 +218,19 @@ int main(int argc, char *argv[])
     cudaStreamDestroy(streams[i]);
 
     cudaFreeHost(recv_buffer[i]);
+    recv_buffer[i] = NULL;
+
     cudaFreeHost(result[i]);
+    result[i] = NULL;
 
     cudaFree(dev_buff[i]);
+    dev_buff[i] = NULL;
+
     cudaFree(dev_cat[i]);
+    dev_cat[i] = NULL;
   }
+
+
 
   
   //do not change the code below this line  
