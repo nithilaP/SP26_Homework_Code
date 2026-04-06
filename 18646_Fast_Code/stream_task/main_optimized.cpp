@@ -238,5 +238,5 @@ int main(int argc, char *argv[])
   // cudaFree(dev_buff);
   // cudaFree(dev_cat);
 
-  free(recv_buffer);
+  // free(recv_buffer);
 }
