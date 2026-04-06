@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 
   /* create a buffer for each stream */
   float* recv_buffer[NUM_STREAMS]; // host mem that sensor data is written to -> one for each buffer (or stream)
-  float* result[NUM_STREAMS]; // host mem that the output from CPU gets put into (by thread 1)
+  float* category[NUM_STREAMS]; // host mem that the output from CPU gets put into (by thread 1)
   float* dev_buff[NUM_STREAMS]; // gpu input buffer -> one for each sensor buffer 
   float* dev_cat[NUM_STREAMS]; // gpu output buffer -> one for each sensor buffer, need to reset in thread 2 before using slot again to avoid storing values over time. 
 
@@ -101,8 +101,11 @@ int main(int argc, char *argv[])
 
   /* allocate buffers */
   for (int i = 0; i < NUM_STREAMS; i++){
-    cudaMallocHost(&recv_buffer[i], sizeof(float)*256);
-    cudaMallocHost(&result[i], sizeof(float));
+    // cudaMallocHost(&recv_buffer[i], sizeof(float)*256);
+    // cudaMallocHost(&category[i], sizeof(float));
+
+    recv_buffer[i] = (float*)malloc(sizeof(float)*256);
+    category[i] = (float*)malloc(sizeof(float));
 
     cudaMalloc(&dev_buff[i], sizeof(float)*256);
     cudaMalloc(&dev_cat[i], sizeof(float));
@@ -183,7 +186,7 @@ int main(int argc, char *argv[])
          * Then copies result back from GPU -> CPU for each buffer that is done. 
          * Prints the run number and result.
          */
-        cudaMemcpyAsync(result[(runs % NUM_STREAMS)], dev_cat[(runs % NUM_STREAMS)], sizeof(float), cudaMemcpyDeviceToHost, streams[(runs % NUM_STREAMS)]);
+        cudaMemcpyAsync(category[(runs % NUM_STREAMS)], dev_cat[(runs % NUM_STREAMS)], sizeof(float), cudaMemcpyDeviceToHost, streams[(runs % NUM_STREAMS)]);
      
         sens_data_buf_full[(runs % NUM_STREAMS)] = false;
         receive_processed_data[(runs % NUM_STREAMS)] = true;
@@ -197,7 +200,7 @@ int main(int argc, char *argv[])
 
         cudaStreamSynchronize(streams[(runs % NUM_STREAMS)]);
 
-        printf("%d %e\n", runs, *result[(runs % NUM_STREAMS)]);
+        printf("%d %e\n", runs, *category[(runs % NUM_STREAMS)]);
 
         /* reset all flags and clear tracking variables */
         // cudaMemset(dev_cat[(runs % NUM_STREAMS)], 0, sizeof(float)); // zeros out the slot before it gets reused.
@@ -218,11 +221,11 @@ int main(int argc, char *argv[])
 
     cudaStreamDestroy(streams[i]);
 
-    cudaFreeHost(recv_buffer[i]);
+    free(recv_buffer[i]);
     recv_buffer[i] = NULL;
 
-    cudaFreeHost(result[i]);
-    result[i] = NULL;
+    free(category[i]);
+    category[i] = NULL;
 
     cudaFree(dev_buff[i]);
     dev_buff[i] = NULL;
@@ -234,9 +237,10 @@ int main(int argc, char *argv[])
   //do not change the code below this line  
   cout<<(et-st)<<" seconds for "<<runlen<<" runs"<<endl;
 
-  // cudaFree(dev_weight);
+  cudaFree(dev_weight);
+
+  /* note: modified these lines, since my code inits values below as array and does the free in loop above. */
   // cudaFree(dev_buff);
   // cudaFree(dev_cat);
-
   // free(recv_buffer);
 }
