@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
         cudaStreamSynchronize(streams[(runs % NUM_STREAMS)]);
 
         /* to match the baseline output, get the sum of all previous run outputs and current output to report as category val for this stream. */
-        curr_category_total += *category[(runs % NUM_STREAMS)]
+        curr_category_total += *category[(runs % NUM_STREAMS)];
         printf("%d %e\n", runs, curr_category_total);
 
         /* reset all flags and clear tracking variables */
