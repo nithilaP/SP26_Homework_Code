@@ -212,6 +212,8 @@ int main(int argc, char *argv[])
     else if (thread_id == 2){
       /** note: use run index to determine what which stream output to use for processing. */
 
+      float curr_category_total = 0.0;
+
       for (int runs = 0; runs != runlen; ++runs){
 
         /* wait until the gpu stream has completed processing. */
@@ -220,7 +222,9 @@ int main(int argc, char *argv[])
         /* make sure that all ops on this stream are done. */
         cudaStreamSynchronize(streams[(runs % NUM_STREAMS)]);
 
-        printf("%d %e\n", runs, *category[(runs % NUM_STREAMS)]);
+        /* to match the baseline output, get the sum of all previous run outputs and current output to report as category val for this stream. */
+        curr_category_total += *category[(runs % NUM_STREAMS)]
+        printf("%d %e\n", runs, curr_category_total);
 
         /* reset all flags and clear tracking variables */
         receive_processed_data[(runs % NUM_STREAMS)] = false; // clear flag for next round of processing on this stream
