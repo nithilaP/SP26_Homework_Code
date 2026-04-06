@@ -91,13 +91,16 @@ int main(int argc, char *argv[])
 
   /** tracking arrays for each stream. 
    * each buffer -> has a corresponding stream. 
+   * needed to add volatile since different threads editing values on stream 
   */
   /* track if corresponding buffer for each stream is full. (thread 0 -> thread 1) */
-  volatile bool sens_data_buf_full[NUM_STREAMS]; // false -> buffer open for new data, true -> buffer full 
+  volatile bool sens_data_buf_full[NUM_STREAMS]; // false -> buffer open for new data, true -> buffer full
+
   /* track if we got the processed data for each buffer. (thread 1 -> thread 2) */
-  volatile bool receive_processed_data[NUM_STREAMS]; // false -> 
-  /* track if a buffer slot is free to be filled w new data. (thread 2 <-> thread 1) */
-  volatile bool slot_free[NUM_STREAMS]; // 
+  volatile bool receive_processed_data[NUM_STREAMS]; // false -> stream still running, stream processed data already
+
+  /* track if a buffer slot is free to be filled w new data. (thread 2 -> thread 1) */
+  volatile bool stream_output_slot_open[NUM_STREAMS]; // false -> stream output has not been processed & reset yet, true -> stream output has been processed
 
   /* allocate buffers */
   for (int i = 0; i < NUM_STREAMS; i++){
@@ -107,6 +110,7 @@ int main(int argc, char *argv[])
     * category[i] = (float*)malloc(sizeof(float));
     * 
     * Need cudaMallocHost: https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html#group__CUDART__MEMORY_1gab84100ae1fa1b12eaca660207ef585b
+    * Need for cudaMemcpyAsync: https://stackoverflow.com/questions/23133203/cudamallochost-vs-malloc-for-better-performance-shows-no-difference
     */
     cudaMallocHost(&recv_buffer[i], sizeof(float)*256);
     cudaMallocHost(&category[i], sizeof(float));
@@ -115,21 +119,24 @@ int main(int argc, char *argv[])
     cudaMalloc(&dev_buff[i], sizeof(float)*256);
     cudaMalloc(&dev_cat[i], sizeof(float));
 
+    /* create stream. */
     cudaStreamCreateWithFlags(&streams[i], cudaStreamNonBlocking);
 
     /* set flags */
     sens_data_buf_full[i] = false;
     receive_processed_data[i] = false;
-    slot_free[i] = true;
+    stream_output_slot_open[i] = true;
   }
-      
+  
+  /* create CPU weights and init. */
   weight = (float*)malloc(sizeof(float)*256*256*LAYERS);
   for (int i = 0; i < LAYERS; ++i){
     for (int j = 0; j < 256*256; ++j){
         weight[i*256*256 + j] = (i + 1.0)*1e-5;
     }
   }
-  
+
+  /* one time copy of weights to GPU. */
   cudaMalloc(&dev_weight, sizeof(float)*256*256*LAYERS);
   cudaMemcpy(dev_weight, weight, sizeof(float)*256*256*LAYERS, cudaMemcpyHostToDevice);
  
@@ -146,6 +153,7 @@ int main(int argc, char *argv[])
     if (thread_id == 0){
 
       for (int runs = 0; runs != runlen; ++runs){
+        /** note: use run index to determine what buffer it gets allocated to. */
         
         /* wait for the sensor data buffer to be full to process. */
         while (sens_data_buf_full[(runs % NUM_STREAMS)] != false){};
@@ -158,59 +166,65 @@ int main(int argc, char *argv[])
           recv_buffer[(runs % NUM_STREAMS)][i] = (runs+i)*1e-3;
         }
 
+        /* set sensor buffer full flag true for this buffer. */
         sens_data_buf_full[(runs % NUM_STREAMS)] = true;
       }
     } 
     else if (thread_id == 1){
 
       for (int runs = 0; runs < runlen; runs++){
+        /** note: use run index to determine what which stream runs buffer. */
 
-        while (slot_free[(runs % NUM_STREAMS)] != true){};
-        slot_free[(runs % NUM_STREAMS)] = false;
+        /* Needed to add a wait until the value in this stream_output_slot_open is true for this stream output slot
+        -> cannot process new data into this slot if not. 
+         */
+        while (stream_output_slot_open[(runs % NUM_STREAMS)] != true){};
+        stream_output_slot_open[(runs % NUM_STREAMS)] = false;
 
         /* wait until the buffer is full*/
         while (sens_data_buf_full[(runs % NUM_STREAMS)] != true){};
 
         /**
-         * Copies sensor data CPU → GPU
-         * This is synchronous — CPU blocks here until the copy finishes
+         * 1. Clear curr value for stream output in dev_cat array
+         * 2. Copies sensor data CPU → GPU
+         * async — queues operation on stream and returns to cpu
+         * since all ops below on same stream, each command runs seqentialaly
          */
         cudaMemsetAsync(dev_cat[(runs % NUM_STREAMS)], 0, sizeof(float), streams[(runs % NUM_STREAMS)]);
         cudaMemcpyAsync(dev_buff[(runs % NUM_STREAMS)], recv_buffer[(runs % NUM_STREAMS)], sizeof(float) * 256, cudaMemcpyHostToDevice, streams[(runs % NUM_STREAMS)]);
 
         /**
          * Launches the kernel: 1 block, 256 threads on each stream
-         * <<<1, 256>>> syntax -> CUDA's launch config
-         * No stream specified means it uses stream 0 (default), 
-         * so it runs sequentially after everything before it
+         * <<<# thread blocks, # threads/ block, ant of shared mem, cuda stream>>> syntax -> CUDA's launch config
          */
         gpu_kernel<<<1, 256, 0, streams[(runs % NUM_STREAMS)]>>>(dev_buff[(runs % NUM_STREAMS)], dev_weight, dev_cat[(runs % NUM_STREAMS)]);
         
         /**
-         * cudaDeviceSynchronize() — CPU waits here until the GPU fully finishes.
-         * Then copies result back from GPU -> CPU for each buffer that is done. 
-         * Prints the run number and result.
+         * Copies result back from GPU -> CPU for buffer when ops above complete. 
          */
         cudaMemcpyAsync(category[(runs % NUM_STREAMS)], dev_cat[(runs % NUM_STREAMS)], sizeof(float), cudaMemcpyDeviceToHost, streams[(runs % NUM_STREAMS)]);
-     
-        sens_data_buf_full[(runs % NUM_STREAMS)] = false;
-        receive_processed_data[(runs % NUM_STREAMS)] = true;
+        
+        /* update tracking variables. */
+        sens_data_buf_full[(runs % NUM_STREAMS)] = false; // clear flag for next iter
+        receive_processed_data[(runs % NUM_STREAMS)] = true; // set flag for recieve procssing
       }
     }
     else if (thread_id == 2){
+      /** note: use run index to determine what which stream output to use for processing. */
 
       for (int runs = 0; runs != runlen; ++runs){
 
+        /* wait until the gpu stream has completed processing. */
         while (receive_processed_data[(runs % NUM_STREAMS)] == false){}
 
+        /* make sure that all ops on this stream are done. */
         cudaStreamSynchronize(streams[(runs % NUM_STREAMS)]);
 
         printf("%d %e\n", runs, *category[(runs % NUM_STREAMS)]);
 
         /* reset all flags and clear tracking variables */
-        // cudaMemset(dev_cat[(runs % NUM_STREAMS)], 0, sizeof(float)); // zeros out the slot before it gets reused.
-        receive_processed_data[(runs % NUM_STREAMS)] = false;
-        slot_free[(runs % NUM_STREAMS)] = true;
+        receive_processed_data[(runs % NUM_STREAMS)] = false; // clear flag for next round of processing on this stream
+        stream_output_slot_open[(runs % NUM_STREAMS)] = true; // set flag so thread 1 can overwrite stream output for next round
       }
     }
   }
@@ -222,8 +236,7 @@ int main(int argc, char *argv[])
   //remember to clean up your streams and data structure you have introduced. 
   for (int i = 0; i < NUM_STREAMS; i++){
 
-    cudaStreamSynchronize(streams[i]);
-
+    /* as per the stream steps, destroy all streams when done. */
     cudaStreamDestroy(streams[i]);
 
     // First try w malloc: free(recv_buffer[i]);
