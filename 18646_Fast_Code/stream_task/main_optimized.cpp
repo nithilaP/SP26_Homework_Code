@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
    * 
    * cudaStream_t streams[4];
    * cudaStreamCreateWithFlags(&streams[i],
-   * cudaStreamNonBlocking);
+   *  cudaStreamNonBlocking);
    * ...
    * kernel_call<<<grid, block, smem_size, streams[i]>>>
    * ...
@@ -101,12 +101,17 @@ int main(int argc, char *argv[])
 
   /* allocate buffers */
   for (int i = 0; i < NUM_STREAMS; i++){
-    // cudaMallocHost(&recv_buffer[i], sizeof(float)*256);
-    // cudaMallocHost(&category[i], sizeof(float));
 
-    recv_buffer[i] = (float*)malloc(sizeof(float)*256);
-    category[i] = (float*)malloc(sizeof(float));
-
+    /** First try with malloc: causes cudaMemcpyAsync sequential behavior w copy.
+    * recv_buffer[i] = (float*)malloc(sizeof(float)*256);
+    * category[i] = (float*)malloc(sizeof(float));
+    * 
+    * Need cudaMallocHost: https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html#group__CUDART__MEMORY_1gab84100ae1fa1b12eaca660207ef585b
+    */
+    cudaMallocHost(&recv_buffer[i], sizeof(float)*256);
+    cudaMallocHost(&category[i], sizeof(float));
+    
+    /* malloc mem on device */
     cudaMalloc(&dev_buff[i], sizeof(float)*256);
     cudaMalloc(&dev_cat[i], sizeof(float));
 
@@ -221,10 +226,12 @@ int main(int argc, char *argv[])
 
     cudaStreamDestroy(streams[i]);
 
-    free(recv_buffer[i]);
+    // First try w malloc: free(recv_buffer[i]);
+    cudaFreeHost(recv_buffer[i]);
     recv_buffer[i] = NULL;
 
-    free(category[i]);
+    // First try w malloc: free(category[i]);
+    cudaFreeHost(category[i]);
     category[i] = NULL;
 
     cudaFree(dev_buff[i]);
