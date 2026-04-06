@@ -167,6 +167,7 @@ int main(int argc, char *argv[])
          * Copies sensor data CPU → GPU
          * This is synchronous — CPU blocks here until the copy finishes
          */
+        cudaMemsetAsync(dev_cat[(runs % NUM_STREAMS)], 0, sizeof(float), streams[(runs % NUM_STREAMS)]);
         cudaMemcpyAsync(dev_buff[(runs % NUM_STREAMS)], recv_buffer[(runs % NUM_STREAMS)], sizeof(float) * 256, cudaMemcpyHostToDevice, streams[(runs % NUM_STREAMS)]);
 
         /**
@@ -199,7 +200,7 @@ int main(int argc, char *argv[])
         printf("%d %e\n", runs, *result[(runs % NUM_STREAMS)]);
 
         /* reset all flags and clear tracking variables */
-        cudaMemset(dev_cat[(runs % NUM_STREAMS)], 0, sizeof(float)); // zeros out the slot before it gets reused.
+        // cudaMemset(dev_cat[(runs % NUM_STREAMS)], 0, sizeof(float)); // zeros out the slot before it gets reused.
         receive_processed_data[(runs % NUM_STREAMS)] = false;
         slot_free[(runs % NUM_STREAMS)] = true;
       }
@@ -229,10 +230,11 @@ int main(int argc, char *argv[])
     cudaFree(dev_cat[i]);
     dev_cat[i] = NULL;
   }
+  recv_buffer = NULL;
+  result = NULL;
+  dev_buff = NULL;
+  dev_cat = NULL;
 
-
-
-  
   //do not change the code below this line  
   cout<<(et-st)<<" seconds for "<<runlen<<" runs"<<endl;
 
