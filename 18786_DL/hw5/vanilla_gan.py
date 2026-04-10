@@ -195,7 +195,7 @@ def training_loop(train_dataloader, opts):
 
             # TRAIN THE GENERATOR
             # 1. Sample noise
-            noise = sample_noise(real_images.size(0), opts.noise_size)
+            noise = sample_noise(real_images.size(0), opts.noise_size).to(real_images.device)
 
             # 2. Generate fake images from the noise
             fake_images = G(noise)
