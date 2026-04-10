@@ -172,6 +172,9 @@ def training_loop(train_dataloader, opts):
 
             # TRAIN THE DISCRIMINATOR
             # 1. Compute the discriminator loss on real images
+
+            print(f"real_images device: {real_images.device}")  # ADD THIS
+            print(f"real_images shape: {real_images.shape}")    # ADD THIS
             
             discriminator_output = D(real_images)
             # TODO: CHANGE BACK TO torch.ones(real_images.size(0))
