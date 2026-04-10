@@ -157,6 +157,10 @@ def training_loop(train_dataloader, opts):
 
     total_train_iters = opts.num_epochs * len(train_dataloader)
 
+    # I ADDED
+    criterion = torch.nn.BCEWithLogitsLoss()
+
+    # I ADDED
     for _ in range(opts.num_epochs):
 
         for batch in train_dataloader:
@@ -166,17 +170,21 @@ def training_loop(train_dataloader, opts):
 
             # TRAIN THE DISCRIMINATOR
             # 1. Compute the discriminator loss on real images
-            D_real_loss = 
+            
+            discriminator_output = D(real_images)
+            # TODO: CHANGE BACK TO torch.ones(real_images.size(0))
+            D_real_loss = criterion(discriminator_output, torch.ones(real_images.size(0),device=real_images.device))
 
             # 2. Sample noise
-            noise = 
+            noise = sample_noise(real_images.size(0), opts.noise_size)
 
             # 3. Generate fake images from the noise
-            fake_images = 
+            fake_images = G(noise)
 
             # 4. Compute the discriminator loss on the fake images
-            D_fake_loss = 
-            D_total_loss = 
+            # TODO: CHANGE BACK TO torch.ones(real_images.size(0))
+            D_fake_loss = criterion(D(fake_images.detach()), torch.zeros(real_images.size(0),device=real_images.device))
+            D_total_loss = D_fake_loss + D_real_loss
 
             # update the discriminator D
             d_optimizer.zero_grad()
@@ -185,13 +193,16 @@ def training_loop(train_dataloader, opts):
 
             # TRAIN THE GENERATOR
             # 1. Sample noise
-            noise = 
+            noise = sample_noise(real_images.size(0), opts.noise_size)
 
             # 2. Generate fake images from the noise
-            fake_images = 
+            fake_images = G(noise)
 
             # 3. Compute the generator loss
-            G_loss = 
+            discriminator_output = D(fake_images)
+            #  D -> classify fakes as real (1)
+            # TODO: CHANGE BACK TO torch.ones(real_images.size(0))
+            G_loss = criterion(discriminator_output, torch.ones(real_images.size(0),device=real_images.device))
 
             # update the generator G
             g_optimizer.zero_grad()

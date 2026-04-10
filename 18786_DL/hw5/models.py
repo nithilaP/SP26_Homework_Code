@@ -77,12 +77,32 @@ class DCGenerator(nn.Module):
         ###########################################
         ##   FILL THIS IN: CREATE ARCHITECTURE   ##
         ###########################################
+        
+        # input:  16x100x1x1
+        # output: 16x3x64x64
 
-        self.up_conv1 = 
-        self.up_conv2 = 
-        self.up_conv3 = 
-        self.up_conv4 = 
-        self.up_conv5 = 
+        # the first layer (up conv1) it is better to directly apply convolution
+        #   layer without any upsampling to get 4x4 output.
+        # DCGAN: https://docs.pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html
+        # nn.Conv2d: https://www.google.com/search?client=safari&rls=en&q=nn.Conv2d&ie=UTF-8&oe=UTF-8
+        # 100x1x1 to 256x4x4
+        self.up_conv1 = nn.Sequential(nn.Conv2d(noise_size, conv_dim * 8, kernel_size=4, stride=1, padding=0, bias=False),
+                        nn.BatchNorm2d(conv_dim * 8),
+                        nn.ReLU(True))
+
+        # 256x4x4 to 128x8x8
+        self.up_conv2 = up_conv(conv_dim * 8, conv_dim * 4, kernel_size=3, norm='batch', activ='relu')
+
+        # 128x8x8 to 64x16x16
+        self.up_conv3 = up_conv(conv_dim * 4, conv_dim * 2, kernel_size=3, norm='batch', activ='relu')
+
+
+        # 64x16x16 to 32x32x32
+        self.up_conv4 = up_conv(conv_dim * 2, conv_dim * 1, kernel_size=3, norm='batch', activ='relu')
+
+
+        # 32x32x32 to 3x64x64 (output = 3)
+        self.up_conv5 = up_conv(conv_dim, 3, kernel_size=3, norm=None, activ='tanh')
 
     def forward(self, z):
         """
@@ -100,7 +120,13 @@ class DCGenerator(nn.Module):
         ##   FILL THIS IN: FORWARD PASS   ##
         ###########################################
 
-        pass
+        layer_out = self.up_conv1(z)
+        layer_out = self.up_conv2(layer_out)
+        layer_out = self.up_conv3(layer_out)
+        layer_out = self.up_conv4(layer_out)
+        layer_out = self.up_conv5(layer_out)
+
+        return layer_out
 
 
 class ResnetBlock(nn.Module):
@@ -123,11 +149,22 @@ class DCDiscriminator(nn.Module):
 
     def __init__(self, conv_dim=64, norm='instance'):
         super().__init__()
+
+        # 3x64x64 -> 32x32x32 
         self.conv1 = conv(3, 32, 4, 2, 1, norm, False, 'relu')
-        self.conv2 = 
-        self.conv3 = 
-        self.conv4 = 
-        self.conv5 = 
+
+        # 32x32x32 -> 64x16x16
+        self.conv2 = conv(32, 64, 4, 2, 1, norm, False, 'relu')
+
+        # 64x16x16 -> 128x8x8
+        self.conv3 = conv(64, 128, 4, 2, 1, norm, False, 'relu')
+
+        # 128x8x8 -> 256x4x4
+        self.conv4 = conv(128, 256, 4, 2, 1, norm, False, 'relu')
+
+        # need a single image after this layer.
+        # 256x4x4 -> 1x1x1
+        self.conv5 = conv(256, 1, 4, 2, 0, None, False, None)
 
     def forward(self, x):
         """Forward pass, x is (B, C, H, W)."""

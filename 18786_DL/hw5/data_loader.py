@@ -43,7 +43,19 @@ def get_data_loader(data_path, opts):
         # transforms.Resize(osize, Image.BICUBIC)
         # transforms.RandomCrop(opts.image_size)
         # transforms.RandomHorizontalFlip()
-        pass
+
+        load_size = int(1.1 * opts.image_size)
+        osize = [load_size, load_size]
+        train_transform = transforms.Compose([
+            # processing above.
+            transforms.Resize(osize, Image.BICUBIC),
+            transforms.RandomCrop(opts.image_size),
+            transforms.RandomHorizontalFlip(),
+
+            # like basic transform above. 
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+        ])
 
     dataset = CustomDataSet(
         os.path.join('data/', data_path), opts.ext, train_transform
