@@ -151,7 +151,9 @@ def training_loop(train_dataloader, opts):
     d_optimizer = optim.Adam(D.parameters(), opts.lr, [opts.beta1, opts.beta2])
 
     # Generate fixed noise for sampling from the generator
-    fixed_noise = sample_noise(opts.batch_size, opts.noise_size)  # B N 1 1
+    # TODO: Change to(device)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    fixed_noise = sample_noise(opts.batch_size, opts.noise_size).to(device)  # B N 1 1
 
     iteration = 1
 
@@ -176,7 +178,7 @@ def training_loop(train_dataloader, opts):
             D_real_loss = criterion(discriminator_output, torch.ones(real_images.size(0),device=real_images.device))
 
             # 2. Sample noise
-            noise = sample_noise(real_images.size(0), opts.noise_size)
+            noise = sample_noise(real_images.size(0), opts.noise_size).to(real_images.device)
 
             # 3. Generate fake images from the noise
             fake_images = G(noise)
