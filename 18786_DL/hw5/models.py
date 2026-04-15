@@ -12,6 +12,9 @@
 # DCGenerator, DCDiscriminator classes.
 # Feel free to add and try your own models
 
+# Vanilla Basic: Iteration [6500/6500] | D_real_loss: 0.1132 | D_fake_loss: 0.0006 | G_loss: 6.7294
+# Advanced: Iteration [6500/6500] | D_real_loss: 0.0032 | D_fake_loss: 0.0835 | G_loss: 5.4473
+
 import torch
 import torch.nn as nn
 
