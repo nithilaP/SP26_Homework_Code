@@ -92,7 +92,7 @@ class DCGenerator(nn.Module):
         # nn.Conv2d: https://www.google.com/search?client=safari&rls=en&q=nn.Conv2d&ie=UTF-8&oe=UTF-8
         # 100x1x1 to 256x4x4
         # output = (input - kernel_size + 2*padding) / stride) + 1
-        self.up_conv1 = nn.Sequential(nn.Conv2d(noise_size, conv_dim * 8, kernel_size=4, stride=1, padding=0, bias=False),
+        self.up_conv1 = nn.Sequential(nn.Conv2d(noise_size, conv_dim * 8, kernel_size=4, stride=1, padding=3, bias=False),
                         nn.BatchNorm2d(conv_dim * 8),
                         nn.ReLU(True))
 
