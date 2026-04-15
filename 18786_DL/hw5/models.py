@@ -12,8 +12,10 @@
 # DCGenerator, DCDiscriminator classes.
 # Feel free to add and try your own models
 
+# padding = 3
 # Vanilla Basic: Iteration [6500/6500] | D_real_loss: 0.1132 | D_fake_loss: 0.0006 | G_loss: 6.7294
 # Advanced: Iteration [6500/6500] | D_real_loss: 0.0032 | D_fake_loss: 0.0835 | G_loss: 5.4473
+
 
 import torch
 import torch.nn as nn
@@ -89,6 +91,7 @@ class DCGenerator(nn.Module):
         # DCGAN: https://docs.pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html
         # nn.Conv2d: https://www.google.com/search?client=safari&rls=en&q=nn.Conv2d&ie=UTF-8&oe=UTF-8
         # 100x1x1 to 256x4x4
+        # output = (input - kernel_size + 2*padding) / stride) + 1
         self.up_conv1 = nn.Sequential(nn.Conv2d(noise_size, conv_dim * 8, kernel_size=4, stride=1, padding=0, bias=False),
                         nn.BatchNorm2d(conv_dim * 8),
                         nn.ReLU(True))
