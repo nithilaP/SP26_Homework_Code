@@ -20,7 +20,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 import utils
 from data_loader import get_data_loader
-from models import DCGenerator, DCDiscriminator
+from model_variants import DCGenerator, SpectralNormDiscriminator
 
 
 policy = 'color,translation,cutout'
@@ -33,8 +33,6 @@ torch.manual_seed(SEED)
 if torch.cuda.is_available():
     torch.cuda.manual_seed(SEED)
 
-# LS GAN BASIC: Iteration [6500/6500] | D_real_loss: 0.1617 | D_fake_loss: 0.3569 | G_loss: 0.6189
-# LS GAN ADVANCED: Iteration [6500/6500] | D_real_loss: 0.1200 | D_fake_loss: 0.0399 | G_loss: 0.4809
 
 def print_models(G, D):
     """Prints model information for the generators and discriminators.
@@ -54,7 +52,7 @@ def create_model(opts):
     """Builds the generators and discriminators.
     """
     G = DCGenerator(noise_size=opts.noise_size, conv_dim=opts.conv_dim)
-    D = DCDiscriminator(conv_dim=opts.conv_dim)
+    D = SpectralNormDiscriminator(conv_dim=opts.conv_dim) # change for this. 
 
     print_models(G, D)
 
@@ -163,7 +161,7 @@ def training_loop(train_dataloader, opts):
     total_train_iters = opts.num_epochs * len(train_dataloader)
 
     # I ADDED
-    criterion = torch.nn.MSELoss()
+    criterion = torch.nn.BCEWithLogitsLoss()
 
     # I ADDED
     for _ in range(opts.num_epochs):
@@ -280,8 +278,8 @@ def create_parser():
     parser.add_argument('--ext', type=str, default='*.png')
 
     # Directories and checkpoint/sample iterations
-    parser.add_argument('--checkpoint_dir', default='./checkpoints_ls_gan')
-    parser.add_argument('--sample_dir', type=str, default='./ls_gan')
+    parser.add_argument('--checkpoint_dir', default='./checkpoints_spectral_norm')
+    parser.add_argument('--sample_dir', type=str, default='./spectral_norm')
     parser.add_argument('--log_step', type=int, default=10)
     parser.add_argument('--sample_every', type=int, default=200)
     parser.add_argument('--checkpoint_every', type=int, default=400)

@@ -15,7 +15,6 @@
 import torch
 import torch.nn as nn
 
-
 def up_conv(in_channels, out_channels, kernel_size, stride=1, padding=1,
             scale_factor=2, norm='batch', activ=None):
     """Create a transposed-convolutional layer, with optional normalization."""
@@ -38,7 +37,6 @@ def up_conv(in_channels, out_channels, kernel_size, stride=1, padding=1,
         layers.append(nn.Tanh())
 
     return nn.Sequential(*layers)
-
 
 def conv(in_channels, out_channels, kernel_size, stride=2, padding=1,
          norm='batch', init_zero_weights=False, activ=None):
@@ -165,6 +163,128 @@ class DCDiscriminator(nn.Module):
         # need a single image after this layer.
         # 256x4x4 -> 1x1x1
         self.conv5 = conv(256, 1, 4, 2, 0, None, False, None)
+
+    def forward(self, x):
+        """Forward pass, x is (B, C, H, W)."""
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
+        x = self.conv4(x)
+        x = self.conv5(x)
+        return x.squeeze()
+    
+####
+# Spectral Norm Function 
+
+# define spectral conv layer
+class SpectralNormConv(nn.Module):
+    """Create a convolutional layer, with optional normalization."""
+
+    def __init__(self, in_channels, out_channels, kernel_size, stride=2, padding=1, bias=True):
+        super().__init__()
+
+        # from MyConv2D
+
+        # define weight
+        self.W = nn.Parameter(torch.randn(out_channels, in_channels, kernel_size, kernel_size))
+
+        # shape of bias: [out_channels]
+        if (bias == True):
+            self.b = nn.Parameter(torch.randn(out_channels))
+        else:    
+            self.b = None
+
+        # power iteration step from paper.  
+        #  v_l ← (W^l)^Tu l/||(W^l)^Tu _l||_2
+        #  u _l ← W^lv l/||W^lv _l||_2        
+        self.v = torch.randn(in_channels * kernel_size * kernel_size)
+        self.v = self.norm(self.v)
+
+        self.u = torch.randn(out_channels)
+        self.u = self.norm(self.u)
+
+        # update for the rest 
+        self.stride = stride
+        self.padding = padding
+        self.kernel_size = kernel_size
+
+    # clac norm
+    def norm(self, b):
+        norm_out = b / torch.norm(b)
+        return norm_out
+    
+    # every forward: need to normalize W^Tu -> v and normalize Wv -> u and make W_sn = W / (u^T W v)
+    def forward(self, z):
+
+        # reshape to 2d matrix 
+        W_2D = self.W.view(self.W.size(0), -1)
+
+        # read u, v to GPU
+        u_l_1 = self.u.to(self.W.device)
+        v_l_1 = self.v.to(self.W.device)
+
+        # power iteration step from paper.  
+        #  v_l ← (W^l)^Tu l/||(W^l)^Tu _l||_2
+        #  u_l ← W^lv l/||W^lv _l||_2        
+        v_l = self.norm(torch.mv(W_2D.t(), u_l_1)).detach()
+        u_l = self.norm(torch.mv(W_2D, v_l_1)).detach()
+
+        # update u and v 
+        self.u = u_l
+        self.v = v_l
+
+        W_spectral_norm = self.W / torch.dot(self.u, torch.mv(W_2D, self.v))
+        # W_spectral_norm = W_spectral_norm.view(self.W.size())
+
+        # do th econv2d with the spectral norm W
+        out = nn.functional.conv2d(z, W_spectral_norm, bias=self.b, stride=self.stride, padding=self.padding)
+        
+        return out
+
+# define spectral_norm_conv func similar to conv function
+def spectral_norm_conv(in_channels, out_channels, kernel_size, stride=2, padding=1,activ=None):
+
+    layers = []
+
+    conv_layer = SpectralNormConv(
+        in_channels=in_channels, out_channels=out_channels,
+        kernel_size=kernel_size, stride=stride, padding=padding,
+        bias=True
+    )
+    layers.append(conv_layer)
+
+    if activ == 'relu':
+        layers.append(nn.ReLU())
+    elif activ == 'leaky':
+        layers.append(nn.LeakyReLU())
+    elif activ == 'tanh':
+        layers.append(nn.Tanh())
+    return nn.Sequential(*layers)
+
+# define spectral norm discriminator
+class SpectralNormDiscriminator(nn.Module):
+    """Architecture of the Spectral Normdiscriminator network."""
+
+    def __init__(self, conv_dim=64):
+        super().__init__()
+
+        # conv parameters 
+
+        # 3x64x64 -> 32x32x32 
+        self.conv1 = spectral_norm_conv(3, 32, 4, 2, 1, activ='relu')
+
+        # 32x32x32 -> 64x16x16
+        self.conv2 = spectral_norm_conv(32, 64, 4, 2, 1, activ='relu')
+
+        # 64x16x16 -> 128x8x8
+        self.conv3 = spectral_norm_conv(64, 128, 4, 2, 1, activ='relu')
+
+        # 128x8x8 -> 256x4x4
+        self.conv4 = spectral_norm_conv(128, 256, 4, 2, 1, activ='relu')
+
+        # need a single image after this layer.
+        # 256x4x4 -> 1x1x1
+        self.conv5 = spectral_norm_conv(256, 1, 4, 2, 0)
 
     def forward(self, x):
         """Forward pass, x is (B, C, H, W)."""
