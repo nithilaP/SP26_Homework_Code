@@ -186,11 +186,11 @@ class SpectralNormConv(nn.Module):
         # from MyConv2D
 
         # define weight
-        self.W = nn.Parameter(torch.randn(out_channels, in_channels, kernel_size, kernel_size))
+        self.W = nn.Parameter(torch.randn(out_channels, in_channels, kernel_size, kernel_size) * 0.1)
 
         # shape of bias: [out_channels]
         if (bias == True):
-            self.b = nn.Parameter(torch.randn(out_channels))
+            self.b = nn.Parameter(torch.zeros(out_channels))
         else:    
             self.b = None
 
@@ -233,7 +233,7 @@ class SpectralNormConv(nn.Module):
         self.u = u_l
         self.v = v_l
 
-        W_spectral_norm = self.W / torch.dot(self.u, torch.mv(W_2D, self.v))
+        W_spectral_norm = self.W / torch.dot(u_l, torch.mv(W_2D, v_l))
         # W_spectral_norm = W_spectral_norm.view(self.W.size())
 
         # do th econv2d with the spectral norm W
