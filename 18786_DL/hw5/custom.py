@@ -52,7 +52,7 @@ def create_model(opts):
     """Builds the generators and discriminators.
     """
     G = DCGenerator(noise_size=opts.noise_size, conv_dim=opts.conv_dim)
-    D = CustomDescriminator(conv_dim=opts.conv_dim)
+    D = CustomDiscriminator(conv_dim=opts.conv_dim)
 
     print_models(G, D)
 
