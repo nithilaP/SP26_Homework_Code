@@ -9,9 +9,6 @@
 #    (saves results to checkpoints_vanilla/ and samples_vanilla/):
 #       python vanilla_gan.py
 
-# Basic: Iteration [6500/6500] | D_real_loss: 0.3322 | D_fake_loss: 0.4208 | G_loss: 1.370
-# Advanced: Iteration [6500/6500] | D_real_loss: 0.7930 | D_fake_loss: 0.7936 | G_loss: 0.6021
-
 import argparse
 import os
 
@@ -23,7 +20,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 import utils
 from data_loader import get_data_loader
-from model_variants import DCGenerator, SpectralNormDiscriminator
+from models import DCGenerator, DCDiscriminator
 
 
 policy = 'color,translation,cutout'
@@ -35,6 +32,17 @@ np.random.seed(SEED)
 torch.manual_seed(SEED)
 if torch.cuda.is_available():
     torch.cuda.manual_seed(SEED)
+
+# add function to calculate grad penalty
+# defualt val: lambda = 10, n_critic = 5, alpha = 0.0001, beta 1 = 0, beta 2 = 0.9
+# algo 1:
+# x_swiggle = G_theta(z)
+# x_hat = e * x_real + (1-e) * x_fake
+# L_i = D(x_swiggle) - D(x_hat) + lambda * (||grad(D(x_hat))|| - 1)**2
+def calc_gradient_penalty(D, real_images, fake_images, device):
+    
+    
+
 
 
 def print_models(G, D):
@@ -55,7 +63,7 @@ def create_model(opts):
     """Builds the generators and discriminators.
     """
     G = DCGenerator(noise_size=opts.noise_size, conv_dim=opts.conv_dim)
-    D = SpectralNormDiscriminator(conv_dim=opts.conv_dim) # change for this. 
+    D = DCDiscriminator(conv_dim=opts.conv_dim)
 
     print_models(G, D)
 
@@ -281,8 +289,8 @@ def create_parser():
     parser.add_argument('--ext', type=str, default='*.png')
 
     # Directories and checkpoint/sample iterations
-    parser.add_argument('--checkpoint_dir', default='./checkpoints_spectral_norm')
-    parser.add_argument('--sample_dir', type=str, default='./spectral_norm')
+    parser.add_argument('--checkpoint_dir', default='./checkpoints_vanilla')
+    parser.add_argument('--sample_dir', type=str, default='./vanilla')
     parser.add_argument('--log_step', type=int, default=10)
     parser.add_argument('--sample_every', type=int, default=200)
     parser.add_argument('--checkpoint_every', type=int, default=400)
