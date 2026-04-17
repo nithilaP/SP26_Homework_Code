@@ -227,7 +227,7 @@ class SpectralNormConv(nn.Module):
         #  v_l ← (W^l)^Tu l/||(W^l)^Tu _l||_2
         #  u_l ← W^lv l/||W^lv _l||_2        
         v_l = self.norm(torch.mv(W_2D.t(), u_l_1)).detach()
-        u_l = self.norm(torch.mv(W_2D, v_l_1)).detach()
+        u_l = self.norm(torch.mv(W_2D, v_l)).detach()
 
         # update u and v 
         self.u = u_l
