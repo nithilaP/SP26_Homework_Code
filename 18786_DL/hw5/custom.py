@@ -20,7 +20,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 import utils
 from data_loader import get_data_loader
-from models import DCGenerator, CustomDiscriminator
+from model_variants import DCGenerator, CustomDiscriminator
 
 
 policy = 'color,translation,cutout'
