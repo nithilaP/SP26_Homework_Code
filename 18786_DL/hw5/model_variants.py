@@ -184,17 +184,17 @@ class SpectralNormConv(nn.Module):
         super().__init__()
 
         # from MyConv2D
-
         # define weight
+        # Added fix: had to scale down weight for better training stsart -> tested * 1 , * 0.5 and *0.1 and 0.1 worked best! 
         self.W = nn.Parameter(torch.randn(out_channels, in_channels, kernel_size, kernel_size) * 0.1)
 
         # shape of bias: [out_channels]
         if (bias == True):
-            self.b = nn.Parameter(torch.zeros(out_channels))
+            self.b = nn.Parameter(torch.zeros(out_channels)) # Added fix: had to change from randn -> zeros for better training start
         else:    
             self.b = None
 
-        # power iteration step from paper.  
+        # power iteration init (use later as step from paper) 
         #  v_l ← (W^l)^Tu l/||(W^l)^Tu _l||_2
         #  u _l ← W^lv l/||W^lv _l||_2        
         self.v = torch.randn(in_channels * kernel_size * kernel_size)
@@ -234,14 +234,12 @@ class SpectralNormConv(nn.Module):
         self.v = v_l
 
         W_spectral_norm = self.W / torch.dot(u_l, torch.mv(W_2D, v_l))
-        # W_spectral_norm = W_spectral_norm.view(self.W.size())
-
         # do th econv2d with the spectral norm W
         out = nn.functional.conv2d(z, W_spectral_norm, bias=self.b, stride=self.stride, padding=self.padding)
         
         return out
 
-# define spectral_norm_conv func similar to conv function
+# define spectral_norm_conv func similar to conv function (from above) but with spectral_norm conv layer
 def spectral_norm_conv(in_channels, out_channels, kernel_size, stride=2, padding=1,activ=None):
 
     layers = []

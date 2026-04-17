@@ -9,8 +9,8 @@
 #    (saves results to checkpoints_vanilla/ and samples_vanilla/):
 #       python vanilla_gan.py
 
-# Basic: Iteration [6500/6500] | D_real_loss: 0.3322 | D_fake_loss: 0.4208 | G_loss: 1.370
-# Advanced: Iteration [6500/6500] | D_real_loss: 0.7930 | D_fake_loss: 0.7936 | G_loss: 0.6021
+# Basic: Iteration [6500/6500] | D_real_loss: 0.3322 | D_fake_loss: 0.4208 | G_loss: 1.3705
+# Advanced: Iteration [6500/6500] | D_real_loss: 0.6503 | D_fake_loss: 0.6849 | G_loss: 0.7254
 
 import argparse
 import os
@@ -155,7 +155,6 @@ def training_loop(train_dataloader, opts):
     d_optimizer = optim.Adam(D.parameters(), opts.lr, [opts.beta1, opts.beta2])
 
     # Generate fixed noise for sampling from the generator
-    # TODO: Change to(device)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     fixed_noise = sample_noise(opts.batch_size, opts.noise_size).to(device)  # B N 1 1
 
@@ -163,10 +162,7 @@ def training_loop(train_dataloader, opts):
 
     total_train_iters = opts.num_epochs * len(train_dataloader)
 
-    # I ADDED
     criterion = torch.nn.BCEWithLogitsLoss()
-
-    # I ADDED
     for _ in range(opts.num_epochs):
 
         for batch in train_dataloader:
@@ -176,12 +172,7 @@ def training_loop(train_dataloader, opts):
 
             # TRAIN THE DISCRIMINATOR
             # 1. Compute the discriminator loss on real images
-
-            print(f"real_images device: {real_images.device}")  # ADD THIS
-            print(f"real_images shape: {real_images.shape}")    # ADD THIS
-            
             discriminator_output = D(real_images)
-            # TODO: CHANGE BACK TO torch.ones(real_images.size(0))
             D_real_loss = criterion(discriminator_output, torch.ones(real_images.size(0),device=real_images.device))
 
             # 2. Sample noise
@@ -191,7 +182,6 @@ def training_loop(train_dataloader, opts):
             fake_images = G(noise)
 
             # 4. Compute the discriminator loss on the fake images
-            # TODO: CHANGE BACK TO torch.ones(real_images.size(0))
             D_fake_loss = criterion(D(fake_images.detach()), torch.zeros(real_images.size(0),device=real_images.device))
             D_total_loss = D_fake_loss + D_real_loss
 
@@ -210,7 +200,6 @@ def training_loop(train_dataloader, opts):
             # 3. Compute the generator loss
             discriminator_output = D(fake_images)
             #  D -> classify fakes as real (1)
-            # TODO: CHANGE BACK TO torch.ones(real_images.size(0))
             G_loss = criterion(discriminator_output, torch.ones(real_images.size(0),device=real_images.device))
 
             # update the generator G

@@ -162,10 +162,7 @@ def training_loop(train_dataloader, opts):
 
     total_train_iters = opts.num_epochs * len(train_dataloader)
 
-    # I ADDED
-    criterion = torch.nn.MSELoss()
-
-    # I ADDED
+    criterion = torch.nn.MSELoss() # LS GAN change from BCEWithLogitsLoss to MSELoss. 
     for _ in range(opts.num_epochs):
 
         for batch in train_dataloader:
@@ -173,14 +170,10 @@ def training_loop(train_dataloader, opts):
             real_images = batch
             real_images = utils.to_var(real_images)
 
+            # https://docs.pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html
             # TRAIN THE DISCRIMINATOR
-            # 1. Compute the discriminator loss on real images
-
-            print(f"real_images device: {real_images.device}")  # ADD THIS
-            print(f"real_images shape: {real_images.shape}")    # ADD THIS
-            
+            # 1. Compute the discriminator loss on real images            
             discriminator_output = D(real_images)
-            # TODO: CHANGE BACK TO torch.ones(real_images.size(0))
             D_real_loss = criterion(discriminator_output, torch.ones(real_images.size(0),device=real_images.device))
 
             # 2. Sample noise
@@ -190,7 +183,6 @@ def training_loop(train_dataloader, opts):
             fake_images = G(noise)
 
             # 4. Compute the discriminator loss on the fake images
-            # TODO: CHANGE BACK TO torch.ones(real_images.size(0))
             D_fake_loss = criterion(D(fake_images.detach()), torch.zeros(real_images.size(0),device=real_images.device))
             D_total_loss = D_fake_loss + D_real_loss
 
@@ -209,7 +201,6 @@ def training_loop(train_dataloader, opts):
             # 3. Compute the generator loss
             discriminator_output = D(fake_images)
             #  D -> classify fakes as real (1)
-            # TODO: CHANGE BACK TO torch.ones(real_images.size(0))
             G_loss = criterion(discriminator_output, torch.ones(real_images.size(0),device=real_images.device))
 
             # update the generator G

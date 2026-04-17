@@ -124,7 +124,6 @@ class DCGenerator(nn.Module):
         ###########################################
         ##   FILL THIS IN: FORWARD PASS   ##
         ###########################################
-        print(f"z shape: {z.shape}")
         layer_out = self.up_conv1(z)
         layer_out = self.up_conv2(layer_out)
         layer_out = self.up_conv3(layer_out)
