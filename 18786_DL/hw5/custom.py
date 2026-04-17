@@ -20,7 +20,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 import utils
 from data_loader import get_data_loader
-from models import DCGenerator, DCDiscriminator
+from models import DCGenerator, CustomDescriminator
 
 
 policy = 'color,translation,cutout'
@@ -52,7 +52,7 @@ def create_model(opts):
     """Builds the generators and discriminators.
     """
     G = DCGenerator(noise_size=opts.noise_size, conv_dim=opts.conv_dim)
-    D = DCDiscriminator(conv_dim=opts.conv_dim)
+    D = CustomDescriminator(conv_dim=opts.conv_dim)
 
     print_models(G, D)
 
@@ -278,8 +278,8 @@ def create_parser():
     parser.add_argument('--ext', type=str, default='*.png')
 
     # Directories and checkpoint/sample iterations
-    parser.add_argument('--checkpoint_dir', default='./checkpoints_vanilla')
-    parser.add_argument('--sample_dir', type=str, default='./vanilla')
+    parser.add_argument('--checkpoint_dir', default='./checkpoints_custom')
+    parser.add_argument('--sample_dir', type=str, default='./custom')
     parser.add_argument('--log_step', type=int, default=10)
     parser.add_argument('--sample_every', type=int, default=200)
     parser.add_argument('--checkpoint_every', type=int, default=400)

@@ -294,3 +294,44 @@ class SpectralNormDiscriminator(nn.Module):
         x = self.conv4(x)
         x = self.conv5(x)
         return x.squeeze()
+
+### 
+# Custom model
+class CustomDiscriminator(nn.Module):
+    """Architecture of the discriminator network."""
+
+    def __init__(self, conv_dim=64, norm='instance'):
+        super().__init__()
+        # 3x64x64 -> 32x32x32 
+        self.conv1 = spectral_norm_conv(3, 32, 4, 2, 1,'leaky')
+        self.dropout1 = nn.Dropout(0.5)
+
+        # 32x32x32 -> 64x16x16
+        self.conv2 = spectral_norm_conv(32, 64, 4, 2, 1, 'leaky')
+        self.dropout2 = nn.Dropout(0.5)
+
+        # 64x16x16 -> 128x8x8
+        self.conv3 = spectral_norm_conv(64, 128, 4, 2, 1, 'leaky')
+        self.dropout3 = nn.Dropout(0.5)
+
+        # 128x8x8 -> 256x4x4
+        self.conv4 = spectral_norm_conv(128, 256, 4, 2, 1, 'leaky')
+        self.dropout4 = nn.Dropout(0.5)
+
+        # need a single image after this layer.
+        # 256x4x4 -> 1x1x1
+        self.conv5 = spectral_norm_conv(256, 1, 4, 2, 0, None)
+
+    def forward(self, x):
+        """Forward pass, x is (B, C, H, W)."""
+        x = self.conv1(x)
+        x = self.dropout1(x)
+        x = self.conv2(x)
+        x = self.dropout2(x)
+        x = self.conv3(x)
+        x = self.dropout3(x)
+        x = self.conv4(x)
+        x = self.dropout4(x)
+        x = self.conv5(x)
+        return x.squeeze()
+    
